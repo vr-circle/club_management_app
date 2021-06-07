@@ -13,7 +13,7 @@ void main() {
 }
 
 class MyApp extends HookWidget {
-  static const String _title = 'Sample Flutter App';
+  static const String _title = 'Circle Management App';
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -50,7 +50,7 @@ class MyPages extends HookWidget {
     final int _selectedIndex = useProvider(pageIndexProvider);
     return Scaffold(
         appBar: AppBar(
-          title: const Text('CCT'),
+          title: const Text('circle management app'),
           actions: <Widget>[Icon(Icons.person)],
         ),
         body: _pageList[_selectedIndex],

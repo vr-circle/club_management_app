@@ -7,9 +7,15 @@ class Home extends HookWidget {
     return Container(
       child: Column(
         children: [
-          Text('HiTech!'),
-          Text('HiTech!'),
-          Text('HiTech!'),
+          ListTile(
+            title: Text("本日のイベント"),
+          ),
+          Card(
+            child: Text("hogehoge"),
+          ),
+          Card(
+            child: Text("hogehoge"),
+          ),
         ],
       ),
     );

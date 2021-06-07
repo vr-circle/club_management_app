@@ -6,25 +6,15 @@ class Todo extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('ToDo List'),
-        actions: [
-          DropdownButton(
-            items: [
-              DropdownMenuItem(
-                  value: "hogehoge",
-                  child: Text(
-                    "hogehoge",
-                    style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                  ))
-            ],
-          )
+      body: DropdownButton(
+        items: [
+          DropdownMenuItem(
+              value: "hogehoge",
+              child: Text(
+                "hogehoge",
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+              ))
         ],
-      ),
-      body: Container(
-        child: Center(
-          child: Text("todo"),
-        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
