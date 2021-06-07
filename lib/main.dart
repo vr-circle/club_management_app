@@ -7,9 +7,10 @@ import 'circle/circle.dart';
 import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
-  runApp(ProviderScope(child: MyApp()));
+  initializeDateFormatting().then((_) => runApp(ProviderScope(child: MyApp())));
 }
 
 class MyApp extends HookWidget {
@@ -39,9 +40,9 @@ class PageIndex extends StateNotifier<int> {
 class MyPages extends HookWidget {
   static List<Widget> _pageList = [
     Home(),
-    Circle(),
     Schedule(),
     Todo(),
+    Circle(),
     Settings()
   ];
 
@@ -59,10 +60,10 @@ class MyPages extends HookWidget {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.circle), label: 'Circle'),
-              BottomNavigationBarItem(
                   icon: Icon(Icons.schedule), label: 'Schedule'),
               BottomNavigationBarItem(icon: Icon(Icons.task), label: 'ToDo'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.search), label: 'Circle'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.library_add_check), label: 'Settings'),
             ],
