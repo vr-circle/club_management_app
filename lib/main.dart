@@ -64,7 +64,7 @@ class MyPages extends HookWidget {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.schedule), label: 'Schedule'),
+                  icon: Icon(Icons.calendar_today), label: 'Calendar'),
               BottomNavigationBarItem(icon: Icon(Icons.task), label: 'ToDo'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.search), label: 'Circle'),

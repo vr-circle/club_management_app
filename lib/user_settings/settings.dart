@@ -70,6 +70,27 @@ class SettingNotification extends HookWidget {
               onChanged: (value) {},
             ),
           ),
+          ListTile(
+            title: Text('hogehoge'),
+            trailing: Switch(
+              value: true,
+              onChanged: (value) {},
+            ),
+          ),
+          ListTile(
+            title: Text('hogehoge'),
+            trailing: Switch(
+              value: true,
+              onChanged: (value) {},
+            ),
+          ),
+          ListTile(
+            title: Text('hogehoge'),
+            trailing: Switch(
+              value: true,
+              onChanged: (value) {},
+            ),
+          ),
         ],
       )),
     );

@@ -4,6 +4,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+class Schedule {
+  const Schedule({this.id, this.title, this.start, this.end});
+  final String id;
+  final String title;
+  final DateTime start;
+  final DateTime end;
+}
+
 final focusDayProvider =
     StateNotifierProvider<FocusDay, DateTime>((refs) => FocusDay());
 
@@ -150,14 +158,30 @@ class ScheduleDetails extends HookWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "削除",
-                      style: TextStyle(color: Colors.red),
-                    )),
-                TextButton(onPressed: () {}, child: Text("編集")),
-                TextButton(onPressed: () {}, child: Text("キャンセル")),
+                SizedBox(
+                  height: 50,
+                  child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "delete",
+                      )),
+                ),
+                SizedBox(
+                  height: 50,
+                  child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Edit",
+                      )),
+                ),
+                SizedBox(
+                  height: 50,
+                  child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "cancel",
+                      )),
+                ),
               ],
             ),
           )
@@ -176,17 +200,17 @@ class ScheduleAddPage extends HookWidget {
       appBar: AppBar(
         title: Text(_format.format(targetDate)),
       ),
-      body: Container(
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            Column(
-              children: [
-                TextField(),
-                TextField(),
-                TextField(),
-                TextField(),
-              ],
-            ),
+            Text('title'),
+            TextField(),
+            Text('time'),
+            TextField(),
+            Text('place'),
+            TextField(),
+            Text('datail'),
+            TextField(),
           ],
         ),
       ),
@@ -194,16 +218,24 @@ class ScheduleAddPage extends HookWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("追加")),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("キャンセル")),
+            SizedBox(
+                height: 50,
+                child: Center(
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text("追加")),
+                )),
+            SizedBox(
+                height: 50,
+                child: Center(
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text("キャンセル")),
+                )),
           ],
         ),
       ),

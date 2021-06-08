@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -11,12 +9,24 @@ class TodoPage extends HookWidget {
   Widget build(BuildContext context) {
     final taskList = useProvider(taskListProvider);
     return Scaffold(
-      body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return Card(child: ListTile(title: Text(taskList[index].title)));
-        },
-        itemCount: taskList.length,
-      ),
+      body: Consumer(builder: (context, watch, child) {
+        return ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            final task = taskList[index];
+            return TaskTile(
+              taskTitle: task.title,
+              isChecked: task.isDone,
+              checkboxCallback: (bool value) {
+                taskList.toggleDone(task.id);
+              },
+              longPressCallback: () {
+                // taskList.deleteTask(task);
+              },
+            );
+          },
+          itemCount: taskList.length,
+        );
+      }),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
@@ -24,6 +34,36 @@ class TodoPage extends HookWidget {
             return ToDoAddPage();
           }));
         },
+      ),
+    );
+  }
+}
+
+class TaskTile extends HookWidget {
+  const TaskTile(
+      {this.isChecked,
+      this.taskTitle,
+      this.checkboxCallback,
+      this.longPressCallback});
+
+  final bool isChecked;
+  final String taskTitle;
+  final Function(bool) checkboxCallback;
+  final Function() longPressCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 4,
+      child: GestureDetector(
+        onLongPress: longPressCallback,
+        child: CheckboxListTile(
+          title: Text(
+            taskTitle,
+          ),
+          value: isChecked,
+          onChanged: checkboxCallback,
+        ),
       ),
     );
   }
@@ -50,7 +90,7 @@ class ToDoAddPage extends HookWidget {
                     },
                     onSubmitted: (newText) {
                       if (_newTaskTitle.isEmpty) {
-                        _newTaskTitle = 'No Title';
+                        return;
                       }
                       watch(taskListProvider.notifier).addTask(_newTaskTitle);
                       Navigator.of(context).pop();
