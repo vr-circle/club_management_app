@@ -55,7 +55,7 @@ class MyPages extends HookWidget {
     final int _selectedIndex = useProvider(pageIndexProvider);
     return Scaffold(
         appBar: AppBar(
-          title: const Text('circle management app'),
+          title: const Text('Club management app'),
           actions: <Widget>[Icon(Icons.person)],
         ),
         body: _pageList[_selectedIndex],
@@ -66,8 +66,7 @@ class MyPages extends HookWidget {
               BottomNavigationBarItem(
                   icon: Icon(Icons.calendar_today), label: 'Calendar'),
               BottomNavigationBarItem(icon: Icon(Icons.task), label: 'ToDo'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.search), label: 'Circle'),
+              BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Club'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.settings), label: 'Settings'),
             ],

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class CircleInfo {
-  CircleInfo(this.name);
+class ClubInfo {
+  ClubInfo(this.name);
   String name;
   String activityContent;
   int member;
@@ -26,7 +26,7 @@ class SearchPage extends HookWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                 FlutterLogo(),
-                Container(child: Text('Circle name'))
+                Container(child: Text('Club name'))
               ]));
         }),
       ),
