@@ -1,41 +1,21 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-// final todoProvider = ChangeNotifierProvider((ref) => )
+import 'task_list.dart';
 
 class TodoPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    final taskList = useProvider(taskListProvider);
     return Scaffold(
-      body: ListView(
-        children: [
-          Card(
-            child: ListTile(
-              title: Text("hogehoge"),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text("hogehoge"),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text("hogehoge"),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text("hogehoge"),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text("hogehoge"),
-            ),
-          ),
-        ],
+      body: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return Card(child: ListTile(title: Text(taskList[index].title)));
+        },
+        itemCount: taskList.length,
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -52,6 +32,8 @@ class TodoPage extends HookWidget {
 class ToDoAddPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    String _newTaskTitle = '';
+    final _textEditingController = TextEditingController();
     return Scaffold(
         appBar: AppBar(
           title: Text('タスクの追加'),
@@ -60,22 +42,37 @@ class ToDoAddPage extends HookWidget {
             padding: EdgeInsets.all(32),
             child: Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                TextField(),
+                Consumer(builder: (context, watch, child) {
+                  return TextField(
+                    controller: _textEditingController,
+                    onChanged: (newText) {
+                      _newTaskTitle = newText;
+                    },
+                    onSubmitted: (newText) {
+                      if (_newTaskTitle.isEmpty) {
+                        _newTaskTitle = 'No Title';
+                      }
+                      watch(taskListProvider.notifier).addTask(_newTaskTitle);
+                      Navigator.of(context).pop();
+                    },
+                  );
+                }),
                 const SizedBox(
                   height: 8,
                 ),
                 Container(
                     child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          '追加',
-                          style: TextStyle(color: Colors.lightBlue),
-                        )),
+                    Consumer(builder: (context, watch, child) {
+                      return TextButton(
+                          onPressed: () {
+                            watch(taskListProvider.notifier)
+                                .addTask(_newTaskTitle);
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Add'));
+                    }),
                     TextButton(
                         onPressed: () {
                           Navigator.of(context).pop();
