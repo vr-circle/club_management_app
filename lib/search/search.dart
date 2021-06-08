@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class Circle extends HookWidget {
+class SearchPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Container(

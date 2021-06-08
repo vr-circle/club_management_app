@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 // final todoProvider = ChangeNotifierProvider((ref) => )
 
-class Todo extends HookWidget {
+class TodoPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

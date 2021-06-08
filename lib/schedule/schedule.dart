@@ -22,7 +22,7 @@ class SelectedDay extends StateNotifier<DateTime> {
   }
 }
 
-class Schedule extends HookWidget {
+class SchedulePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final _focusDay = useProvider(focusDayProvider);

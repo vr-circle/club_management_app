@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'home/home.dart';
-import 'circle/circle.dart';
+import 'search/search.dart';
 import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
@@ -17,12 +17,16 @@ class MyApp extends HookWidget {
   static const String _title = 'Circle Management App';
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: _title,
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        home: MyPages(),
-        debugShowCheckedModeBanner: false);
+    return Consumer(
+      builder: (context, watch, child) {
+        return MaterialApp(
+            title: _title,
+            theme:
+                watch(darkModeProvider) ? ThemeData.dark() : ThemeData.light(),
+            home: MyPages(),
+            debugShowCheckedModeBanner: false);
+      },
+    );
   }
 }
 
@@ -39,11 +43,11 @@ class PageIndex extends StateNotifier<int> {
 
 class MyPages extends HookWidget {
   static List<Widget> _pageList = [
-    Home(),
-    Schedule(),
-    Todo(),
-    Circle(),
-    Settings()
+    HomePage(),
+    SchedulePage(),
+    TodoPage(),
+    SearchPage(),
+    SettingsPage()
   ];
 
   @override
@@ -65,7 +69,7 @@ class MyPages extends HookWidget {
               BottomNavigationBarItem(
                   icon: Icon(Icons.search), label: 'Circle'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.library_add_check), label: 'Settings'),
+                  icon: Icon(Icons.settings), label: 'Settings'),
             ],
             currentIndex: _selectedIndex,
             onTap: context.read(pageIndexProvider.notifier).updateIndex));

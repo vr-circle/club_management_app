@@ -11,10 +11,10 @@ class DarkModeState extends StateNotifier<bool> {
   void changeSwitch(bool e) => this.state = e;
 }
 
-class Settings extends HookWidget {
-  final bool isDarkMode = useProvider(darkModeProvider);
+class SettingsPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = useProvider(darkModeProvider);
     return Scaffold(
         body: Column(children: [
       ListTile(
