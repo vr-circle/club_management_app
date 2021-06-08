@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+class CircleInfo {
+  CircleInfo(this.name);
+  String name;
+  String activityContent;
+  int member;
+}
+
 class SearchPage extends HookWidget {
   @override
   Widget build(BuildContext context) {

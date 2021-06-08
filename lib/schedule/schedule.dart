@@ -1,8 +1,11 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../user_settings/settings.dart';
 
 class Schedule {
   const Schedule({this.id, this.title, this.start, this.end});
@@ -31,39 +34,125 @@ class SelectedDay extends StateNotifier<DateTime> {
   }
 }
 
+final calendarScreenProvider =
+    StateNotifierProvider((refs) => CalendarScreen());
+
+class CalendarScreenState {
+  // CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  Map<DateTime, List> _eventList = {};
+}
+
+class CalendarScreen extends StateNotifier<CalendarScreenState> {
+  CalendarScreen() : super(CalendarScreenState());
+}
+
 class SchedulePage extends HookWidget {
+  int getHashCode(DateTime key) {
+    return key.day * 1000000 + key.month * 10000 + key.year;
+  }
+
+  Map<DateTime, List> _eventsList = {
+    DateTime.now().subtract(Duration(days: 2)): ['Event A6', 'Event B6'],
+    DateTime.now(): [
+      'Event A7',
+      'hogehoge',
+      'fugafuga',
+      'aaaaaaaa',
+      'Event A7',
+      'Event B7',
+      'Event C7',
+      'Event D7'
+    ],
+    DateTime.now().add(Duration(days: 1)): [
+      'Event A8',
+      'Event B8',
+      'Event C8',
+      'Event D8'
+    ],
+    DateTime.now().add(Duration(days: 3)):
+        Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
+    DateTime.now().add(Duration(days: 7)): [
+      'Event A10',
+      'Event B10',
+      'Event C10'
+    ],
+    DateTime.now().add(Duration(days: 11)): ['Event A11', 'Event B11'],
+    DateTime.now().add(Duration(days: 17)): [
+      'Event A12',
+      'Event B12',
+      'Event C12',
+      'Event D12'
+    ],
+    DateTime.now().add(Duration(days: 22)): ['Event A13', 'Event B13'],
+    DateTime.now().add(Duration(days: 26)): [
+      'Event A14',
+      'Event B14',
+      'Event C14'
+    ],
+  };
+
   @override
   Widget build(BuildContext context) {
+    final _events = LinkedHashMap<DateTime, List>(
+      equals: isSameDay,
+      hashCode: getHashCode,
+    )..addAll(_eventsList);
+
+    List _getEventForDay(DateTime day) {
+      return _events[day] ?? [];
+    }
+
     final _focusDay = useProvider(focusDayProvider);
     final _selectedDay = useProvider(selectedDayProvider);
     const CalendarFormat _calendarFormat = CalendarFormat.month;
-    return Container(
-        child: TableCalendar(
-      locale: 'ja_JP',
-      headerStyle: HeaderStyle(
-        formatButtonVisible: false,
+
+    return Column(children: [
+      TableCalendar(
+        locale: 'ja_JP',
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+        ),
+        firstDay: DateTime.utc(2020, 1, 1),
+        lastDay: DateTime.utc(2050, 12, 31),
+        focusedDay: _focusDay,
+        calendarFormat: _calendarFormat,
+        calendarStyle: CalendarStyle(
+          markerDecoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: useProvider(darkModeProvider) == true
+                  ? Colors.white
+                  : Colors.black),
+        ),
+        selectedDayPredicate: (day) {
+          return isSameDay(_selectedDay, day);
+        },
+        eventLoader: _getEventForDay,
+        onDaySelected: (selectedDay, focusedDay) {
+          if (!isSameDay(_selectedDay, selectedDay)) {
+            context
+                .read(selectedDayProvider.notifier)
+                .updateSelectedDay(selectedDay);
+            context.read(focusDayProvider.notifier).updateFocusDay(focusedDay);
+          }
+          if (isSameDay(_focusDay, selectedDay)) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return ScheduleListOnDay(targetDate: selectedDay);
+            }));
+          }
+        },
       ),
-      firstDay: DateTime.utc(2020, 1, 1),
-      lastDay: DateTime.utc(2040, 12, 31),
-      focusedDay: _focusDay,
-      calendarFormat: _calendarFormat,
-      selectedDayPredicate: (day) {
-        return isSameDay(_selectedDay, day);
-      },
-      onDaySelected: (selectedDay, focusedDay) {
-        if (!isSameDay(_selectedDay, selectedDay)) {
-          context
-              .read(selectedDayProvider.notifier)
-              .updateSelectedDay(selectedDay);
-          context.read(focusDayProvider.notifier).updateFocusDay(focusedDay);
-        }
-        if (isSameDay(_focusDay, selectedDay)) {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ScheduleListOnDay(targetDate: selectedDay);
-          }));
-        }
-      },
-    ));
+      Expanded(
+          child: ListView(shrinkWrap: true, children: [
+        Column(
+            children: _getEventForDay(_selectedDay)
+                .map((e) => ListTile(
+                      title: Text(e.toString()),
+                    ))
+                .toList()),
+      ]))
+    ]);
   }
 }
 
