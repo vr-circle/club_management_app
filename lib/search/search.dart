@@ -12,11 +12,13 @@ class SearchPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: new RefreshIndicator(
-      onRefresh: () {
-        return;
-      },
-      child: GridView.count(
+      body:
+          //new RefreshIndicator(
+          // onRefresh: () {
+          //   return;
+          // },
+          // child:
+          GridView.count(
         crossAxisCount: MediaQuery.of(context).size.shortestSide < 600 ? 2 : 4,
         children: List.generate(28, (index) {
           return Container(
@@ -28,6 +30,7 @@ class SearchPage extends HookWidget {
               ]));
         }),
       ),
-    ));
+      // )
+    );
   }
 }
