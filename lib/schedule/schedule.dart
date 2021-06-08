@@ -31,6 +31,7 @@ class SchedulePage extends HookWidget {
     const CalendarFormat _calendarFormat = CalendarFormat.month;
     return Container(
         child: TableCalendar(
+      locale: 'ja_JP',
       headerStyle: HeaderStyle(
         formatButtonVisible: false,
       ),

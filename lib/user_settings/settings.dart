@@ -17,26 +17,61 @@ class SettingsPage extends HookWidget {
     final isDarkMode = useProvider(darkModeProvider);
     return Scaffold(
         body: Column(children: [
-      ListTile(
-        leading: Icon(Icons.dark_mode),
-        title: Text('ダークテーマ'),
-        trailing: Switch(
-          value: isDarkMode,
-          onChanged: context.read(darkModeProvider.notifier).changeSwitch,
-        ),
-      ),
+      Consumer(builder: (context, watch, child) {
+        return ListTile(
+          leading: Icon(Icons.dark_mode),
+          title: Text('ダークテーマ'),
+          onTap: () {
+            watch(darkModeProvider.notifier).changeSwitch(!isDarkMode);
+          },
+          trailing: Switch(
+            value: isDarkMode,
+            onChanged: (value) {
+              watch(darkModeProvider.notifier).changeSwitch(value);
+            },
+          ),
+        );
+      }),
       ListTile(
         leading: Icon(Icons.people),
         title: Text("所属サークル"),
       ),
       ListTile(
-        leading: Icon(Icons.people),
-        title: Text("hogehoge"),
+        leading: Icon(Icons.notifications),
+        title: Text('通知'),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return SettingNotification();
+          }));
+        },
       ),
       ListTile(
         leading: Icon(Icons.people),
         title: Text("hogehoge"),
       ),
     ]));
+  }
+}
+
+class SettingNotification extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('通知設定'),
+      ),
+      body: Container(
+          child: Column(
+        children: [
+          ListTile(
+            title: Text('hogehoge'),
+            trailing: Switch(
+              value: true,
+              onChanged: (value) {},
+            ),
+          ),
+        ],
+      )),
+    );
   }
 }

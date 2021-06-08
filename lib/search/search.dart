@@ -8,7 +8,11 @@ class SearchPage extends HookWidget {
       body: GridView.count(
         crossAxisCount: MediaQuery.of(context).size.shortestSide < 600 ? 2 : 4,
         children: List.generate(28, (index) {
-          return Center(child: Text('Item $index'));
+          return Container(
+              child: Column(children: [
+            FlutterLogo(),
+            Container(child: Text('Circle name'))
+          ]));
         }),
       ),
     );
