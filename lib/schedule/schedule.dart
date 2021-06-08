@@ -135,6 +135,7 @@ class ScheduleListOnDay extends HookWidget {
           title: Text(_format.format(DateTime.now())),
         ),
         body: ListView(
+          // show schedule list on a day
           children: [
             Card(
               child: ListTile(
@@ -206,7 +207,7 @@ class ScheduleDetails extends HookWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("XXXX年OO月TT日"),
+          title: Text("XXXX年OO月TT日"), // fix
         ),
         body: Column(children: [
           // show details
@@ -219,7 +220,7 @@ class ScheduleDetails extends HookWidget {
                   height: 50,
                   child: TextButton(
                       onPressed: () {},
-                      child: Text(
+                      child: const Text(
                         "delete",
                       )),
                 ),
@@ -227,7 +228,7 @@ class ScheduleDetails extends HookWidget {
                   height: 50,
                   child: TextButton(
                       onPressed: () {},
-                      child: Text(
+                      child: const Text(
                         "Edit",
                       )),
                 ),
@@ -235,7 +236,7 @@ class ScheduleDetails extends HookWidget {
                   height: 50,
                   child: TextButton(
                       onPressed: () {},
-                      child: Text(
+                      child: const Text(
                         "cancel",
                       )),
                 ),
@@ -259,7 +260,7 @@ class ScheduleAddPage extends HookWidget {
       ),
       body: SingleChildScrollView(
         child: Column(
-          children: [
+          children: const <Widget>[
             Text('title'),
             TextField(),
             Text('time'),
@@ -282,7 +283,7 @@ class ScheduleAddPage extends HookWidget {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text("追加")),
+                      child: const Text("追加")),
                 )),
             SizedBox(
                 height: 50,
@@ -291,7 +292,7 @@ class ScheduleAddPage extends HookWidget {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text("キャンセル")),
+                      child: const Text("キャンセル")),
                 )),
           ],
         ),
