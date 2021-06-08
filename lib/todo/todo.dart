@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'task_list.dart';
 
+// todo: devide by category(private,club,other club) with tabbar
+
 class TodoPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
