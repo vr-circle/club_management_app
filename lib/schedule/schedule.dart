@@ -121,12 +121,14 @@ class ScheduleListOnDay extends HookWidget {
                       );
                     }));
                   },
-                  child: Text("新規登録")),
+                  child:
+                      SizedBox(height: 50, child: Center(child: Text("Add")))),
               TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text("閉じる"))
+                  child: SizedBox(
+                      height: 50, child: Center(child: Text("Close")))),
             ],
           ),
         ));
