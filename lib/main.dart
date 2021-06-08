@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+// import 'package:intl/date_symbol_data_local.dart';
 
 import 'home/home.dart';
 import 'search/search.dart';
 import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
-  initializeDateFormatting().then((_) => runApp(ProviderScope(child: MyApp())));
+  // initializeDateFormatting().then((_) =>
+  runApp(ProviderScope(child: MyApp()));
+  // );
 }
 
 class MyApp extends HookWidget {

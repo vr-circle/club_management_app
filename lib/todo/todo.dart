@@ -8,20 +8,85 @@ class TodoPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DropdownButton(
-        items: [
-          DropdownMenuItem(
-              value: "hogehoge",
-              child: Text(
-                "hogehoge",
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ))
+      body: ListView(
+        children: [
+          Card(
+            child: ListTile(
+              title: Text("hogehoge"),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: Text("hogehoge"),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: Text("hogehoge"),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: Text("hogehoge"),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: Text("hogehoge"),
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ToDoAddPage();
+          }));
+        },
       ),
     );
+  }
+}
+
+class ToDoAddPage extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('タスクの追加'),
+        ),
+        body: Container(
+            padding: EdgeInsets.all(32),
+            child: Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                TextField(),
+                const SizedBox(
+                  height: 8,
+                ),
+                Container(
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          '追加',
+                          style: TextStyle(color: Colors.lightBlue),
+                        )),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          'キャンセル',
+                          style: TextStyle(color: Colors.red),
+                        )),
+                  ],
+                )),
+              ]),
+            )));
   }
 }

@@ -26,7 +26,7 @@ class HomePage extends HookWidget {
                 title: Text("所属サークルのイベント"),
               ),
               Card(
-                child: Text("hogehoge"),
+                child: Text("aaaaaaaaaaaaaaaaaaa"),
               ),
               Card(
                 child: Text("hogehoge"),

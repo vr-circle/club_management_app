@@ -4,8 +4,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 class SearchPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text("hogehoge"),
+    return Scaffold(
+      body: GridView.count(
+        crossAxisCount: MediaQuery.of(context).size.shortestSide < 600 ? 2 : 4,
+        children: List.generate(28, (index) {
+          return Center(child: Text('Item $index'));
+        }),
+      ),
     );
   }
 }

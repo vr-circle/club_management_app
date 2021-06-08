@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 final focusDayProvider =
@@ -30,7 +31,6 @@ class SchedulePage extends HookWidget {
     const CalendarFormat _calendarFormat = CalendarFormat.month;
     return Container(
         child: TableCalendar(
-      locale: 'ja_JP',
       headerStyle: HeaderStyle(
         formatButtonVisible: false,
       ),
@@ -49,9 +49,161 @@ class SchedulePage extends HookWidget {
           context.read(focusDayProvider.notifier).updateFocusDay(focusedDay);
         }
         if (isSameDay(_focusDay, selectedDay)) {
-          print("Show dialog");
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ScheduleListOnDay(targetDate: selectedDay);
+          }));
         }
       },
     ));
+  }
+}
+
+class ScheduleListOnDay extends HookWidget {
+  ScheduleListOnDay({Key key, @required this.targetDate}) : super(key: key);
+  final DateTime targetDate;
+  var _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(_format.format(DateTime.now())),
+        ),
+        body: ListView(
+          children: [
+            Card(
+              child: ListTile(
+                title: Text("hoge"),
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return ScheduleDetails();
+                })),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                title: Text("hoge"),
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return ScheduleDetails();
+                })),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                title: Text("hoge"),
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return ScheduleDetails();
+                })),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                title: Text("hoge"),
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return ScheduleDetails();
+                })),
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return ScheduleAddPage(
+                        targetDate: targetDate,
+                      );
+                    }));
+                  },
+                  child: Text("新規登録")),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("閉じる"))
+            ],
+          ),
+        ));
+  }
+}
+
+class ScheduleDetails extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("XXXX年OO月TT日"),
+        ),
+        body: Column(children: [
+          // show details
+          Expanded(child: Container(child: Text("hogehoge"))),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "削除",
+                      style: TextStyle(color: Colors.red),
+                    )),
+                TextButton(onPressed: () {}, child: Text("編集")),
+                TextButton(onPressed: () {}, child: Text("キャンセル")),
+              ],
+            ),
+          )
+        ]));
+  }
+}
+
+class ScheduleAddPage extends HookWidget {
+  final DateTime targetDate;
+  final _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
+  ScheduleAddPage({Key key, @required this.targetDate}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_format.format(targetDate)),
+      ),
+      body: Container(
+        child: Column(
+          children: [
+            Column(
+              children: [
+                TextField(),
+                TextField(),
+                TextField(),
+                TextField(),
+              ],
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("追加")),
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("キャンセル")),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -19,7 +19,7 @@ class SettingsPage extends HookWidget {
         body: Column(children: [
       ListTile(
         leading: Icon(Icons.dark_mode),
-        title: Text("dark mode"),
+        title: Text('ダークテーマ'),
         trailing: Switch(
           value: isDarkMode,
           onChanged: context.read(darkModeProvider.notifier).changeSwitch,
@@ -27,7 +27,7 @@ class SettingsPage extends HookWidget {
       ),
       ListTile(
         leading: Icon(Icons.people),
-        title: Text("hogehoge"),
+        title: Text("所属サークル"),
       ),
       ListTile(
         leading: Icon(Icons.people),
