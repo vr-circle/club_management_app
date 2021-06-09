@@ -43,10 +43,10 @@ class PageIndex extends StateNotifier<int> {
 
 class MyPages extends HookWidget {
   static List<Widget> _pageList = [
-    HomePage(),
+    // HomePage(),
     SchedulePage(),
     TodoPage(),
-    SearchPage(),
+    // SearchPage(),
     SettingsPage()
   ];
 
@@ -62,11 +62,11 @@ class MyPages extends HookWidget {
         bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              // BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.calendar_today), label: 'Calendar'),
               BottomNavigationBarItem(icon: Icon(Icons.task), label: 'ToDo'),
-              BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Club'),
+              // BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Club'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.settings), label: 'Settings'),
             ],
