@@ -9,35 +9,39 @@ import 'task_list.dart';
 class TodoPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final taskList = useProvider(taskListProvider);
-    return Scaffold(
-      body: Consumer(builder: (context, watch, child) {
-        return ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            final task = taskList[index];
-            return TaskTile(
-              taskTitle: task.title,
-              isChecked: task.isDone,
-              checkboxCallback: (bool value) {
-                taskList.toggleDone(task.id);
-              },
-              longPressCallback: () {
-                // taskList.deleteTask(task);
-              },
-            );
-          },
-          itemCount: taskList.length,
-        );
-      }),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ToDoAddPage();
-          }));
-        },
-      ),
-    );
+    return BuildDefaultTabController();
+  }
+}
+
+class BuildDefaultTabController extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    final _tabInfo = <String>['private', 'club'];
+    return DefaultTabController(
+        length: _tabInfo.length,
+        child: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                TabBar(
+                    isScrollable: true,
+                    tabs: _tabInfo
+                        .map((e) => Tab(
+                              text: e,
+                            ))
+                        .toList())
+              ],
+            ),
+            elevation: 0,
+          ),
+          body: TabBarView(children: [
+            TodoPrivatePage(),
+            TabPage(
+              title: 'hoge',
+            ),
+          ]),
+        ));
   }
 }
 
@@ -66,6 +70,32 @@ class TaskTile extends HookWidget {
           value: isChecked,
           onChanged: checkboxCallback,
         ),
+      ),
+    );
+  }
+}
+
+class TabPage extends HookWidget {
+  const TabPage({Key key, this.title}) : super(key: key);
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('show task list place')),
+    );
+  }
+}
+
+class TodoPrivatePage extends HookWidget {
+  const TodoPrivatePage({Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('This is place what show task list')),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {},
       ),
     );
   }
