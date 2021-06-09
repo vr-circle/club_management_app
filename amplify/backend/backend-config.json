@@ -1,0 +1,10 @@
+{
+	"auth": {
+		"cmaapp44ef5372": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false
+		}
+	}
+}
