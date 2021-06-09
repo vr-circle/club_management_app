@@ -3,21 +3,13 @@ import 'package:flutter_application_1/auth_credentials.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final loginPageStateProvider =
-    StateNotifierProvider<LoginPageNotifier, LoginPageState>(
-        (refs) => LoginPageNotifier());
+final loginCredentialProvider =
+    StateNotifierProvider((ref) => LoginCredentials());
 
-class LoginPageNotifier extends StateNotifier<LoginPageState> {
-  LoginPageNotifier()
-      : super(LoginPageState(
-          didProvideCredentials: ValueChanged<LoginCredentials>(),
-        ));
-}
-
-class LoginPageState {
-  final ValueChanged<LoginCredentials> didProvideCredentials;
-  final VoidCallback shouldShowSignPage;
-  LoginPageState({this.didProvideCredentials, this.shouldShowSignPage});
+class LoginCredential extends StateNotifier {
+  final String username;
+  final String password;
+  LoginCredential() : super();
 }
 
 class LoginPage extends HookWidget {
