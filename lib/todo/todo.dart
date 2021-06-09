@@ -88,14 +88,37 @@ class TabPage extends HookWidget {
 }
 
 class TodoPrivatePage extends HookWidget {
-  const TodoPrivatePage({Key key}) : super(key: key);
+  TodoPrivatePage({Key key}) : super(key: key);
+
+  final taskList = useProvider(taskListProvider);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: Text('This is place what show task list')),
+      body: Consumer(
+        builder: (context, watch, child) {
+          return ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              final task = taskList[index];
+              return TaskTile(
+                taskTitle: task.title,
+                isChecked: task.isDone,
+                checkboxCallback: (bool value) {
+                  taskList.toggleDone(task.id);
+                },
+                longPressCallback: () {},
+              );
+            },
+            itemCount: taskList.length,
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ToDoAddPage();
+          }));
+        },
       ),
     );
   }
