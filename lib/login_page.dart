@@ -8,7 +8,10 @@ final loginPageStateProvider =
         (refs) => LoginPageNotifier());
 
 class LoginPageNotifier extends StateNotifier<LoginPageState> {
-  LoginPageNotifier() : super(LoginPageState());
+  LoginPageNotifier()
+      : super(LoginPageState(
+          didProvideCredentials: ValueChanged<LoginCredentials>(),
+        ));
 }
 
 class LoginPageState {
