@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_application_1/auth_credentials.dart';
+import 'auth_credentials.dart';
 
 // 1
 enum AuthFlowStatus { login, signUp, verification, session }
