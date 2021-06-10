@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'task_list.dart';
 
 class TodoPage extends HookWidget {
+  static const String route = '/todo';
   @override
   Widget build(BuildContext context) {
     return BuildDefaultTabController();

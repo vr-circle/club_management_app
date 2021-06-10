@@ -14,6 +14,7 @@ class StateIsOpen extends StateNotifier<bool> {
 }
 
 class HomePage extends HookWidget {
+  static const String route = '/homepage';
   @override
   Widget build(BuildContext context) {
     final _isOpen = useProvider(isOpenProvider);

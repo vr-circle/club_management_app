@@ -49,6 +49,7 @@ class CalendarScreen extends StateNotifier<CalendarScreenState> {
 }
 
 class SchedulePage extends HookWidget {
+  static const String route = '/schedule/';
   int getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
@@ -76,7 +77,8 @@ class SchedulePage extends HookWidget {
     final _selectedDay = useProvider(selectedDayProvider);
     const CalendarFormat _calendarFormat = CalendarFormat.month;
 
-    return Column(children: [
+    return Container(
+        child: Column(children: [
       TableCalendar(
         locale: 'ja_JP',
         headerStyle: HeaderStyle(
@@ -120,7 +122,7 @@ class SchedulePage extends HookWidget {
                     ))
                 .toList()),
       ]))
-    ]);
+    ]));
   }
 }
 

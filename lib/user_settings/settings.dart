@@ -21,6 +21,7 @@ class ExpandedState extends StateNotifier<bool> {
 }
 
 class SettingsPage extends HookWidget {
+  static const String route = '/settings';
   @override
   Widget build(BuildContext context) {
     final isDarkMode = useProvider(darkModeProvider);

@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,25 +19,20 @@ void main() {
   initializeDateFormatting().then((_) => runApp(ProviderScope(child: MyApp())));
 }
 
-class MyApp extends HookWidget {
-  static const String _title = 'Club Management App';
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, watch, child) {
-        return MaterialApp(
-          title: _title,
-          routes: <String, WidgetBuilder>{
-            '/': (_) => MyPages(),
-            // '/': (_) => LoginPage()
-          },
-          theme: watch(darkModeProvider) ? ThemeData.dark() : ThemeData.light(),
-          // home: MyPages(),
-          // debugShowCheckedModeBanner: false
-        );
-      },
-    );
-  }
+class UserStatus {
+  String username;
+  AuthFlowStatus authStatus;
+}
+
+final homeGlobalKeyProvider = StateNotifierProvider((_) => GlobalKeyState());
+final scheduleGlobalKeyProvider =
+    StateNotifierProvider((_) => GlobalKeyState());
+final todoGlobalKeyProvider = StateNotifierProvider((_) => GlobalKeyState());
+final settingsGlobalKeyProvider =
+    StateNotifierProvider((_) => GlobalKeyState());
+
+class GlobalKeyState extends StateNotifier {
+  GlobalKeyState() : super(GlobalKey<NavigatorState>());
 }
 
 final pageIndexProvider =
@@ -49,9 +46,49 @@ class PageIndex extends StateNotifier<int> {
   }
 }
 
-class MyPages extends HookWidget {
+class MyApp extends HookWidget {
+  static const String _appTitle = "Club Management App";
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: _appTitle,
+      initialRoute: '/',
+      routes: <String, WidgetBuilder>{
+        '/': (context) => MyTopPage(),
+        PagesController.route: (context) => PagesController(),
+        HomePage.route: (context) => HomePage(),
+        SchedulePage.route: (context) => SchedulePage(),
+        TodoPage.route: (context) => TodoPage(),
+        SettingsPage.route: (context) => SettingsPage(),
+      },
+    );
+  }
+}
+
+class MyTopPage extends HookWidget {
+  static const String route = '/';
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('hogehoge'),
+      ),
+      body: Center(
+        child: TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, HomePage.route);
+            },
+            child: Text('aaaaaaaaaaaa')),
+      ),
+    );
+  }
+}
+
+class PagesController extends HookWidget {
+  static const String route = 'lead';
+  static const String _title = 'Club Management App';
   static List<Widget> _pageList = [
-    // HomePage(),
+    HomePage(),
     SchedulePage(),
     TodoPage(),
     // SearchPage(),
@@ -61,90 +98,85 @@ class MyPages extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final int _selectedIndex = useProvider(pageIndexProvider);
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Club management app'),
-          actions: <Widget>[Icon(Icons.person)],
-        ),
-        body: _pageList[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            items: const <BottomNavigationBarItem>[
-              // BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.calendar_today), label: 'Calendar'),
-              BottomNavigationBarItem(icon: Icon(Icons.task), label: 'ToDo'),
-              // BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Club'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.settings), label: 'Settings'),
-            ],
-            currentIndex: _selectedIndex,
-            onTap: context.read(pageIndexProvider.notifier).updateIndex));
+    final _homeScreen = useProvider(homeGlobalKeyProvider);
+    final _scheduleScreen = useProvider(scheduleGlobalKeyProvider);
+    final _todoScreen = useProvider(todoGlobalKeyProvider);
+    final _settingsScreen = useProvider(settingsGlobalKeyProvider);
+    var url = window.location.href;
+    return Consumer(builder: (context, watch, _) {
+      return MaterialApp(
+          title: _title,
+          theme: watch(darkModeProvider) ? ThemeData.dark() : ThemeData.light(),
+          initialRoute: '/lead/',
+          routes: <String, WidgetBuilder>{
+            HomePage.route: (context) => HomePage(),
+            SchedulePage.route: (context) => SchedulePage(),
+            TodoPage.route: (context) => TodoPage(),
+            SettingsPage.route: (context) => SettingsPage(),
+          },
+          home: Scaffold(
+            appBar: AppBar(
+              title: Text(url.toString()),
+              actions: <Widget>[Icon(Icons.person)],
+            ),
+            body: Center(child: Text("hogehoge")
+                //     child: [
+                //   Navigator(
+                //     key: _homeScreen,
+                //     onGenerateRoute: (route) => MaterialPageRoute(
+                //         settings: route, builder: (context) => HomePage()),
+                //   ),
+                //   Navigator(
+                //     key: _scheduleScreen,
+                //     onGenerateRoute: (route) => MaterialPageRoute(
+                //         settings: route, builder: (context) => SchedulePage()),
+                //   ),
+                //   Navigator(
+                //     key: _todoScreen,
+                //     onGenerateRoute: (route) => MaterialPageRoute(
+                //         settings: route, builder: (context) => TodoPage()),
+                //   ),
+                //   Navigator(
+                //     key: _settingsScreen,
+                //     onGenerateRoute: (route) => MaterialPageRoute(
+                //         settings: route, builder: (context) => SettingsPage()),
+                //   ),
+                // ][_selectedIndex]
+                ),
+            bottomNavigationBar: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.home), label: 'Home'),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.calendar_today), label: 'Calendar'),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.task), label: 'ToDo'),
+                  // BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Club'),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.settings), label: 'Settings'),
+                ],
+                currentIndex: _selectedIndex,
+                onTap: (index) {
+                  print(index == 0);
+                  context.read(pageIndexProvider.notifier).updateIndex(index);
+                  switch (index) {
+                    case 0:
+                      print('hogepage');
+                      Navigator.pushNamed(context, HomePage.route);
+                      break;
+                    case 1:
+                      Navigator.of(context).pushNamed(SchedulePage.route);
+                      break;
+                    case 2:
+                      Navigator.of(context).pushNamed(TodoPage.route);
+                      break;
+                    case 3:
+                      Navigator.of(context).pushNamed(SettingsPage.route);
+                      break;
+                  }
+                }),
+          ));
+    });
   }
 }
-
-// final authServiceProvider = ;
-
-// class MyApp extends StatefulWidget {
-//   @override
-//   State<StatefulWidget> createState() => _MyAppState();
-// }
-
-// class _MyAppState extends State<MyApp> {
-//   final _authService = AuthService();
-//   @override
-//   void initState() {
-//     super.initState();
-//     _authService.showLogin();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Photo Gallery App',
-//       theme: ThemeData(visualDensity: VisualDensity.adaptivePlatformDensity),
-//       home: StreamBuilder<AuthState>(
-//           stream: _authService.authStateController.stream,
-//           builder: (context, snapshot) {
-//             if (snapshot.hasData) {
-//               return Navigator(
-//                 pages: [
-//                   // Show Login Page
-//                   if (snapshot.data.authFlowStatus == AuthFlowStatus.login)
-//                     MaterialPage(
-//                       child: LoginPage(
-//                         shouldShowSignPage: _authService.showSignUp,
-//                         didProvideCredentials:
-//                             _authService.loginWithCredentials,
-//                       ),
-//                     ),
-
-//                   // Show Sign Up Page
-//                   if (snapshot.data.authFlowStatus == AuthFlowStatus.signUp)
-//                     MaterialPage(
-//                         child: SignUpPage(
-//                       shouldShowLogin: _authService.showLogin,
-//                       didProvideCredentials: _authService.signUpWithCredentials,
-//                     )),
-//                   if (snapshot.data.authFlowStatus ==
-//                       AuthFlowStatus.verification)
-//                     MaterialPage(
-//                         child: VerificationPage(
-//                       didProvideVerificationCode: _authService.verifyCode,
-//                     )),
-
-//                   if (snapshot.data.authFlowStatus == AuthFlowStatus.session)
-//                     MaterialPage(child: ClubManagementApp())
-//                 ],
-//                 onPopPage: (route, result) => route.didPop(result),
-//               );
-//             } else {
-//               return Container(
-//                 alignment: Alignment.center,
-//                 child: CircularProgressIndicator(),
-//               );
-//             }
-//           }),
-//     );
-//   }
-// }
