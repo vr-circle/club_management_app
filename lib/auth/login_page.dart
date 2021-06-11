@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'auth_credentials.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'auth_credentials.dart';
+import '../schedule/schedule.dart';
 
 final loginCredentialProvider =
     StateNotifierProvider((ref) => LoginCredentialState());
@@ -50,7 +52,7 @@ class LoginPage extends HookWidget {
                 watch(loginCredentialProvider.notifier).login(
                     _usernameController.text.trim(),
                     _passwordController.text.trim());
-                Navigator.pushNamed(context, '/schedule');
+                Navigator.of(context).pushReplacementNamed(SchedulePage.route);
               },
               child: Text('login'));
         }),

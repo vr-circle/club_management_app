@@ -18,8 +18,8 @@ class HomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final _isOpen = useProvider(isOpenProvider);
-    return Container(
-      child: Column(
+    return Scaffold(
+      body: Column(
         children: [
           Column(
             children: [
