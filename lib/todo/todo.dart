@@ -15,7 +15,7 @@ class TodoPage extends HookWidget {
 class BuildDefaultTabController extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final _tabInfo = <String>['private', 'club'];
+    final _tabInfo = <String>['private', 'club', 'hogehoeg'];
     return DefaultTabController(
         length: _tabInfo.length,
         child: Scaffold(
@@ -37,7 +37,10 @@ class BuildDefaultTabController extends HookWidget {
           body: TabBarView(children: [
             TodoPrivatePage(),
             TabPage(
-              title: 'hoge',
+              title: 'club',
+            ),
+            TabPage(
+              title: 'hogehoge',
             ),
           ]),
         ));

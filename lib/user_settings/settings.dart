@@ -31,16 +31,25 @@ class SettingsPage extends HookWidget {
         const ListTile(
           title: Text("アカウント"),
         ),
-        const ListTile(
+        ListTile(
           leading: Icon(Icons.account_box),
           title: Text("アカウントの管理"),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return UserAccountView();
+            }));
+          },
         ),
-        const ListTile(
-            leading: Icon(Icons.logout),
-            title: Text(
-              "サインアウト",
-              style: TextStyle(color: Colors.red),
-            )),
+        ListTile(
+          leading: Icon(Icons.logout),
+          title: Text(
+            "サインアウト",
+            style: TextStyle(color: Colors.red),
+          ),
+          onTap: () {
+            // logout
+          },
+        ),
         Divider(
           color: isDarkMode ? Colors.white : Colors.black,
         ),
@@ -69,9 +78,23 @@ class SettingsPage extends HookWidget {
         ListTile(
           leading: Icon(Icons.info),
           title: Text("バージョン"),
-          subtitle: Text("1.0.0"),
+          subtitle: Text("1.0.0β"),
         ),
       ]),
     ));
+  }
+}
+
+class UserAccountView extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('アカウント情報'),
+      ),
+      body: Center(
+        child: Text('User name'),
+      ),
+    );
   }
 }
