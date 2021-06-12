@@ -52,7 +52,6 @@ class LoginPage extends HookWidget {
                 watch(loginCredentialProvider.notifier).login(
                     _usernameController.text.trim(),
                     _passwordController.text.trim());
-                Navigator.of(context).pushReplacementNamed(SchedulePage.route);
               },
               child: Text('login'));
         }),

@@ -77,8 +77,8 @@ class SchedulePage extends HookWidget {
     final _selectedDay = useProvider(selectedDayProvider);
     const CalendarFormat _calendarFormat = CalendarFormat.month;
 
-    return Container(
-        child: Column(children: [
+    return Scaffold(
+        body: Column(children: [
       TableCalendar(
         locale: 'ja_JP',
         headerStyle: HeaderStyle(

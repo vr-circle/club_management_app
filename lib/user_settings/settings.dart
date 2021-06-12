@@ -65,30 +65,30 @@ class SettingsPage extends HookWidget {
         Divider(
           color: isDarkMode ? Colors.white : Colors.black,
         ),
-        ListTile(
-          title: Text('通知'),
-        ),
-        ListTile(
-          leading: Icon(Icons.task),
-          title: Text('タスクの通知'),
-          trailing: Switch(
-            value: false,
-            onChanged: (value) {},
-          ),
-          subtitle: Text("未実装"),
-        ),
-        ListTile(
-          leading: Icon(Icons.schedule),
-          title: Text('スケジュールの通知'),
-          trailing: Switch(
-            value: false,
-            onChanged: (value) {},
-          ),
-          subtitle: Text("未実装"),
-        ),
-        Divider(
-          color: isDarkMode ? Colors.white : Colors.black,
-        ),
+        // ListTile(
+        //   title: Text('通知'),
+        // ),
+        // ListTile(
+        //   leading: Icon(Icons.task),
+        //   title: Text('タスクの通知'),
+        //   trailing: Switch(
+        //     value: false,
+        //     onChanged: (value) {},
+        //   ),
+        //   subtitle: Text("未実装"),
+        // ),
+        // ListTile(
+        //   leading: Icon(Icons.schedule),
+        //   title: Text('スケジュールの通知'),
+        //   trailing: Switch(
+        //     value: false,
+        //     onChanged: (value) {},
+        //   ),
+        //   subtitle: Text("未実装"),
+        // ),
+        // Divider(
+        //   color: isDarkMode ? Colors.white : Colors.black,
+        // ),
         ListTile(title: Text("情報")),
         ListTile(
           leading: Icon(Icons.info),
@@ -97,28 +97,5 @@ class SettingsPage extends HookWidget {
         ),
       ]),
     ));
-  }
-}
-
-class SettingNotification extends HookWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('通知設定'),
-      ),
-      body: Container(
-          child: Column(
-        children: [
-          ListTile(
-            title: Text('hogehoge'),
-            trailing: Switch(
-              value: true,
-              onChanged: (value) {},
-            ),
-          ),
-        ],
-      )),
-    );
   }
 }
