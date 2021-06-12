@@ -15,350 +15,103 @@ import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
 
-// void main() {
-//   initializeDateFormatting().then((_) => runApp(ProviderScope(child: MyApp())));
-// }
-
-// final routeStateProvider = StateNotifierProvider((ref) => RouteStateNotifier());
-// class RouteStateNotifier extends StateNotifier{
-//   RouteStateNotifier() : super(RouteState(routeInformationParser: RouteInformationParser()));
-// }
-// class RouteState {
-//   RouteState({this.routeInformationParser,this.routerDelegate});
-//   final RouterDelegate routerDelegate;
-//   final RouteInformationParser routeInformationParser;
-// }
-
-// class MyApp extends HookWidget {
-//   static const String _title = 'MyAppTitle';
-//   @override
-//   Widget build(BuildContext context) {
-//     final routeState = useProvider(routeStateProvider);
-//     return MaterialApp.router(
-//         title: _title,
-//         routeInformationParser: ,
-//         routerDelegate: routerDelegate);
-//   }
-// }
-
-// class AppState extends StateNotifier{
-
-// }
-// class AppState
-
-// final selectedIndexProvider = StateNotifierProvider((_) => SelectedIndexState);
-
-// class SelectedIndexState extends StateNotifier {
-//   SelectedIndexState() : super(0);
-//   set selectedIndex(int index) {
-//     this.state = index;
-//   }
-// }
-
-// class MyAppRouteInformationParser extends RouteInformationParser<RoutePath> {
-//   @override
-//   Future<RoutePath> parseRouteInformation(
-//       RouteInformation routeInformation) async {
-//     final uri = Uri.parse(routeInformation.location);
-//     if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'settings') {
-//       return SettingsPath();
-//     } else {
-//       if (uri.pathSegments.length >= 2) {
-//         if (uri.pathSegments[0] == 'book') {
-//           return BooksDetaisPath(int.tryParse(uri.pathSegments[1]));
-//         }
-//       }
-//       return BooksListPath();
-//     }
-//   }
-
-//   @override
-//   RouteInformation restoreRouteInformation(RoutePath configuration) {
-//     if (configuration is BooksListPath) {
-//       return RouteInformation(location: '/home');
-//     }
-//     if (configuration is SettingsPath){
-//       return RouteInformation(location: '/settings')
-//     }
-
-//     return null;
-//   }
-// }
-
-// final navigatorKeyProvider = StateNotifierProvider<GlobalKeyState,GlobalKey<NavigatorState>>((ref) => GlobalKeyState());
-
-// class GlobalKeyState extends StateNotifier<GlobalKey<NavigatorState>>{
-//   GlobalKeyState() : super(GlobalKey<NavigatorState>());
-// }
-
-// final todoAppStateProvider = StateNotifierProvider((ref) => TodoAppState());
-// class TodoAppState extends StateNotifier{
-//   TodoAppState() : super();
-// }
-// class TodoRouterDelegate extends RouterDelegate<TodoRoutePath>{
-//   @override
-//   Widget build(BuildContext context){
-//     final navigatorKey = useProvider(navigatorKeyProvider);
-//     final todoAppState = useProvider(todoAppStateProvider);
-//     return Navigator(
-//       key: navigatorKey,
-//       pages: [
-//         MaterialPage(
-//           child: AppShell(appState: appState)
-//         ),
-//       ],
-//       onPopPage: (route,result){
-//         if(!route.didPop(result)){
-//           return false;
-//         }
-
-//         if(appState.selectedTodo!=null) {
-//           appState.selectedTodo = null;
-//         }
-//         return true;
-//       },
-//     )
-//   }
-//   @override
-//   Future<void> setNewRoutePath(RoutePath path) async{
-//     if(path is TodoListPath){
-//       appState.selectedIndex = 0;
-//       appState.selectedTodo = null;
-//     }else if(path is SettingsPath){
-//       appState.selectedIndex = 1;
-//     }else if(path is TodoDetailsPath){
-//       appState.setSelectedTodoById(path.id);
-//     }
-//   }
-// }
-
-// abstract class RoutePath{}
-// class TodoListPath extends RoutePath{}
-// class SettingsPath extends RoutePath{}
-// class TodoDetailsPath extends RoutePath{
-//   final int id;
-//   TodoDetailsPath(this.id);
-// }
-// class AppShell extends HookWidget{
-//   @override
-//   Widget build(BuildContext context){
-//     final _routeDelegate;
-//     final _backButtonDispatcher;
-//     return Scaffold(
-//       appBar: AppBar(),
-//       body:Router(
-//         routerDelegate: _routeDelegate,
-//         backButtonDispatcher: _backButtonDispatcher,
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: [
-//           BottomNavigationBarItem(icon:Icon(Icons.home),label: 'Home'),
-//           BottomNavigationBarItem(icon:Icon(Icons.settings),label: 'Settings'),
-//         ],
-//         currentIndex: appState.selectedIndex,
-//         onTap: (newIndex){
-//           appState.selectedIndex = newIndex;
-//         },
-//       ),
-//     );
-//   }
-// }
-
-// final todoNavigatorKeyProvider = StateNotifierProvider<GlobalKeyState,GlobalKey<NavigatorState>>((ref) => GlobalKeyState());
-
-// class InnerRouterDelegate extends RouterDelegate<TodoRoutePath> with PopNavigatorRouterDelegateMixin<TodoRoutePath>{
-//   final navigatorKey = useProvider(todoNavigatorKeyProvider);
-//   InnerRouterDelegate(this._appState);
-
-//   @override
-//   Widget build(BuildContext context){
-//     return Navigator(
-//       key: navigatorKey,
-//       pages: [
-//         if(appState.selectedIndex == 0) ...[
-//         ]
-//       ],
-//       onPopPage: (route,result){
-//         appState.selectedTodo = null;
-//         return route.didPop(result);
-//       },
-//     )
-//   }
-
-//   @override
-//   Future<void> setNewRoutePath(RoutePath path) async {
-//     assert(false);
-//   }
-
-//   void _handleBookTapped(Todo todo){
-//     appState.selectedTodo = todo;
-//   }
-// }
-
-// class FadeAnimationPage extends Page{
-//   final Widget child;
-//   FadeAnimationPage({Key key,this.child}): super(key: key);
-
-//   Route createRoute(BuildContext context){
-//     return PageRouteBuilder(
-//       settings: this,
-//       pageBuilder: (context,animatino,animation2){
-//       var curveTween = CurveTween(curve: Curves.easeIn);
-//       return FadeTransition(opacity: animatino.drive(curveTween),child: child,);
-//     });
-//   }
-// }
-
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-// import 'package:flutter/material.dart';
-
 void main() {
-  runApp(ProviderScope(child: NestedRouterDemo()));
+  runApp(ProviderScope(child: MyApp()));
 }
 
-class Book {
-  final String title;
-  final String author;
-
-  Book(this.title, this.author);
+class MyRouteAppState{
+  MyRouteAppState({this.routeInformationParser,this.routerDelegate});
+  RouteInformationParser routeInformationParser;
+  RouterDelegate routerDelegate;
+}
+class MyRouteAppStateNotifier extends StateNotifier<MyRouteAppState>{
+  MyRouteAppStateNotifier() : super(MyRouteAppState(routerDelegate: MyRouterDelegate(),routeInformationParser: MyRouteInformationParser()));
 }
 
-final routerStateProvider =
-    StateNotifierProvider<RouterStateNotifier, RouterState>(
-        (ref) => RouterStateNotifier());
+final myAppStateProvider = StateNotifierProvider((ref) => MyRouteAppStateNotifier());
 
-class RouterStateNotifier extends StateNotifier<RouterState> {
-  RouterStateNotifier()
-      : super(RouterState(
-            routeInformationParser: BookRouteInformationParser(),
-            routerDelegate: BookRouterDelegate()));
-}
-
-class RouterState {
-  RouterState({this.routeInformationParser, this.routerDelegate});
-  BookRouterDelegate routerDelegate;
-  BookRouteInformationParser routeInformationParser;
-}
-
-class NestedRouterDemo extends HookWidget {
+class MyApp extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final routerState = useProvider(routerStateProvider);
+    final myAppState = useProvider(myAppStateProvider);
     return MaterialApp.router(
-      title: 'Books App',
-      routerDelegate: routerState.routerDelegate,
-      routeInformationParser: routerState.routeInformationParser,
+      routeInformationParser: myAppState.routeInformationParser,
+      routerDelegate: myAppState.routerDelegate
     );
   }
 }
 
-class BooksAppState extends ChangeNotifier {
-  int _selectedIndex;
-
-  Book _selectedBook;
-
-  final List<Book> books = [
-    Book('Stranger in a Strange Land', 'Robert A. Heinlein'),
-    Book('Foundation', 'Isaac Asimov'),
-    Book('Fahrenheit 451', 'Ray Bradbury'),
-  ];
-
-  BooksAppState() : _selectedIndex = 0;
-
-  int get selectedIndex => _selectedIndex;
-
-  set selectedIndex(int idx) {
-    _selectedIndex = idx;
-    if (_selectedIndex == 1) {
-      // Remove this line if you want to keep the selected book when navigating
-      // between "settings" and "home" which book was selected when Settings is
-      // tapped.
-      // selectedBook = null;
-    }
-    notifyListeners();
-  }
-
-  Book get selectedBook => _selectedBook;
-
-  set selectedBook(Book book) {
-    _selectedBook = book;
-    notifyListeners();
-  }
-
-  int getSelectedBookById() {
-    if (!books.contains(_selectedBook)) return 0;
-    return books.indexOf(_selectedBook);
-  }
-
-  void setSelectedBookById(int id) {
-    if (id < 0 || id > books.length - 1) {
-      return;
-    }
-
-    _selectedBook = books[id];
-    notifyListeners();
+class MyAppState extends StateNotifier<int>{
+  MyAppState() : super(0);
+  int get selectedIndex => this.state;
+  set selectedIndex(int idx){
+    this.state = idx;
   }
 }
+final appStateProvider = StateNotifierProvider<MyAppState,int>((ref) => MyAppState());
 
-class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
+abstract class RoutePath {}
+
+class HomePath extends RoutePath {}
+
+class SchedulePath extends RoutePath {}
+
+class TodoPath extends RoutePath {}
+
+class SettingsPath extends RoutePath {}
+
+class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   @override
-  Future<BookRoutePath> parseRouteInformation(
+  Future<RoutePath> parseRouteInformation(
       RouteInformation routeInformation) async {
     final uri = Uri.parse(routeInformation.location);
 
-    if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'settings') {
-      return BooksSettingsPath();
-    } else {
-      if (uri.pathSegments.length >= 2) {
-        if (uri.pathSegments[0] == 'book') {
-          return BooksDetailsPath(int.tryParse(uri.pathSegments[1]));
-        }
-      }
-      return BooksListPath();
+    if (uri.pathSegments.length == 0) {
+      return HomePath();
     }
+    return HomePath();
   }
 
   @override
-  RouteInformation restoreRouteInformation(BookRoutePath configuration) {
-    if (configuration is BooksListPath) {
+  RouteInformation restoreRouteInformation(RoutePath path) {
+    if (path is HomePath) {
       return RouteInformation(location: '/home');
     }
-    if (configuration is BooksSettingsPath) {
-      return RouteInformation(location: '/settings');
+    if (path is SchedulePath) {
+      return RouteInformation(location: '/schedule');
     }
-    if (configuration is BooksDetailsPath) {
-      return RouteInformation(location: '/book/${configuration.id}');
+    if (path is TodoPath) {
+      return RouteInformation(location: '/todo');
+    }
+    if (path is SettingsPath) {
+      return RouteInformation(location: '/settings');
     }
     return null;
   }
 }
 
-class BookRouterDelegate extends RouterDelegate<BookRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
+class MyRouterDelegate extends RouterDelegate<RoutePath>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
   final GlobalKey<NavigatorState> navigatorKey;
 
-  BooksAppState appState = BooksAppState();
+  MyRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
-  BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>() {
-    appState.addListener(notifyListeners);
-  }
+  final appState = useProvider(appStateProvider.notifier);
 
-  BookRoutePath get currentConfiguration {
-    if (appState.selectedIndex == 1) {
-      return BooksSettingsPath();
-    } else {
-      if (appState.selectedBook == null) {
-        return BooksListPath();
-      } else {
-        return BooksDetailsPath(appState.getSelectedBookById());
-      }
-    }
+  RoutePath get currentConfiguration {
+    if (appState.selectedIndex == 0) {
+      // hoem
+      return HomePath();
+    } else if (appState.selectedIndex == 1) {
+      // schedule
+      return SchedulePath();
+    } else if (appState.selectedIndex == 2) {
+      // todo
+      return TodoPath();
+    }else {
+      // settings
+      return SettingsPath(); // UnknownPath?
+    } 
   }
 
   @override
@@ -366,17 +119,11 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        MaterialPage(
-          child: AppShell(appState: appState),
-        ),
+        MaterialPage(child: AppShell()),
       ],
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
           return false;
-        }
-
-        if (appState.selectedBook != null) {
-          appState.selectedBook = null;
         }
         notifyListeners();
         return true;
@@ -385,153 +132,77 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath>
   }
 
   @override
-  Future<void> setNewRoutePath(BookRoutePath path) async {
-    if (path is BooksListPath) {
+  Future<void> setNewRoutePath(RoutePath path) async {
+    if (path is HomePath) {
       appState.selectedIndex = 0;
-      appState.selectedBook = null;
-    } else if (path is BooksSettingsPath) {
+    } else if (path is SchedulePath) {
       appState.selectedIndex = 1;
-    } else if (path is BooksDetailsPath) {
-      appState.setSelectedBookById(path.id);
+    } else if (path is TodoPath) {
+      appState.selectedIndex = 2;
+    } else if (path is SettingsPath) {
+      appState.selectedIndex = 3;
     }
   }
 }
 
-// Routes
-abstract class BookRoutePath {}
-
-class BooksListPath extends BookRoutePath {}
-
-class BooksSettingsPath extends BookRoutePath {}
-
-class BooksDetailsPath extends BookRoutePath {
-  final int id;
-
-  BooksDetailsPath(this.id);
-}
-
-// Widget that contains the AdaptiveNavigationScaffold
-class AppShell extends StatefulWidget {
-  final BooksAppState appState;
-
-  AppShell({
-    @required this.appState,
-  });
-
-  @override
-  _AppShellState createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
+class AppShell extends HookWidget {
   InnerRouterDelegate _routerDelegate;
-  ChildBackButtonDispatcher _backButtonDispatcher;
-
-  void initState() {
-    super.initState();
-    _routerDelegate = InnerRouterDelegate(widget.appState);
-  }
-
-  @override
-  void didUpdateWidget(covariant AppShell oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _routerDelegate.appState = widget.appState;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Defer back button dispatching to the child router
-    _backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher
-        .createChildBackButtonDispatcher();
-  }
-
   @override
   Widget build(BuildContext context) {
-    var appState = widget.appState;
-
-    // Claim priority, If there are parallel sub router, you will need
-    // to pick which one should take priority;
-    _backButtonDispatcher.takePriority();
-
+    var appState = useProvider();
     return Scaffold(
       appBar: AppBar(),
-      body: Router(
-        routerDelegate: _routerDelegate,
-        backButtonDispatcher: _backButtonDispatcher,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-        currentIndex: appState.selectedIndex,
-        onTap: (newIndex) {
-          appState.selectedIndex = newIndex;
-        },
-      ),
+    body: Router(
+      routerDelegate: _routerDelegate,
+      backButtonDispatcher: ,
+    ),
+    bottomNavigationBar: BottomNavigationBar(
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.home),label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.schedule),label: 'Schedule'),
+        BottomNavigationBarItem(icon: Icon(Icons.task),label: 'ToDo'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings),label: 'Settings'),
+      ],
+      currentIndex: appState.selectedIndex,
+      onTap: (newIndex){
+        appState.selectedIndex = newIndex;
+      },
+    ),
     );
   }
 }
 
-class InnerRouterDelegate extends RouterDelegate<BookRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
+class InnerRouterDelegate extends RouterDelegate<RoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  BooksAppState get appState => _appState;
-  BooksAppState _appState;
-  set appState(BooksAppState value) {
-    if (value == _appState) {
-      return;
-    }
-    _appState = value;
-    notifyListeners();
-  }
-
   InnerRouterDelegate(this._appState);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Navigator(
       key: navigatorKey,
       pages: [
-        if (appState.selectedIndex == 0) ...[
+        if (appState.selectedIndex == 0)
           FadeAnimationPage(
-            child: BooksListScreen(
-              books: appState.books,
-              onTapped: _handleBookTapped,
-            ),
-            key: ValueKey('BooksListPage'),
+            child:HomePage(),
+            key: ValueKey('HomePage')
           ),
-          if (appState.selectedBook != null)
-            MaterialPage(
-              key: ValueKey(appState.selectedBook),
-              child: BookDetailsScreen(book: appState.selectedBook),
-            ),
-        ] else
-          FadeAnimationPage(
-            child: SettingsScreen(),
-            key: ValueKey('SettingsPage'),
-          ),
+        else if(appState.selectedIndex == 1)
+        FadeAnimationPage(
+          child: SettingsPage()
+        ),
+        else 
+        FadeAnimationPage(
+          child:
+        )
       ],
-      onPopPage: (route, result) {
-        appState.selectedBook = null;
-        notifyListeners();
+      onPopPage: (route,result){
         return route.didPop(result);
       },
     );
   }
-
   @override
-  Future<void> setNewRoutePath(BookRoutePath path) async {
-    // This is not required for inner router delegate because it does not
-    // parse route
+  Future<void> setNewRoutePath(RoutePath path) async {
     assert(false);
-  }
-
-  void _handleBookTapped(Book book) {
-    appState.selectedBook = book;
-    notifyListeners();
   }
 }
 
@@ -550,76 +221,6 @@ class FadeAnimationPage extends Page {
           child: child,
         );
       },
-    );
-  }
-}
-
-// Screens
-class BooksListScreen extends StatelessWidget {
-  final List<Book> books;
-  final ValueChanged<Book> onTapped;
-
-  BooksListScreen({
-    @required this.books,
-    @required this.onTapped,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        children: [
-          for (var book in books)
-            ListTile(
-              title: Text(book.title),
-              subtitle: Text(book.author),
-              onTap: () => onTapped(book),
-            )
-        ],
-      ),
-    );
-  }
-}
-
-class BookDetailsScreen extends StatelessWidget {
-  final Book book;
-
-  BookDetailsScreen({
-    @required this.book,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Back'),
-            ),
-            if (book != null) ...[
-              Text(book.title, style: Theme.of(context).textTheme.headline6),
-              Text(book.author, style: Theme.of(context).textTheme.subtitle1),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SettingsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text('Settings screen'),
-      ),
     );
   }
 }
