@@ -72,7 +72,7 @@ abstract class RoutePath {}
 
 class LoginPath extends RoutePath {}
 
-class HomePath extends RoutePath {}
+// class HomePath extends RoutePath {}
 
 class SchedulePath extends RoutePath {}
 
@@ -90,20 +90,21 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       if (uri.pathSegments.first == 'login') {
         return LoginPath();
       }
-      if (uri.pathSegments.first == 'home') {
-        return SettingsPath();
-      }
+      // if (uri.pathSegments.first == 'home') {
+      //   return HomePath();
+      // }
       if (uri.pathSegments.first == 'schedule') {
-        return SettingsPath();
+        return SchedulePath();
       }
       if (uri.pathSegments.first == 'todo') {
-        return SettingsPath();
+        return TodoPath();
       }
       if (uri.pathSegments.first == 'settings') {
         return SettingsPath();
       }
     }
-    return HomePath();
+    // return HomePath();
+    return null;
   }
 
   @override
@@ -111,9 +112,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is LoginPath) {
       return RouteInformation(location: '/login');
     }
-    if (path is HomePath) {
-      return RouteInformation(location: '/home');
-    }
+    // if (path is HomePath) {
+    //   return RouteInformation(location: '/home');
+    // }
     if (path is SchedulePath) {
       return RouteInformation(location: '/schedule');
     }
@@ -137,13 +138,14 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   }
 
   RoutePath get currentConfiguration {
+    // if (appState.selectedIndex == 0) {
+    //   // hoem
+    //   return HomePath();
+    // } else
     if (appState.selectedIndex == 0) {
-      // hoem
-      return HomePath();
-    } else if (appState.selectedIndex == 1) {
       // schedule
       return SchedulePath();
-    } else if (appState.selectedIndex == 2) {
+    } else if (appState.selectedIndex == 1) {
       // todo
       return TodoPath();
     } else {
@@ -174,14 +176,15 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
-    if (path is HomePath) {
+    // if (path is HomePath) {
+    //   appState.selectedIndex = 0;
+    // } else
+    if (path is SchedulePath) {
       appState.selectedIndex = 0;
-    } else if (path is SchedulePath) {
-      appState.selectedIndex = 1;
     } else if (path is TodoPath) {
-      appState.selectedIndex = 2;
+      appState.selectedIndex = 1;
     } else if (path is SettingsPath) {
-      appState.selectedIndex = 3;
+      appState.selectedIndex = 2;
     }
   }
 }
@@ -240,7 +243,7 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          // BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.schedule), label: 'Schedule'),
           BottomNavigationBarItem(
@@ -277,12 +280,13 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
+        // if (appState.selectedIndex == 0)
+        //   FadeAnimationPage(child: HomePage(), key: ValueKey('HomePage'))
+        // else
         if (appState.selectedIndex == 0)
-          FadeAnimationPage(child: HomePage(), key: ValueKey('HomePage'))
-        else if (appState.selectedIndex == 1)
           FadeAnimationPage(
               child: SchedulePage(), key: ValueKey('SchedulePage'))
-        else if (appState.selectedIndex == 2)
+        else if (appState.selectedIndex == 1)
           FadeAnimationPage(child: TodoPage(), key: ValueKey('TodoPage'))
         else
           FadeAnimationPage(

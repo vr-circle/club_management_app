@@ -2,12 +2,14 @@ import 'package:flutter_application_1/todo/task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final taskListProvider = StateNotifierProvider((refs) => TaskList());
+final clubTaskListProvider = StateNotifierProvider((refs) => TaskList());
 
 class TaskList extends StateNotifier<List<Task>> {
   TaskList([List<Task> initialTask]) : super(initialTask ?? []);
 
   void addTask(String title) {
     state = [...state, Task(title: title)];
+    print("added!");
   }
 
   void toggleDone(String id) {

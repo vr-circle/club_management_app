@@ -65,30 +65,6 @@ class SettingsPage extends HookWidget {
         Divider(
           color: isDarkMode ? Colors.white : Colors.black,
         ),
-        // ListTile(
-        //   title: Text('通知'),
-        // ),
-        // ListTile(
-        //   leading: Icon(Icons.task),
-        //   title: Text('タスクの通知'),
-        //   trailing: Switch(
-        //     value: false,
-        //     onChanged: (value) {},
-        //   ),
-        //   subtitle: Text("未実装"),
-        // ),
-        // ListTile(
-        //   leading: Icon(Icons.schedule),
-        //   title: Text('スケジュールの通知'),
-        //   trailing: Switch(
-        //     value: false,
-        //     onChanged: (value) {},
-        //   ),
-        //   subtitle: Text("未実装"),
-        // ),
-        // Divider(
-        //   color: isDarkMode ? Colors.white : Colors.black,
-        // ),
         ListTile(title: Text("情報")),
         ListTile(
           leading: Icon(Icons.info),
