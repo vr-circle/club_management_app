@@ -94,7 +94,7 @@ class SchedulePage extends HookWidget {
       hashCode: getHashCode,
     )..addAll(_eventsList);
 
-    List _getEventForDay(DateTime day) {
+    List<Schedule> _getEventForDay(DateTime day) {
       return _events[day] ?? [];
     }
 
@@ -132,17 +132,12 @@ class SchedulePage extends HookWidget {
             context.read(focusDayProvider.notifier).updateFocusDay(focusedDay);
           }
           if (isSameDay(_focusDay, selectedDay)) {
-            if (_getEventForDay(selectedDay).isEmpty)
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return NonScheduleListOnDay();
-              }));
-            else
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return ScheduleListOnDay(
-                  targetDate: selectedDay,
-                  schedules: _getEventForDay(selectedDay),
-                );
-              }));
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return ScheduleListOnDay(
+                targetDate: selectedDay,
+                schedules: _getEventForDay(selectedDay),
+              );
+            }));
           }
         },
       ),
@@ -168,11 +163,8 @@ class SchedulePage extends HookWidget {
 class NonScheduleListOnDay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: Text('予定はありません'),
-      ),
+    return Center(
+      child: Text('予定はありません'),
     );
   }
 }
@@ -187,48 +179,31 @@ class ScheduleListOnDay extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(_format.format(DateTime.now())),
-        ),
-        body: ListView(
-          children: [
-            ...schedules
-                .map((e) => Card(
-                        child: ListTile(
-                      title: Text(e.title),
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                ScheduleDetails(schedule: e)));
-                      },
-                    )))
-                .toList()
-          ],
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return ScheduleAddPage(
-                        targetDate: targetDate,
-                      );
-                    }));
-                  },
-                  child:
-                      SizedBox(height: 50, child: Center(child: Text("Add")))),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: SizedBox(
-                      height: 50, child: Center(child: Text("Close")))),
-            ],
-          ),
-        ));
+      appBar: AppBar(
+        title: Text(_format.format(DateTime.now())),
+      ),
+      body: schedules.isEmpty
+          ? NonScheduleListOnDay()
+          : ListView(
+              children: [
+                ...schedules
+                    .map((e) => Card(
+                            child: ListTile(
+                          title: Text(e.title),
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    ScheduleDetails(schedule: e)));
+                          },
+                        )))
+                    .toList()
+              ],
+            ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {},
+      ),
+    );
   }
 }
 
@@ -239,62 +214,36 @@ class ScheduleDetails extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(schedule.title), // fix
-        ),
-        body: Column(children: [
-          // show details
-          Expanded(
-              child: Container(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Text('開始時刻'),
-                  title: Text(_format.format(schedule.start)),
-                ),
-                ListTile(
-                  leading: Text('終了時刻'),
-                  title: Text(_format.format(schedule.end)),
-                ),
-                ListTile(
-                  leading: Text('場所'),
-                  title: Text(schedule.place),
-                ),
-              ],
-            ),
-          )),
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "delete",
-                      )),
-                ),
-                SizedBox(
-                  height: 50,
-                  child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "Edit",
-                      )),
-                ),
-                SizedBox(
-                  height: 50,
-                  child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "cancel",
-                      )),
-                ),
-              ],
-            ),
-          )
-        ]));
+      appBar: AppBar(
+        title: Text(schedule.title), // fix
+      ),
+      body: Column(children: [
+        // show details
+        Expanded(
+            child: Container(
+          child: Column(
+            children: [
+              ListTile(
+                leading: Text('開始時刻'),
+                title: Text(_format.format(schedule.start)),
+              ),
+              ListTile(
+                leading: Text('終了時刻'),
+                title: Text(_format.format(schedule.end)),
+              ),
+              ListTile(
+                leading: Text('場所'),
+                title: Text(schedule.place),
+              ),
+            ],
+          ),
+        )),
+      ]),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.edit),
+        onPressed: () {},
+      ),
+    );
   }
 }
 

@@ -16,128 +16,7 @@ import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
 import 'user_state.dart';
-
-class MyAuthPage extends StatefulWidget {
-  @override
-  _MyAuthPageState createState() => _MyAuthPageState();
-}
-
-class _MyAuthPageState extends State<MyAuthPage> {
-  // 入力されたメールアドレス
-  String newUserEmail = "";
-  // 入力されたパスワード
-  String newUserPassword = "";
-  String loginUserEmail = "";
-  String loginUserPassword = "";
-  // 登録・ログインに関する情報を表示
-  String infoText = "";
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(32),
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                // テキスト入力のラベルを設定
-                decoration: InputDecoration(labelText: "メールアドレス"),
-                onChanged: (String value) {
-                  setState(() {
-                    newUserEmail = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: InputDecoration(labelText: "パスワード（６文字以上）"),
-                // パスワードが見えないようにする
-                obscureText: true,
-                onChanged: (String value) {
-                  setState(() {
-                    newUserPassword = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    // メール/パスワードでユーザー登録
-                    final FirebaseAuth auth = FirebaseAuth.instance;
-                    final UserCredential result =
-                        await auth.createUserWithEmailAndPassword(
-                      email: newUserEmail,
-                      password: newUserPassword,
-                    );
-
-                    // 登録したユーザー情報
-                    final User user = result.user;
-                    setState(() {
-                      infoText = "登録OK：${user.email}";
-                    });
-                  } catch (e) {
-                    // 登録に失敗した場合
-                    setState(() {
-                      infoText = "登録NG：${e.toString()}";
-                    });
-                  }
-                },
-                child: Text("ユーザー登録"),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                decoration: InputDecoration(labelText: "メールアドレス"),
-                onChanged: (String value) {
-                  setState(() {
-                    loginUserEmail = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: "パスワード"),
-                obscureText: true,
-                onChanged: (String value) {
-                  setState(() {
-                    loginUserPassword = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    // メール/パスワードでログイン
-                    final FirebaseAuth auth = FirebaseAuth.instance;
-                    final UserCredential result =
-                        await auth.signInWithEmailAndPassword(
-                      email: loginUserEmail,
-                      password: loginUserPassword,
-                    );
-                    // ログインに成功した場合
-                    final User user = result.user;
-                    setState(() {
-                      infoText = "ログインOK：${user.displayName}";
-                    });
-                  } catch (e) {
-                    // ログインに失敗した場合
-                    setState(() {
-                      infoText = "ログインNG：${e.toString()}";
-                    });
-                  }
-                },
-                child: Text("ログイン"),
-              ),
-              const SizedBox(height: 8),
-              Text(infoText)
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+import 'auth/auth_service.dart';
 
 Future<void> main() async {
   await Firebase.initializeApp();
@@ -166,7 +45,8 @@ class MyApp extends HookWidget {
   Widget build(BuildContext context) {
     final myAppState = useProvider(myAppStateProvider);
     if (FirebaseAuth.instance.currentUser == null) {
-      print("who are you");
+      // print("who are you");
+      // How to verify a user session?
     }
     return MaterialApp.router(
         debugShowCheckedModeBanner: false,
@@ -181,7 +61,7 @@ class MyApp extends HookWidget {
 class MyAppState extends ChangeNotifier {
   MyAppState()
       : _selectedIndex = 0,
-        _authFlowStatus = AuthFlowStatus.login;
+        _authFlowStatus = AuthFlowStatus.login {}
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {

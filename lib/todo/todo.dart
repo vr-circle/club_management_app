@@ -15,9 +15,7 @@ class TodoPage extends HookWidget {
 class BuildDefaultTabController extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final _tabInfo = <String>[
-      'private',
-    ];
+    final _tabInfo = <String>['private', 'club'];
     return DefaultTabController(
         length: _tabInfo.length,
         child: Scaffold(
@@ -38,6 +36,7 @@ class BuildDefaultTabController extends HookWidget {
           ),
           body: TabBarView(children: [
             TodoPrivatePage(),
+            TodoClubPage(),
           ]),
         ));
   }
@@ -74,7 +73,7 @@ class TaskTile extends HookWidget {
 }
 
 class TabPage extends HookWidget {
-  const TabPage({Key key, this.title}) : super(key: key);
+  const TabPage({Key key, @required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -83,19 +82,20 @@ class TabPage extends HookWidget {
       body: Center(child: Text('$title')),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => TodoClubPage()));
+        },
       ),
     );
   }
 }
 
-class TodoPrivatePage extends HookWidget {
-  TodoPrivatePage({Key key}) : super(key: key);
-
+class TodoClubPage extends HookWidget {
+  TodoClubPage({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final _taskListProvider = useProvider(taskListProvider.notifier);
-    final taskList = useProvider(taskListProvider);
+    final taskList = useProvider(clubTaskListProvider);
     return Scaffold(
       body: Consumer(
         builder: (context, watch, child) {
@@ -106,7 +106,9 @@ class TodoPrivatePage extends HookWidget {
                 taskTitle: task.title,
                 isChecked: task.isDone,
                 checkboxCallback: (bool value) {
-                  _taskListProvider.toggleDone(task.id);
+                  context
+                      .read(clubTaskListProvider.notifier)
+                      .toggleDone(task.id);
                 },
                 longPressCallback: () {
                   showDialog(
@@ -119,6 +121,9 @@ class TodoPrivatePage extends HookWidget {
                               child: Text('削除'),
                               onPressed: () {
                                 // delete task by id
+                                context
+                                    .read(clubTaskListProvider.notifier)
+                                    .deleteTask(task);
                                 Navigator.pop(context);
                               },
                             ),
@@ -140,7 +145,67 @@ class TodoPrivatePage extends HookWidget {
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ToDoAddPage();
+            return ToDoAddPage(false);
+          }));
+        },
+      ),
+    );
+  }
+}
+
+class TodoPrivatePage extends HookWidget {
+  TodoPrivatePage({Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    final taskList = useProvider(taskListProvider);
+    return Scaffold(
+      body: Consumer(
+        builder: (context, watch, child) {
+          return ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              final task = taskList[index];
+              return TaskTile(
+                taskTitle: task.title,
+                isChecked: task.isDone,
+                checkboxCallback: (bool value) {
+                  context.read(taskListProvider.notifier).toggleDone(task.id);
+                },
+                longPressCallback: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SimpleDialog(
+                          title: Text(task.title),
+                          children: [
+                            SimpleDialogOption(
+                              child: Text('削除'),
+                              onPressed: () {
+                                // delete task by id
+                                context
+                                    .read(taskListProvider.notifier)
+                                    .deleteTask(task);
+                                Navigator.pop(context);
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text('キャンセル'),
+                              onPressed: () => Navigator.pop(context),
+                            )
+                          ],
+                        );
+                      });
+                },
+              );
+            },
+            itemCount: taskList.length,
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ToDoAddPage(true);
           }));
         },
       ),
@@ -149,6 +214,8 @@ class TodoPrivatePage extends HookWidget {
 }
 
 class ToDoAddPage extends HookWidget {
+  ToDoAddPage(this.isPrivate);
+  bool isPrivate;
   @override
   Widget build(BuildContext context) {
     String _newTaskTitle = '';
@@ -171,7 +238,12 @@ class ToDoAddPage extends HookWidget {
                       if (_newTaskTitle.isEmpty) {
                         return;
                       }
-                      watch(taskListProvider.notifier).addTask(_newTaskTitle);
+                      if (isPrivate) {
+                        watch(taskListProvider.notifier).addTask(_newTaskTitle);
+                      } else {
+                        watch(clubTaskListProvider.notifier)
+                            .addTask(_newTaskTitle);
+                      }
                       Navigator.of(context).pop();
                     },
                   );
@@ -186,9 +258,16 @@ class ToDoAddPage extends HookWidget {
                     Consumer(builder: (context, watch, child) {
                       return TextButton(
                           onPressed: () {
-                            watch(taskListProvider.notifier)
-                                .addTask(_newTaskTitle);
-                            Navigator.of(context).pop();
+                            if (_newTaskTitle.isEmpty) {
+                              return;
+                            }
+                            if (isPrivate) {
+                              watch(taskListProvider.notifier)
+                                  .addTask(_newTaskTitle);
+                            } else {
+                              watch(clubTaskListProvider.notifier)
+                                  .addTask(_newTaskTitle);
+                            }
                           },
                           child: Text('Add'));
                     }),

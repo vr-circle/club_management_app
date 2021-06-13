@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
-import 'package:flutter_application_1/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../user_state.dart';
+import '../auth/auth_service.dart';
 
 final darkModeProvider =
     StateNotifierProvider<DarkModeState, bool>((refs) => DarkModeState());
@@ -50,8 +53,9 @@ class SettingsPage extends HookWidget {
             'ログアウト',
             style: TextStyle(color: Colors.red),
           ),
-          onTap: () {
+          onTap: () async {
             // logout
+            authService.signOut();
             appState.authFlowStatus = AuthFlowStatus.login;
           },
         ),
@@ -104,11 +108,13 @@ class UserAccountView extends HookWidget {
           children: [
             ListTile(
               title: Text('名前'),
-              trailing: Text('namehogehoge'),
+              trailing: Text(appState.user.displayName == null
+                  ? '(表示名は設定されていません)'
+                  : appState.user.displayName),
             ),
             ListTile(
               title: Text('Email'),
-              trailing: Text('aaaaaaaaaa.gmail.com'),
+              trailing: Text(appState.user.email),
             ),
           ],
         ),

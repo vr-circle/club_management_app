@@ -1,9 +1,3 @@
-enum AuthFlowStatus { login, signUp, verification, session }
+enum AuthFlowStatus { login, session }
 
-enum Role { Member, Anonymous }
-
-class UserState {
-  AuthFlowStatus authFlowStatus;
-  Role role;
-  String username;
-}
+class UserState {}

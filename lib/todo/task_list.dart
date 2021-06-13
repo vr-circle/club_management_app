@@ -11,14 +11,14 @@ class TaskList extends StateNotifier<List<Task>> {
 
   void addTask(String title) {
     state = [...state, Task(title: title)];
-    print("added!");
   }
 
   void toggleDone(String id) {
+    // todo: O(N) -> O(1)
     state = [
       for (final task in state)
         if (task.id == id)
-          Task(id: task.id, title: task.title, isDone: task.isDone)
+          Task(id: task.id, title: task.title, isDone: !task.isDone)
         else
           task
     ];
@@ -26,17 +26,6 @@ class TaskList extends StateNotifier<List<Task>> {
 
   void deleteTask(Task target) {
     state = state.where((task) => task.id != target.id).toList();
-  }
-
-  void deleteAllTasks() {
-    state = [];
-  }
-
-  void deleteDoneTasks() {
-    state = state.where((task) => !task.isDone).toList();
-  }
-
-  void updateTasks(List<Task> newTasks) {
-    state = [for (final task in newTasks) task];
+    print("delete!");
   }
 }
