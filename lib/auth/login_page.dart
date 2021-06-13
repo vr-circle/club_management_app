@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/store_service.dart';
 import 'package:flutter_application_1/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -89,6 +90,7 @@ class LoginPage extends HookWidget {
                           email: email, password: password);
                       // if success to login
                       appState.user = user;
+                      storeService = StoreService(userId: user.uid);
                       // var id = auth.currentUser.uid;
                       appState.authFlowStatus = AuthFlowStatus.session;
                     } catch (e) {

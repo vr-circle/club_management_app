@@ -13,6 +13,10 @@ class TaskList extends StateNotifier<List<Task>> {
     state = [...state, Task(title: title)];
   }
 
+  void addTaskList(List<Task> taskList) {
+    state = state..addAll(taskList);
+  }
+
   void toggleDone(String id) {
     // todo: O(N) -> O(1)
     state = [

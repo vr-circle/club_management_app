@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
+import 'package:flutter_application_1/store_service.dart';
+import 'package:flutter_application_1/todo/task.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -62,12 +64,12 @@ class TaskTile extends HookWidget {
       elevation: 4,
       child: GestureDetector(
         onLongPress: longPressCallback,
-        child: CheckboxListTile(
+        child: ListTile(
           title: Text(
             taskTitle,
           ),
-          value: isChecked,
-          onChanged: checkboxCallback,
+          // value: isChecked,
+          // onChanged: checkboxCallback,
         ),
       ),
     );
@@ -94,10 +96,14 @@ class TabPage extends HookWidget {
 }
 
 class TodoClubPage extends HookWidget {
-  TodoClubPage({Key key}) : super(key: key);
+  TodoClubPage({Key key}) : super(key: key) {
+    useProvider(clubTaskListProvider.notifier)
+        .addTaskList(storeService.getClubTaskList());
+  }
   @override
   Widget build(BuildContext context) {
     final taskList = useProvider(clubTaskListProvider);
+    // context.read(clubTaskListProvider.notifier).addTaskList(storeService.getClubTaskList());
     return Scaffold(
       body: Consumer(
         builder: (context, watch, child) {
@@ -121,8 +127,9 @@ class TodoClubPage extends HookWidget {
                           children: [
                             SimpleDialogOption(
                               child: Text('削除'),
-                              onPressed: () {
+                              onPressed: () async {
                                 // delete task by id
+                                await storeService.deleteTask(task, false);
                                 context
                                     .read(clubTaskListProvider.notifier)
                                     .deleteTask(task);
@@ -156,7 +163,10 @@ class TodoClubPage extends HookWidget {
 }
 
 class TodoPrivatePage extends HookWidget {
-  TodoPrivatePage({Key key}) : super(key: key);
+  TodoPrivatePage({Key key}) : super(key: key) {
+    useProvider(taskListProvider.notifier)
+        .addTaskList(storeService.getPrivateTaskList());
+  }
   @override
   Widget build(BuildContext context) {
     final taskList = useProvider(taskListProvider);
@@ -181,8 +191,9 @@ class TodoPrivatePage extends HookWidget {
                           children: [
                             SimpleDialogOption(
                               child: Text('削除'),
-                              onPressed: () {
+                              onPressed: () async {
                                 // delete task by id
+                                await storeService.deleteTask(task, true);
                                 context
                                     .read(taskListProvider.notifier)
                                     .deleteTask(task);
@@ -242,15 +253,11 @@ class ToDoAddPage extends StatelessWidget {
                       }
                       if (isPrivate) {
                         watch(taskListProvider.notifier).addTask(_newTaskTitle);
-                        String id = (await authService.getCurrentUser()).uid;
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(id)
-                            .update({todo:})
-                        // print(data.data());
+                        storeService.addTask(Task(title: newText), isPrivate);
                       } else {
                         watch(clubTaskListProvider.notifier)
                             .addTask(_newTaskTitle);
+                        storeService.addTask(Task(title: newText), isPrivate);
                       }
                       Navigator.of(context).pop();
                     },
