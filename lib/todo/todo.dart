@@ -243,12 +243,10 @@ class ToDoAddPage extends StatelessWidget {
                       if (isPrivate) {
                         watch(taskListProvider.notifier).addTask(_newTaskTitle);
                         String id = (await authService.getCurrentUser()).uid;
-                        // await FirebaseFirestore.instance
-                        //     .collection('users')
-                        //     .doc(id)
-                        //     .collection('todo')
-                        //     .doc(id)
-                        //     .set(data)
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(id)
+                            .update({todo:})
                         // print(data.data());
                       } else {
                         watch(clubTaskListProvider.notifier)
