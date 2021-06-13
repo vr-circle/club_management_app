@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -21,6 +23,8 @@ class ExpandedState extends StateNotifier<bool> {
 }
 
 class SettingsPage extends HookWidget {
+  SettingsPage(this.appState);
+  MyAppState appState;
   static const String route = '/settings';
   @override
   Widget build(BuildContext context) {
@@ -36,18 +40,19 @@ class SettingsPage extends HookWidget {
           title: Text("アカウントの管理"),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return UserAccountView();
+              return UserAccountView(appState);
             }));
           },
         ),
         ListTile(
           leading: Icon(Icons.logout),
           title: Text(
-            "サインアウト",
+            'ログアウト',
             style: TextStyle(color: Colors.red),
           ),
           onTap: () {
             // logout
+            appState.authFlowStatus = AuthFlowStatus.login;
           },
         ),
         Divider(
@@ -78,7 +83,7 @@ class SettingsPage extends HookWidget {
         ListTile(
           leading: Icon(Icons.info),
           title: Text("バージョン"),
-          subtitle: Text("1.0.0β"),
+          subtitle: Text("1.0.0"),
         ),
       ]),
     ));
@@ -86,6 +91,8 @@ class SettingsPage extends HookWidget {
 }
 
 class UserAccountView extends HookWidget {
+  UserAccountView(this.appState);
+  MyAppState appState;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,7 +100,18 @@ class UserAccountView extends HookWidget {
         title: Text('アカウント情報'),
       ),
       body: Center(
-        child: Text('User name'),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text('名前'),
+              trailing: Text('namehogehoge'),
+            ),
+            ListTile(
+              title: Text('Email'),
+              trailing: Text('aaaaaaaaaa.gmail.com'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -15,6 +15,7 @@ import 'search/search.dart';
 import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
+import 'user_state.dart';
 
 class MyAuthPage extends StatefulWidget {
   @override
@@ -117,7 +118,7 @@ class _MyAuthPageState extends State<MyAuthPage> {
                     // ログインに成功した場合
                     final User user = result.user;
                     setState(() {
-                      infoText = "ログインOK：${user.email}";
+                      infoText = "ログインOK：${user.displayName}";
                     });
                   } catch (e) {
                     // ログインに失敗した場合
@@ -164,7 +165,11 @@ class MyApp extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final myAppState = useProvider(myAppStateProvider);
+    if (FirebaseAuth.instance.currentUser == null) {
+      print("who are you");
+    }
     return MaterialApp.router(
+        debugShowCheckedModeBanner: false,
         theme: useProvider(darkModeProvider)
             ? ThemeData.dark()
             : ThemeData.light(),
@@ -174,7 +179,9 @@ class MyApp extends HookWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  MyAppState() : _selectedIndex = 0;
+  MyAppState()
+      : _selectedIndex = 0,
+        _authFlowStatus = AuthFlowStatus.login;
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {
@@ -182,11 +189,19 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // AuthFlowStatus get authFlowStatus => _authFlowStatus;
-  // set authFlowStatus(AuthFlowStatus s) {
-  //   _authFlowStatus = s;
-  //   notifyListeners();
-  // }
+  AuthFlowStatus _authFlowStatus;
+  AuthFlowStatus get authFlowStatus => _authFlowStatus;
+  set authFlowStatus(AuthFlowStatus s) {
+    _authFlowStatus = s;
+    notifyListeners();
+  }
+
+  User _user;
+  User get user => _user;
+  set user(User u) {
+    _user = u;
+    notifyListeners();
+  }
 }
 
 abstract class RoutePath {}
@@ -211,9 +226,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       if (uri.pathSegments.first == 'login') {
         return LoginPath();
       }
-      // if (uri.pathSegments.first == 'home') {
-      //   return HomePath();
-      // }
       if (uri.pathSegments.first == 'schedule') {
         return SchedulePath();
       }
@@ -233,9 +245,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is LoginPath) {
       return RouteInformation(location: '/login');
     }
-    // if (path is HomePath) {
-    //   return RouteInformation(location: '/home');
-    // }
     if (path is SchedulePath) {
       return RouteInformation(location: '/schedule');
     }
@@ -259,10 +268,9 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   }
 
   RoutePath get currentConfiguration {
-    // if (appState.selectedIndex == 0) {
-    //   // hoem
-    //   return HomePath();
-    // } else
+    if (appState.authFlowStatus == AuthFlowStatus.login) {
+      return LoginPath();
+    }
     if (appState.selectedIndex == 0) {
       // schedule
       return SchedulePath();
@@ -280,10 +288,11 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        // if (appState.authFlowStatus == AuthFlowStatus.login)
-        //   FadeAnimationPage(child: LoginPage(), key: ValueKey('LoginPage'))
-        // else
-        MaterialPage(child: AppShell(appState: appState)),
+        if (appState.authFlowStatus == AuthFlowStatus.login)
+          FadeAnimationPage(
+              child: LoginPage(appState), key: ValueKey('LoginPage'))
+        else
+          MaterialPage(child: AppShell(appState: appState)),
       ],
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
@@ -356,6 +365,12 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Club Management App'),
+        actions: [
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(Icons.people),
+          )
+        ],
       ),
       body: Router(
         routerDelegate: _routerDelegate,
@@ -401,9 +416,6 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        // if (appState.selectedIndex == 0)
-        //   FadeAnimationPage(child: HomePage(), key: ValueKey('HomePage'))
-        // else
         if (appState.selectedIndex == 0)
           FadeAnimationPage(
               child: SchedulePage(), key: ValueKey('SchedulePage'))
@@ -411,7 +423,7 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
           FadeAnimationPage(child: TodoPage(), key: ValueKey('TodoPage'))
         else
           FadeAnimationPage(
-            child: SettingsPage(),
+            child: SettingsPage(appState),
             key: ValueKey('SettingsPage'),
           ),
       ],

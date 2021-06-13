@@ -89,7 +89,7 @@ class SchedulePage extends HookWidget {
     return Scaffold(
         body: Column(children: [
       TableCalendar(
-        locale: 'ja_JP',
+        locale: 'en_US',
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
         ),
