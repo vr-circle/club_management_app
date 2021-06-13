@@ -15,7 +15,9 @@ class TodoPage extends HookWidget {
 class BuildDefaultTabController extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final _tabInfo = <String>['private', 'club', 'hogehoeg'];
+    final _tabInfo = <String>[
+      'private',
+    ];
     return DefaultTabController(
         length: _tabInfo.length,
         child: Scaffold(
@@ -36,12 +38,6 @@ class BuildDefaultTabController extends HookWidget {
           ),
           body: TabBarView(children: [
             TodoPrivatePage(),
-            TabPage(
-              title: 'club',
-            ),
-            TabPage(
-              title: 'hogehoge',
-            ),
           ]),
         ));
   }
@@ -96,9 +92,10 @@ class TabPage extends HookWidget {
 class TodoPrivatePage extends HookWidget {
   TodoPrivatePage({Key key}) : super(key: key);
 
-  final taskList = useProvider(taskListProvider);
   @override
   Widget build(BuildContext context) {
+    final _taskListProvider = useProvider(taskListProvider.notifier);
+    final taskList = useProvider(taskListProvider);
     return Scaffold(
       body: Consumer(
         builder: (context, watch, child) {
@@ -109,9 +106,30 @@ class TodoPrivatePage extends HookWidget {
                 taskTitle: task.title,
                 isChecked: task.isDone,
                 checkboxCallback: (bool value) {
-                  taskList.toggleDone(task.id);
+                  _taskListProvider.toggleDone(task.id);
                 },
-                longPressCallback: () {},
+                longPressCallback: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SimpleDialog(
+                          title: Text(task.title),
+                          children: [
+                            SimpleDialogOption(
+                              child: Text('削除'),
+                              onPressed: () {
+                                // delete task by id
+                                Navigator.pop(context);
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text('キャンセル'),
+                              onPressed: () => Navigator.pop(context),
+                            )
+                          ],
+                        );
+                      });
+                },
               );
             },
             itemCount: taskList.length,

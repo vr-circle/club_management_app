@@ -15,31 +15,34 @@ class LoginPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Text('Club Management App'),
+        ),
         body: Center(
             child: Padding(
-      padding: EdgeInsets.all(32),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(
-          // controller: _usernameController,
-          decoration:
-              InputDecoration(icon: Icon(Icons.mail), labelText: 'Username'),
-        ),
-        TextField(
-          // controller: _passwordController,
-          decoration: InputDecoration(
-              icon: Icon(Icons.lock_open), labelText: 'Password'),
-          obscureText: true,
-          keyboardType: TextInputType.visiblePassword,
-        ),
-        Consumer(builder: (context, watch, child) {
-          return TextButton(
-              onPressed: () {
-                // login function
-                appState.authFlowStatus = AuthFlowStatus.session;
-              },
-              child: Text('login'));
-        }),
-      ]),
-    )));
+          padding: EdgeInsets.all(32),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(
+              // controller: _usernameController,
+              decoration: InputDecoration(
+                  icon: Icon(Icons.mail), labelText: 'Username'),
+            ),
+            TextField(
+              // controller: _passwordController,
+              decoration: InputDecoration(
+                  icon: Icon(Icons.lock_open), labelText: 'Password'),
+              obscureText: true,
+              keyboardType: TextInputType.visiblePassword,
+            ),
+            Consumer(builder: (context, watch, child) {
+              return TextButton(
+                  onPressed: () {
+                    // login function
+                    appState.authFlowStatus = AuthFlowStatus.session;
+                  },
+                  child: Text('login'));
+            }),
+          ]),
+        )));
   }
 }

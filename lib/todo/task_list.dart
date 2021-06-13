@@ -1,8 +1,10 @@
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final taskListProvider = StateNotifierProvider((refs) => TaskList());
-final clubTaskListProvider = StateNotifierProvider((refs) => TaskList());
+final taskListProvider =
+    StateNotifierProvider<TaskList, List<Task>>((refs) => TaskList());
+final clubTaskListProvider =
+    StateNotifierProvider<TaskList, List<Task>>((refs) => TaskList());
 
 class TaskList extends StateNotifier<List<Task>> {
   TaskList([List<Task> initialTask]) : super(initialTask ?? []);
