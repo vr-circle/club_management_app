@@ -4,11 +4,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:uuid/uuid.dart';
 
 import '../user_settings/settings.dart';
 
+var _uuid = Uuid();
+
 class Schedule {
-  Schedule({this.id, this.title, this.start, this.end, this.place});
+  Schedule({String id, this.title, this.start, this.end, this.place})
+      : id = id ?? _uuid.v4();
   String id;
   String title;
   String place;
@@ -58,16 +62,28 @@ class CalendarScreen extends StateNotifier<CalendarScreenState> {
 }
 
 class SchedulePage extends HookWidget {
-  static const String route = '/schedule/';
+  static const String route = '/schedule';
   int getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
-  Map<DateTime, List> _eventsList = {
+  Map<DateTime, List<Schedule>> _eventsList = {
     DateTime.now(): [
-      'hogehoge',
-      'fugafuga',
-      'aaaaaaaa',
+      Schedule(
+          title: 'hoghoge',
+          start: DateTime.now(),
+          end: DateTime.now(),
+          place: 'place_01'),
+      Schedule(
+          title: 'fugafuga',
+          start: DateTime.now(),
+          end: DateTime.now(),
+          place: 'place_01'),
+      Schedule(
+          title: 'piyopiyo',
+          start: DateTime.now(),
+          end: DateTime.now(),
+          place: 'place_01'),
     ],
   };
 
@@ -116,9 +132,17 @@ class SchedulePage extends HookWidget {
             context.read(focusDayProvider.notifier).updateFocusDay(focusedDay);
           }
           if (isSameDay(_focusDay, selectedDay)) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return ScheduleListOnDay(targetDate: selectedDay);
-            }));
+            if (_getEventForDay(selectedDay).isEmpty)
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return NonScheduleListOnDay();
+              }));
+            else
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return ScheduleListOnDay(
+                  targetDate: selectedDay,
+                  schedules: _getEventForDay(selectedDay),
+                );
+              }));
           }
         },
       ),
@@ -126,23 +150,38 @@ class SchedulePage extends HookWidget {
           child: ListView(shrinkWrap: true, children: [
         Column(
             children: _getEventForDay(_selectedDay)
-                .map((e) => ListTile(
-                      title: Text(e.toString()),
-                    ))
+                .map((e) => Card(
+                        child: ListTile(
+                      title: Text(e.title),
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                ScheduleDetails(schedule: e)));
+                      },
+                    )))
                 .toList()),
       ]))
     ]));
   }
 }
 
+class NonScheduleListOnDay extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Text('予定はありません'),
+      ),
+    );
+  }
+}
+
 class ScheduleListOnDay extends HookWidget {
-  ScheduleListOnDay({Key key, @required this.targetDate}) : super(key: key);
-  var _schedule = Schedule(
-      id: '1',
-      place: 'hogehoge',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      title: 'タイトル');
+  ScheduleListOnDay(
+      {Key key, @required this.targetDate, @required this.schedules})
+      : super(key: key);
+  final List<Schedule> schedules;
   final DateTime targetDate;
   var _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
   @override
@@ -152,17 +191,18 @@ class ScheduleListOnDay extends HookWidget {
           title: Text(_format.format(DateTime.now())),
         ),
         body: ListView(
-          // show schedule list on a day
           children: [
-            Card(
-              child: ListTile(
-                title: Text("hoge"),
-                onTap: () => Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return ScheduleDetails(schedule: this._schedule);
-                })),
-              ),
-            ),
+            ...schedules
+                .map((e) => Card(
+                        child: ListTile(
+                      title: Text(e.title),
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                ScheduleDetails(schedule: e)));
+                      },
+                    )))
+                .toList()
           ],
         ),
         bottomNavigationBar: BottomAppBar(
