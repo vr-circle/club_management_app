@@ -16,7 +16,6 @@ import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
 import 'user_state.dart';
-import 'auth/auth_service.dart';
 
 Future<void> main() async {
   await Firebase.initializeApp();
@@ -61,7 +60,7 @@ class MyApp extends HookWidget {
 class MyAppState extends ChangeNotifier {
   MyAppState()
       : _selectedIndex = 0,
-        _authFlowStatus = AuthFlowStatus.login {}
+        _authFlowStatus = AuthFlowStatus.login;
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {
@@ -87,8 +86,6 @@ class MyAppState extends ChangeNotifier {
 abstract class RoutePath {}
 
 class LoginPath extends RoutePath {}
-
-// class HomePath extends RoutePath {}
 
 class SchedulePath extends RoutePath {}
 
@@ -186,9 +183,6 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
-    // if (path is HomePath) {
-    //   appState.selectedIndex = 0;
-    // } else
     if (path is SchedulePath) {
       appState.selectedIndex = 0;
     } else if (path is TodoPath) {
@@ -259,7 +253,6 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: [
-          // BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.schedule), label: 'Schedule'),
           BottomNavigationBarItem(

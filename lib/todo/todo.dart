@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -213,9 +215,9 @@ class TodoPrivatePage extends HookWidget {
   }
 }
 
-class ToDoAddPage extends HookWidget {
+class ToDoAddPage extends StatelessWidget {
   ToDoAddPage(this.isPrivate);
-  bool isPrivate;
+  final bool isPrivate;
   @override
   Widget build(BuildContext context) {
     String _newTaskTitle = '';
@@ -234,12 +236,20 @@ class ToDoAddPage extends HookWidget {
                     onChanged: (newText) {
                       _newTaskTitle = newText;
                     },
-                    onSubmitted: (newText) {
+                    onSubmitted: (newText) async {
                       if (_newTaskTitle.isEmpty) {
                         return;
                       }
                       if (isPrivate) {
                         watch(taskListProvider.notifier).addTask(_newTaskTitle);
+                        String id = (await authService.getCurrentUser()).uid;
+                        // await FirebaseFirestore.instance
+                        //     .collection('users')
+                        //     .doc(id)
+                        //     .collection('todo')
+                        //     .doc(id)
+                        //     .set(data)
+                        // print(data.data());
                       } else {
                         watch(clubTaskListProvider.notifier)
                             .addTask(_newTaskTitle);
