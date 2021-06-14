@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/store_service.dart';
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -87,7 +85,7 @@ class _TodoClubPageState extends State<TodoClubPage> {
   TaskList _taskList = TaskList([]);
 
   Future<TaskList> getTaskData() async {
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 1));
     final List<Task> res = await storeService.getClubTaskList();
     _taskList = TaskList(res);
     return _taskList;
@@ -97,6 +95,18 @@ class _TodoClubPageState extends State<TodoClubPage> {
   void initState() {
     _taskListFuture = getTaskData();
     super.initState();
+  }
+
+  void addTask(String title) {
+    setState(() {
+      _taskList.addTask(title);
+    });
+  }
+
+  void deleteTask(Task task) {
+    setState(() {
+      _taskList.deleteTask(task);
+    });
   }
 
   @override
@@ -128,9 +138,7 @@ class _TodoClubPageState extends State<TodoClubPage> {
                                 onPressed: () async {
                                   // delete task by id
                                   await storeService.deleteTask(task, false);
-                                  setState(() {
-                                    _taskList.deleteTask(task);
-                                  });
+                                  deleteTask(task);
                                   Navigator.pop(context);
                                 },
                               ),
@@ -150,7 +158,7 @@ class _TodoClubPageState extends State<TodoClubPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ToDoAddPage(false, this._taskList);
+            return ToDoAddPage(false, addTask);
           }));
         },
         child: Icon(Icons.add),
@@ -166,40 +174,51 @@ class TodoPrivatePage extends StatefulWidget {
 }
 
 class _TodoPrivatePageState extends State<TodoPrivatePage> {
-  Future<List<Task>> _taskListFuture;
-  List<Task> _taskList = <Task>[];
+  Future<TaskList> _taskListFuture;
+  TaskList _taskList = TaskList([]);
 
-  Future<List<Task>> getTaskData() async {
-    await Future.delayed(Duration(seconds: 3));
+  Future<TaskList> getTaskData() async {
+    await Future.delayed(Duration(seconds: 1));
     final List<Task> res = await storeService.getPrivateTaskList();
-    _taskList = res;
-    return res;
+    _taskList = TaskList(res);
+    return _taskList;
+  }
+
+  @override
+  void initState() {
+    _taskListFuture = getTaskData();
+    super.initState();
+  }
+
+  void addTask(String title) {
+    setState(() {
+      _taskList.addTask(title);
+    });
+  }
+
+  void deleteTask(Task task) {
+    setState(() {
+      _taskList.deleteTask(task);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    _taskListFuture = getTaskData();
     return Scaffold(
       body: FutureBuilder(
           future: _taskListFuture,
-          builder: (context, snapshot) {
+          builder: (context, AsyncSnapshot<TaskList> snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('snapshot error'),
-              );
             }
             return Container(
                 child: ListView.builder(
               itemBuilder: (BuildContext context, int index) {
-                final task = _taskList[index];
+                final task = _taskList.taskList[index];
                 return TaskTile(
                   taskTitle: task.title,
                   isChecked: task.isDone,
-                  checkboxCallback: (bool value) {
-                    // context.read(taskListProvider.notifier).toggleDone(task.id);
-                  },
+                  checkboxCallback: (bool value) {},
                   longPressCallback: () {
                     showDialog(
                         context: context,
@@ -212,9 +231,7 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
                                 onPressed: () async {
                                   // delete task by id
                                   await storeService.deleteTask(task, true);
-                                  // context
-                                  //     .read(taskListProvider.notifier)
-                                  //     .deleteTask(task);
+                                  deleteTask(task);
                                   Navigator.pop(context);
                                 },
                               ),
@@ -228,11 +245,15 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
                   },
                 );
               },
-              itemCount: _taskList.length,
+              itemCount: _taskList.taskList.length,
             ));
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ToDoAddPage(true, addTask);
+          }));
+        },
         child: Icon(Icons.add),
       ),
     );
@@ -240,8 +261,8 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
 }
 
 class ToDoAddPage extends StatelessWidget {
-  ToDoAddPage(this.isPrivate, this.taskList);
-  final TaskList taskList;
+  ToDoAddPage(this.isPrivate, this.addTask);
+  Function(String title) addTask;
   final bool isPrivate;
   @override
   Widget build(BuildContext context) {
@@ -265,7 +286,7 @@ class ToDoAddPage extends StatelessWidget {
                       if (_newTaskTitle.isEmpty) {
                         return;
                       }
-                      taskList.addTask(_newTaskTitle);
+                      addTask(_newTaskTitle);
                       storeService.addTask(
                           Task(title: _newTaskTitle), isPrivate);
                       Navigator.of(context).pop();
@@ -285,7 +306,7 @@ class ToDoAddPage extends StatelessWidget {
                             if (_newTaskTitle.isEmpty) {
                               return;
                             }
-                            taskList.addTask(_newTaskTitle);
+                            addTask(_newTaskTitle);
                             storeService.addTask(
                                 Task(title: _newTaskTitle), isPrivate);
                           },
