@@ -69,13 +69,18 @@ class StoreService {
 
   Future<Map<DateTime, List<Schedule>>> getPrivateSchedule() async {
     print('get private schedules');
-    final _scheduleList =
-        (await FirebaseFirestore.instance.collection('users').doc(userId).get())
-            .data()['schedule'];
+    final _scheduleList = (await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('schedule')
+            .doc('schedule')
+            .get())
+        .data();
     print(_scheduleList.runtimeType);
     print(_scheduleList);
     final _format = DateFormat("y/M/d");
     print(_format.parseStrict('2021/06/16'));
+    // Map<DateTime, List<Schedule>> res;
     return <DateTime, List<Schedule>>{
       _format.parseStrict('2021/06/16'): <Schedule>[
         Schedule(
@@ -95,5 +100,27 @@ class StoreService {
             end: DateTime.now()),
       ]
     };
+  }
+
+  Future<void> addSchedule(Schedule schedule, bool isPrivate) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(isPrivate ? userId : 'circle')
+        .collection('schedule')
+        .doc('schedule')
+        .update({
+      DateFormat('yyyy/MM/dd').format(schedule.start): [
+        {
+          'title': schedule.title,
+        },
+        {
+          'place': schedule.place,
+        },
+        {
+          'start': Timestamp.fromDate(schedule.start),
+        },
+        {'end': Timestamp.fromDate(schedule.end)},
+      ]
+    });
   }
 }
