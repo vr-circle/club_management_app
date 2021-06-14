@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 
 import 'todo/task_list.dart';
@@ -66,37 +67,33 @@ class StoreService {
     });
   }
 
-  Future<Map<String, List<Schedule>>> getPrivateSchedule() async {
+  Future<Map<DateTime, List<Schedule>>> getPrivateSchedule() async {
     print('get private schedules');
     final _scheduleList =
         (await FirebaseFirestore.instance.collection('users').doc(userId).get())
             .data()['schedule'];
     print(_scheduleList.runtimeType);
     print(_scheduleList);
-    // return _scheduleList;
-    return <String, List<Schedule>>{
-      '2021/06/14': <Schedule>[
+    final _format = DateFormat("y/M/d");
+    print(_format.parseStrict('2021/06/16'));
+    return <DateTime, List<Schedule>>{
+      _format.parseStrict('2021/06/16'): <Schedule>[
         Schedule(
-            title: 'tttttt',
-            place: 'pppppp',
+            title: 'title1',
+            place: 'place_01',
             start: DateTime.now(),
             end: DateTime.now()),
         Schedule(
-            title: '2tttttt',
-            place: 'pppppp',
+            title: 'title2',
+            place: 'place_02',
             start: DateTime.now(),
             end: DateTime.now()),
         Schedule(
-            title: '3tttttt',
-            place: 'pppppp',
+            title: 'title3',
+            place: 'place_03',
             start: DateTime.now(),
             end: DateTime.now()),
       ]
     };
-  }
-
-  Map<String, List<Schedule>> getClubSchedule() {
-    final _scheduleList = clubJsonData['schedule'];
-    print(_scheduleList);
   }
 }

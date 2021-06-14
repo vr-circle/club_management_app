@@ -85,7 +85,6 @@ class _TodoClubPageState extends State<TodoClubPage> {
   TaskList _taskList = TaskList([]);
 
   Future<TaskList> getTaskData() async {
-    await Future.delayed(Duration(seconds: 1));
     final List<Task> res = await storeService.getClubTaskList();
     _taskList = TaskList(res);
     return _taskList;
@@ -178,7 +177,6 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
   TaskList _taskList = TaskList([]);
 
   Future<TaskList> getTaskData() async {
-    await Future.delayed(Duration(seconds: 1));
     final List<Task> res = await storeService.getPrivateTaskList();
     _taskList = TaskList(res);
     return _taskList;

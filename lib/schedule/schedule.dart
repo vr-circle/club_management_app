@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -20,156 +21,118 @@ class Schedule {
   DateTime end;
 }
 
-final eventMapProvider =
-    StateNotifierProvider<EventMapStateNotifier, Map<DateTime, List>>(
-        (ref) => EventMapStateNotifier());
-
-class EventMapStateNotifier extends StateNotifier<Map<DateTime, List>> {
-  EventMapStateNotifier() : super(Map<DateTime, List>());
+class SchedulePage extends StatefulWidget {
+  SchedulePage({Key key}) : super(key: key);
+  @override
+  _SchedulePageState createState() => _SchedulePageState();
 }
 
-final focusDayProvider =
-    StateNotifierProvider<FocusDay, DateTime>((refs) => FocusDay());
-
-class FocusDay extends StateNotifier<DateTime> {
-  FocusDay() : super(DateTime.now());
-  void updateFocusDay(day) {
-    this.state = day;
-  }
-}
-
-final selectedDayProvider = StateNotifierProvider((refs) => SelectedDay());
-
-class SelectedDay extends StateNotifier<DateTime> {
-  SelectedDay() : super(DateTime.now());
-  void updateSelectedDay(day) {
-    this.state = day;
-  }
-}
-
-final calendarScreenProvider =
-    StateNotifierProvider((refs) => CalendarScreen());
-
-class CalendarScreenState {
-  // CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime _focusedDay = DateTime.now();
+class _SchedulePageState extends State<SchedulePage> {
+  DateTime _focusDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
-  Map<DateTime, List> _eventList = {};
-}
 
-class CalendarScreen extends StateNotifier<CalendarScreenState> {
-  CalendarScreen() : super(CalendarScreenState());
-}
+  LinkedHashMap<DateTime, List<Schedule>> _schedules = LinkedHashMap();
+  Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
 
-class SchedulePage extends HookWidget {
-  static const String route = '/schedule';
+  Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
+    final res = await storeService.getPrivateSchedule();
+    _schedules = LinkedHashMap(equals: isSameDay, hashCode: getHashCode)
+      ..addAll(res);
+    return _schedules;
+  }
+
+  @override
+  void initState() {
+    this._futureSchedules = getScheduleData();
+    super.initState();
+  }
+
   int getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
-  Map<DateTime, List<Schedule>> _eventsList = {
-    DateTime.now(): [
-      Schedule(
-          title: 'hoghoge',
-          start: DateTime.now(),
-          end: DateTime.now(),
-          place: 'place_01'),
-      Schedule(
-          title: 'fugafuga',
-          start: DateTime.now(),
-          end: DateTime.now(),
-          place: 'place_01'),
-      Schedule(
-          title: 'piyopiyo',
-          start: DateTime.now(),
-          end: DateTime.now(),
-          place: 'place_01'),
-    ],
-  };
+  void addSchedule(Schedule schedule) {}
+
+  void deleteSchedule(Schedule schedule) {}
+
+  void editSchedule(Schedule targeet) {}
+
+  List<Schedule> getEventForDay(DateTime day) {
+    return _schedules[day] ?? [];
+  }
 
   @override
   Widget build(BuildContext context) {
-    final _events = LinkedHashMap<DateTime, List>(
-      equals: isSameDay,
-      hashCode: getHashCode,
-    )..addAll(_eventsList);
-
-    List<Schedule> _getEventForDay(DateTime day) {
-      return _events[day] ?? [];
-    }
-
-    final _focusDay = useProvider(focusDayProvider);
-    final _selectedDay = useProvider(selectedDayProvider);
     const CalendarFormat _calendarFormat = CalendarFormat.month;
 
     return Scaffold(
-        body: Column(children: [
-      TableCalendar(
-        locale: 'en_US',
-        headerStyle: HeaderStyle(
-          formatButtonVisible: false,
-        ),
-        firstDay: DateTime.utc(2020, 1, 1),
-        lastDay: DateTime.utc(2050, 12, 31),
-        focusedDay: _focusDay,
-        calendarFormat: _calendarFormat,
-        calendarStyle: CalendarStyle(
-          markerDecoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: useProvider(darkModeProvider) == true
-                  ? Colors.white
-                  : Colors.black),
-        ),
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-        eventLoader: _getEventForDay,
-        onDaySelected: (selectedDay, focusedDay) {
-          if (!isSameDay(_selectedDay, selectedDay)) {
-            context
-                .read(selectedDayProvider.notifier)
-                .updateSelectedDay(selectedDay);
-            context.read(focusDayProvider.notifier).updateFocusDay(focusedDay);
-          }
-          if (isSameDay(_focusDay, selectedDay)) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return ScheduleListOnDay(
-                targetDate: selectedDay,
-                schedules: _getEventForDay(selectedDay),
-              );
+        body: FutureBuilder(
+            future: this._futureSchedules,
+            builder: (context,
+                AsyncSnapshot<LinkedHashMap<DateTime, List<Schedule>>>
+                    snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return Column(children: [
+                TableCalendar(
+                  locale: 'en_US',
+                  headerStyle: HeaderStyle(
+                    formatButtonVisible: false,
+                  ),
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2050, 12, 31),
+                  focusedDay: _focusDay,
+                  calendarFormat: _calendarFormat,
+                  calendarStyle: CalendarStyle(
+                    markerDecoration: BoxDecoration(
+                        shape: BoxShape.circle, color: Colors.blue),
+                  ),
+                  selectedDayPredicate: (day) {
+                    return isSameDay(_selectedDay, day);
+                  },
+                  eventLoader: getEventForDay,
+                  onDaySelected: (selectedDay, focusedDay) {
+                    if (!isSameDay(_selectedDay, selectedDay)) {
+                      // updateSelectedDay & update FocusDay
+                      setState(() {
+                        this._selectedDay = selectedDay;
+                        this._focusDay = focusedDay;
+                      });
+                    } else if (isSameDay(_focusDay, selectedDay)) {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        return ScheduleListOnDay(
+                          targetDate: selectedDay,
+                          schedules: getEventForDay(selectedDay),
+                        );
+                      }));
+                    }
+                  },
+                ),
+                Expanded(
+                    child: ListView(shrinkWrap: true, children: [
+                  Column(
+                      children: getEventForDay(_selectedDay)
+                          .map((e) => Card(
+                                  child: ListTile(
+                                title: Text(e.title),
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          ScheduleDetails(schedule: e)));
+                                },
+                              )))
+                          .toList()),
+                ]))
+              ]);
             }));
-          }
-        },
-      ),
-      Expanded(
-          child: ListView(shrinkWrap: true, children: [
-        Column(
-            children: _getEventForDay(_selectedDay)
-                .map((e) => Card(
-                        child: ListTile(
-                      title: Text(e.title),
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                ScheduleDetails(schedule: e)));
-                      },
-                    )))
-                .toList()),
-      ]))
-    ]));
   }
 }
 
-class NonScheduleListOnDay extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('予定はありません'),
-    );
-  }
-}
-
-class ScheduleListOnDay extends HookWidget {
+class ScheduleListOnDay extends StatelessWidget {
   ScheduleListOnDay(
       {Key key, @required this.targetDate, @required this.schedules})
       : super(key: key);
@@ -180,10 +143,10 @@ class ScheduleListOnDay extends HookWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_format.format(DateTime.now())),
+        title: Text(_format.format(targetDate)),
       ),
       body: schedules.isEmpty
-          ? NonScheduleListOnDay()
+          ? Center(child: Text('予定はありません'))
           : ListView(
               children: [
                 ...schedules
@@ -207,7 +170,7 @@ class ScheduleListOnDay extends HookWidget {
   }
 }
 
-class ScheduleDetails extends HookWidget {
+class ScheduleDetails extends StatelessWidget {
   ScheduleDetails({@required this.schedule});
   Schedule schedule;
   final _format = new DateFormat('yyyy/MM/dd(E) hh:mm', 'ja_JP');
