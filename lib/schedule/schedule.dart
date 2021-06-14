@@ -9,6 +9,9 @@ import 'package:uuid/uuid.dart';
 
 import '../user_settings/settings.dart';
 
+// todo: show timePicker in ScheduleAddPage
+// todo: cooperate with firestore
+
 var _uuid = Uuid();
 
 class Schedule {
@@ -51,7 +54,10 @@ class _SchedulePageState extends State<SchedulePage> {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
-  void addSchedule(Schedule schedule) {}
+  void addSchedule(Schedule schedule) {
+    _schedules[schedule.start].add(schedule);
+    storeService.addSchedule(schedule, true);
+  }
 
   void deleteSchedule(Schedule schedule) {}
 
@@ -164,7 +170,11 @@ class ScheduleListOnDay extends StatelessWidget {
             ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ScheduleAddPage(targetDate: targetDate);
+          }));
+        },
       ),
     );
   }
@@ -223,20 +233,38 @@ class ScheduleAddPage extends HookWidget {
       appBar: AppBar(
         title: Text(_format.format(targetDate)),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: const <Widget>[
-            Text('title'),
-            TextField(),
-            Text('time'),
-            TextField(),
-            Text('place'),
-            TextField(),
-            Text('datail'),
-            TextField(),
-          ],
-        ),
-      ),
+      body: Padding(
+          padding: EdgeInsets.all(32),
+          child: SingleChildScrollView(
+            child: Column(
+              children: const <Widget>[
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.title), labelText: 'タイトル'),
+                ),
+                TextField(
+                  decoration:
+                      InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.timer), labelText: '開始時刻'),
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.timer), labelText: '終了時刻'),
+                ),
+                TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.content_copy),
+                    labelText: '内容',
+                  ),
+                ),
+              ],
+            ),
+          )),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
