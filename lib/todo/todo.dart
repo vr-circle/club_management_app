@@ -97,64 +97,69 @@ class TabPage extends HookWidget {
 
 class TodoClubPage extends HookWidget {
   TodoClubPage({Key key}) : super(key: key);
+
+  Future<List<Task>> _taskListFuture;
+  List<Task> _taskList = <Task>[];
+
+  Future<List<Task>> getTaskData() async {
+    Future.delayed(Duration(seconds: 3));
+    final List<Task> res = await storeService.getClubTaskList();
+    _taskList = res;
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final taskList = useProvider(clubTaskListProvider);
-    final taskListState = useProvider(clubTaskListProvider.notifier);
+    _taskListFuture = getTaskData();
     return Scaffold(
       body: FutureBuilder(
-          future: storeService.getClubTaskList(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              print('snapshot is done');
-              // taskListState.addTaskList(snapshot.data);
-              print('a1');
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  print('a2');
-                  final task = taskList[index];
-                  return TaskTile(
-                    taskTitle: task.title,
-                    isChecked: task.isDone,
-                    checkboxCallback: (bool value) {
-                      context
-                          .read(clubTaskListProvider.notifier)
-                          .toggleDone(task.id);
-                    },
-                    longPressCallback: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return SimpleDialog(
-                              title: Text(task.title),
-                              children: [
-                                SimpleDialogOption(
-                                  child: Text('削除'),
-                                  onPressed: () async {
-                                    // delete task by id
-                                    await storeService.deleteTask(task, true);
-                                    context
-                                        .read(clubTaskListProvider.notifier)
-                                        .deleteTask(task);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                SimpleDialogOption(
-                                  child: Text('キャンセル'),
-                                  onPressed: () => Navigator.pop(context),
-                                )
-                              ],
-                            );
-                          });
-                    },
-                  );
-                },
-                itemCount: taskList.length,
-              );
-            } else {
-              print('loading..');
-              return Center(child: Text('loading...'));
+          future: _taskListFuture,
+          builder: (context, AsyncSnapshot<List<Task>> snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Center(child: CircularProgressIndicator());
             }
+            return Container(
+                child: ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                final task = _taskList[index];
+                return TaskTile(
+                  taskTitle: task.title,
+                  isChecked: task.isDone,
+                  checkboxCallback: (bool value) {
+                    context
+                        .read(clubTaskListProvider.notifier)
+                        .toggleDone(task.id);
+                  },
+                  longPressCallback: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SimpleDialog(
+                            title: Text(task.title),
+                            children: [
+                              SimpleDialogOption(
+                                child: Text('削除'),
+                                onPressed: () async {
+                                  // delete task by id
+                                  await storeService.deleteTask(task, true);
+                                  context
+                                      .read(clubTaskListProvider.notifier)
+                                      .deleteTask(task);
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              SimpleDialogOption(
+                                child: Text('キャンセル'),
+                                onPressed: () => Navigator.pop(context),
+                              )
+                            ],
+                          );
+                        });
+                  },
+                );
+              },
+              itemCount: _taskList.length,
+            ));
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -166,66 +171,71 @@ class TodoClubPage extends HookWidget {
 
 class TodoPrivatePage extends HookWidget {
   TodoPrivatePage({Key key}) : super(key: key);
+
+  Future<List<Task>> _taskListFuture;
+  List<Task> _taskList = <Task>[];
+
+  Future<List<Task>> getTaskData() async {
+    Future.delayed(Duration(seconds: 3));
+    final List<Task> res = await storeService.getPrivateTaskList();
+    _taskList = res;
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final taskList = useProvider(taskListProvider);
-    final taskListState = useProvider(taskListProvider.notifier);
-
+    _taskListFuture = getTaskData();
     return Scaffold(
       body: FutureBuilder(
-          future: storeService.getPrivateTaskList(),
+          future: _taskListFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              print('snapshot is done');
-              print('a_1');
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  // taskListState.addTaskList(snapshot.data);
-                  print('a_2');
-                  final task = taskList[index];
-                  print('a_3');
-                  return TaskTile(
-                    taskTitle: task.title,
-                    isChecked: task.isDone,
-                    checkboxCallback: (bool value) {
-                      context
-                          .read(taskListProvider.notifier)
-                          .toggleDone(task.id);
-                    },
-                    longPressCallback: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return SimpleDialog(
-                              title: Text(task.title),
-                              children: [
-                                SimpleDialogOption(
-                                  child: Text('削除'),
-                                  onPressed: () async {
-                                    // delete task by id
-                                    await storeService.deleteTask(task, true);
-                                    context
-                                        .read(taskListProvider.notifier)
-                                        .deleteTask(task);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                SimpleDialogOption(
-                                  child: Text('キャンセル'),
-                                  onPressed: () => Navigator.pop(context),
-                                )
-                              ],
-                            );
-                          });
-                    },
-                  );
-                },
-                itemCount: taskList.length,
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text('snapshot error'),
               );
-            } else {
-              print('a_4');
-              return Center(child: Text('loading...'));
             }
+            return Container(
+                child: ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                final task = _taskList[index];
+                return TaskTile(
+                  taskTitle: task.title,
+                  isChecked: task.isDone,
+                  checkboxCallback: (bool value) {
+                    context.read(taskListProvider.notifier).toggleDone(task.id);
+                  },
+                  longPressCallback: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SimpleDialog(
+                            title: Text(task.title),
+                            children: [
+                              SimpleDialogOption(
+                                child: Text('削除'),
+                                onPressed: () async {
+                                  // delete task by id
+                                  await storeService.deleteTask(task, true);
+                                  context
+                                      .read(taskListProvider.notifier)
+                                      .deleteTask(task);
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              SimpleDialogOption(
+                                child: Text('キャンセル'),
+                                onPressed: () => Navigator.pop(context),
+                              )
+                            ],
+                          );
+                        });
+                  },
+                );
+              },
+              itemCount: _taskList.length,
+            ));
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},

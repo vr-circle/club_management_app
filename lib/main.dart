@@ -213,7 +213,6 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     storeService = StoreService(userId: widget.appState.user.uid);
-    storeService.getUserData();
     _routerDelegate = InnerRouterDelegate(widget.appState);
   }
 

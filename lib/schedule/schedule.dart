@@ -241,7 +241,9 @@ class ScheduleDetails extends HookWidget {
       ]),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.edit),
-        onPressed: () {},
+        onPressed: () {
+          // edit schedule
+        },
       ),
     );
   }

@@ -18,10 +18,6 @@ class StoreService {
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
   Future<void> getUserData() async {
-    print('getUserData');
-    print(
-        (await FirebaseFirestore.instance.collection('users').doc(userId).get())
-            .data());
     this.privateJsonData =
         (await FirebaseFirestore.instance.collection('users').doc(userId).get())
             .data();
@@ -30,11 +26,9 @@ class StoreService {
             .doc('circle')
             .get())
         .data();
-    print('ended getUserData()');
   }
 
   Future<List<Task>> getClubTaskList() async {
-    print('getClubTaskList');
     final clubTaskList = (await FirebaseFirestore.instance
             .collection('users')
             .doc('circle')
@@ -42,18 +36,15 @@ class StoreService {
         .data()['todo'];
     List<String> castedClubTaskList = clubTaskList.cast<String>();
     var result = castedClubTaskList.map((e) => Task(title: e)).toList();
-    print(result);
     return result;
   }
 
   Future<List<Task>> getPrivateTaskList() async {
-    print('getPrivateTaskList');
     final clubTaskList =
         (await FirebaseFirestore.instance.collection('users').doc(userId).get())
             .data()['todo'];
-    List<String> castedClubTaskList = clubTaskList.cast<String>();
-    var result = castedClubTaskList.map((e) => Task(title: e)).toList();
-    print(result);
+    List<String> castedPrivateTaskList = clubTaskList.cast<String>();
+    var result = castedPrivateTaskList.map((e) => Task(title: e)).toList();
     return result;
   }
 
@@ -75,9 +66,33 @@ class StoreService {
     });
   }
 
-  Map<String, List<Schedule>> getPrivateSchedule() {
-    final _scheduleList = privateJsonData['schedule'];
+  Future<Map<String, List<Schedule>>> getPrivateSchedule() async {
+    print('get private schedules');
+    final _scheduleList =
+        (await FirebaseFirestore.instance.collection('users').doc(userId).get())
+            .data()['schedule'];
+    print(_scheduleList.runtimeType);
     print(_scheduleList);
+    // return _scheduleList;
+    return <String, List<Schedule>>{
+      '2021/06/14': <Schedule>[
+        Schedule(
+            title: 'tttttt',
+            place: 'pppppp',
+            start: DateTime.now(),
+            end: DateTime.now()),
+        Schedule(
+            title: '2tttttt',
+            place: 'pppppp',
+            start: DateTime.now(),
+            end: DateTime.now()),
+        Schedule(
+            title: '3tttttt',
+            place: 'pppppp',
+            start: DateTime.now(),
+            end: DateTime.now()),
+      ]
+    };
   }
 
   Map<String, List<Schedule>> getClubSchedule() {
