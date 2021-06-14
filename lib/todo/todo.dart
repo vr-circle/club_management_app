@@ -64,72 +64,58 @@ class TaskTile extends HookWidget {
       elevation: 4,
       child: GestureDetector(
         onLongPress: longPressCallback,
-        child: ListTile(
+        child: CheckboxListTile(
           title: Text(
             taskTitle,
           ),
-          // value: isChecked,
-          // onChanged: checkboxCallback,
+          value: isChecked,
+          onChanged: checkboxCallback,
         ),
       ),
     );
   }
 }
 
-class TabPage extends HookWidget {
-  const TabPage({Key key, @required this.title}) : super(key: key);
-  final String title;
-
+class TodoClubPage extends StatefulWidget {
+  TodoClubPage({Key key}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('$title')),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => TodoClubPage()));
-        },
-      ),
-    );
-  }
+  _TodoClubPageState createState() => _TodoClubPageState();
 }
 
-class TodoClubPage extends HookWidget {
-  TodoClubPage({Key key}) : super(key: key);
+class _TodoClubPageState extends State<TodoClubPage> {
+  Future<TaskList> _taskListFuture;
+  TaskList _taskList = TaskList([]);
 
-  Future<List<Task>> _taskListFuture;
-  List<Task> _taskList = <Task>[];
-
-  Future<List<Task>> getTaskData() async {
-    Future.delayed(Duration(seconds: 3));
+  Future<TaskList> getTaskData() async {
+    await Future.delayed(Duration(seconds: 3));
     final List<Task> res = await storeService.getClubTaskList();
-    _taskList = res;
-    return res;
+    _taskList = TaskList(res);
+    return _taskList;
+  }
+
+  @override
+  void initState() {
+    _taskListFuture = getTaskData();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _taskListFuture = getTaskData();
     return Scaffold(
       body: FutureBuilder(
           future: _taskListFuture,
-          builder: (context, AsyncSnapshot<List<Task>> snapshot) {
+          builder: (context, AsyncSnapshot<TaskList> snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return Center(child: CircularProgressIndicator());
             }
             return Container(
                 child: ListView.builder(
               itemBuilder: (BuildContext context, int index) {
-                final task = _taskList[index];
+                final task = _taskList.taskList[index];
                 return TaskTile(
                   taskTitle: task.title,
                   isChecked: task.isDone,
-                  checkboxCallback: (bool value) {
-                    context
-                        .read(clubTaskListProvider.notifier)
-                        .toggleDone(task.id);
-                  },
+                  checkboxCallback: (bool value) {},
                   longPressCallback: () {
                     showDialog(
                         context: context,
@@ -141,10 +127,10 @@ class TodoClubPage extends HookWidget {
                                 child: Text('削除'),
                                 onPressed: () async {
                                   // delete task by id
-                                  await storeService.deleteTask(task, true);
-                                  context
-                                      .read(clubTaskListProvider.notifier)
-                                      .deleteTask(task);
+                                  await storeService.deleteTask(task, false);
+                                  setState(() {
+                                    _taskList.deleteTask(task);
+                                  });
                                   Navigator.pop(context);
                                 },
                               ),
@@ -158,25 +144,33 @@ class TodoClubPage extends HookWidget {
                   },
                 );
               },
-              itemCount: _taskList.length,
+              itemCount: _taskList.taskList.length,
             ));
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ToDoAddPage(false, this._taskList);
+          }));
+        },
         child: Icon(Icons.add),
       ),
     );
   }
 }
 
-class TodoPrivatePage extends HookWidget {
+class TodoPrivatePage extends StatefulWidget {
   TodoPrivatePage({Key key}) : super(key: key);
+  @override
+  _TodoPrivatePageState createState() => _TodoPrivatePageState();
+}
 
+class _TodoPrivatePageState extends State<TodoPrivatePage> {
   Future<List<Task>> _taskListFuture;
   List<Task> _taskList = <Task>[];
 
   Future<List<Task>> getTaskData() async {
-    Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 3));
     final List<Task> res = await storeService.getPrivateTaskList();
     _taskList = res;
     return res;
@@ -204,7 +198,7 @@ class TodoPrivatePage extends HookWidget {
                   taskTitle: task.title,
                   isChecked: task.isDone,
                   checkboxCallback: (bool value) {
-                    context.read(taskListProvider.notifier).toggleDone(task.id);
+                    // context.read(taskListProvider.notifier).toggleDone(task.id);
                   },
                   longPressCallback: () {
                     showDialog(
@@ -218,9 +212,9 @@ class TodoPrivatePage extends HookWidget {
                                 onPressed: () async {
                                   // delete task by id
                                   await storeService.deleteTask(task, true);
-                                  context
-                                      .read(taskListProvider.notifier)
-                                      .deleteTask(task);
+                                  // context
+                                  //     .read(taskListProvider.notifier)
+                                  //     .deleteTask(task);
                                   Navigator.pop(context);
                                 },
                               ),
@@ -246,7 +240,8 @@ class TodoPrivatePage extends HookWidget {
 }
 
 class ToDoAddPage extends StatelessWidget {
-  ToDoAddPage(this.isPrivate);
+  ToDoAddPage(this.isPrivate, this.taskList);
+  final TaskList taskList;
   final bool isPrivate;
   @override
   Widget build(BuildContext context) {
@@ -270,14 +265,9 @@ class ToDoAddPage extends StatelessWidget {
                       if (_newTaskTitle.isEmpty) {
                         return;
                       }
-                      if (isPrivate) {
-                        watch(taskListProvider.notifier).addTask(_newTaskTitle);
-                        storeService.addTask(Task(title: newText), isPrivate);
-                      } else {
-                        watch(clubTaskListProvider.notifier)
-                            .addTask(_newTaskTitle);
-                        storeService.addTask(Task(title: newText), isPrivate);
-                      }
+                      taskList.addTask(_newTaskTitle);
+                      storeService.addTask(
+                          Task(title: _newTaskTitle), isPrivate);
                       Navigator.of(context).pop();
                     },
                   );
@@ -295,13 +285,9 @@ class ToDoAddPage extends StatelessWidget {
                             if (_newTaskTitle.isEmpty) {
                               return;
                             }
-                            if (isPrivate) {
-                              watch(taskListProvider.notifier)
-                                  .addTask(_newTaskTitle);
-                            } else {
-                              watch(clubTaskListProvider.notifier)
-                                  .addTask(_newTaskTitle);
-                            }
+                            taskList.addTask(_newTaskTitle);
+                            storeService.addTask(
+                                Task(title: _newTaskTitle), isPrivate);
                           },
                           child: Text('Add'));
                     }),
