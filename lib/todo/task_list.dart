@@ -1,3 +1,6 @@
+import 'dart:html';
+
+import 'package:flutter_application_1/store_service.dart';
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -14,7 +17,14 @@ class TaskList extends StateNotifier<List<Task>> {
   }
 
   void addTaskList(List<Task> taskList) {
-    state = state..addAll(taskList);
+    print('start addTaskList');
+    print(taskList.runtimeType);
+    print(taskList);
+    taskList.forEach((element) {
+      print('start adding');
+      addTask(element.title);
+    });
+    print('end addTaskList');
   }
 
   void toggleDone(String id) {

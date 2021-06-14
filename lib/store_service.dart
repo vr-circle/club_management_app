@@ -2,15 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/todo/task.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'dart:convert';
+
+import 'todo/task_list.dart';
+
+// todo: isPrivate -> targetClub or something
 
 StoreService storeService;
 
 class StoreService {
-  StoreService({this.userId}) {
-    this.getUserData();
-    print(privateJsonData);
-  }
+  StoreService({this.userId});
   String userId;
   Map<String, dynamic> privateJsonData;
   Map<String, dynamic> clubJsonData;
@@ -28,20 +30,31 @@ class StoreService {
             .doc('circle')
             .get())
         .data();
+    print('ended getUserData()');
   }
 
-  List<Task> getClubTaskList() {
-    final _taskTitle = clubJsonData['todo'];
-    List<String> res = _taskTitle.cast<String>();
-    var ans = res.map((e) => Task(title: e)).toList();
-    return ans;
+  Future<List<Task>> getClubTaskList() async {
+    print('getClubTaskList');
+    final clubTaskList = (await FirebaseFirestore.instance
+            .collection('users')
+            .doc('circle')
+            .get())
+        .data()['todo'];
+    List<String> castedClubTaskList = clubTaskList.cast<String>();
+    var result = castedClubTaskList.map((e) => Task(title: e)).toList();
+    print(result);
+    return result;
   }
 
-  List<Task> getPrivateTaskList() {
-    var _taskTitle = privateJsonData['todo'];
-    List<String> res = _taskTitle.cast<String>();
-    var ans = res.map((e) => Task(title: e)).toList();
-    return ans;
+  Future<List<Task>> getPrivateTaskList() async {
+    print('getPrivateTaskList');
+    final clubTaskList =
+        (await FirebaseFirestore.instance.collection('users').doc(userId).get())
+            .data()['todo'];
+    List<String> castedClubTaskList = clubTaskList.cast<String>();
+    var result = castedClubTaskList.map((e) => Task(title: e)).toList();
+    print(result);
+    return result;
   }
 
   Future<void> addTask(Task task, bool isPrivate) async {

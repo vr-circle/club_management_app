@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -165,7 +166,8 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        if (appState.authFlowStatus == AuthFlowStatus.login)
+        if (appState.authFlowStatus == AuthFlowStatus.login ||
+            appState.user == null)
           FadeAnimationPage(
               child: LoginPage(appState), key: ValueKey('LoginPage'))
         else
@@ -210,6 +212,8 @@ class _AppShellState extends State<AppShell> {
 
   void initState() {
     super.initState();
+    storeService = StoreService(userId: widget.appState.user.uid);
+    storeService.getUserData();
     _routerDelegate = InnerRouterDelegate(widget.appState);
   }
 

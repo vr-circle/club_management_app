@@ -90,8 +90,6 @@ class LoginPage extends HookWidget {
                           email: email, password: password);
                       // if success to login
                       appState.user = user;
-                      storeService = StoreService(userId: user.uid);
-                      // var id = auth.currentUser.uid;
                       appState.authFlowStatus = AuthFlowStatus.session;
                     } catch (e) {
                       // if failed to login
