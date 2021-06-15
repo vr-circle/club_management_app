@@ -68,7 +68,6 @@ class StoreService {
   }
 
   Future<Map<DateTime, List<Schedule>>> getPrivateSchedule() async {
-    print('get private schedules');
     final _scheduleList = (await FirebaseFirestore.instance
             .collection('users')
             .doc(userId)
@@ -76,30 +75,20 @@ class StoreService {
             .doc('schedule')
             .get())
         .data();
-    print(_scheduleList.runtimeType);
-    print(_scheduleList);
-    final _format = DateFormat("y/M/d");
-    print(_format.parseStrict('2021/06/16'));
-    // Map<DateTime, List<Schedule>> res;
-    return <DateTime, List<Schedule>>{
-      _format.parseStrict('2021/06/16'): <Schedule>[
+
+    final _format = DateFormat("yyyyMMdd");
+    Map<DateTime, List<Schedule>> res = {};
+    _scheduleList.forEach((key, value) {
+      res[_format.parseStrict(key)] = <Schedule>[
         Schedule(
-            title: 'title1',
-            place: 'place_01',
-            start: DateTime.now(),
-            end: DateTime.now()),
-        Schedule(
-            title: 'title2',
-            place: 'place_02',
-            start: DateTime.now(),
-            end: DateTime.now()),
-        Schedule(
-            title: 'title3',
-            place: 'place_03',
-            start: DateTime.now(),
-            end: DateTime.now()),
-      ]
-    };
+            title: value['title'],
+            place: value['place'],
+            details: value['details'],
+            start: value['start'].toDate(),
+            end: value['end'].toDate()),
+      ];
+    });
+    return res;
   }
 
   Future<void> addSchedule(Schedule schedule, bool isPrivate) async {
@@ -108,8 +97,8 @@ class StoreService {
         .doc(isPrivate ? userId : 'circle')
         .collection('schedule')
         .doc('schedule')
-        .update({
-      DateFormat('yyyy/MM/dd').format(schedule.start): [
+        .set({
+      DateFormat('yyyyMMdd').format(schedule.start): [
         {
           'title': schedule.title,
         },
@@ -120,7 +109,8 @@ class StoreService {
           'start': Timestamp.fromDate(schedule.start),
         },
         {'end': Timestamp.fromDate(schedule.end)},
+        {'details': schedule.details},
       ]
-    });
+    }, SetOptions(merge: true));
   }
 }

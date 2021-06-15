@@ -15,13 +15,15 @@ import '../user_settings/settings.dart';
 var _uuid = Uuid();
 
 class Schedule {
-  Schedule({String id, this.title, this.start, this.end, this.place})
+  Schedule(
+      {String id, this.title, this.start, this.end, this.place, this.details})
       : id = id ?? _uuid.v4();
   String id;
   String title;
   String place;
   DateTime start;
   DateTime end;
+  String details;
 }
 
 class SchedulePage extends StatefulWidget {
@@ -55,8 +57,12 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   void addSchedule(Schedule schedule) {
-    _schedules[schedule.start].add(schedule);
-    storeService.addSchedule(schedule, true);
+    setState(() {
+      _schedules[schedule.start] = [
+        ..._schedules[schedule.start],
+        ...[schedule]
+      ];
+    });
   }
 
   void deleteSchedule(Schedule schedule) {}
@@ -113,6 +119,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         return ScheduleListOnDay(
                           targetDate: selectedDay,
                           schedules: getEventForDay(selectedDay),
+                          addSchedule: addSchedule,
                         );
                       }));
                     }
@@ -140,8 +147,12 @@ class _SchedulePageState extends State<SchedulePage> {
 
 class ScheduleListOnDay extends StatelessWidget {
   ScheduleListOnDay(
-      {Key key, @required this.targetDate, @required this.schedules})
+      {Key key,
+      @required this.targetDate,
+      @required this.schedules,
+      @required this.addSchedule})
       : super(key: key);
+  void Function(Schedule schedule) addSchedule;
   final List<Schedule> schedules;
   final DateTime targetDate;
   var _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
@@ -172,7 +183,8 @@ class ScheduleListOnDay extends StatelessWidget {
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ScheduleAddPage(targetDate: targetDate);
+            return ScheduleAddPage(
+                addSchedule: addSchedule, targetDate: targetDate);
           }));
         },
       ),
@@ -184,6 +196,7 @@ class ScheduleDetails extends StatelessWidget {
   ScheduleDetails({@required this.schedule});
   Schedule schedule;
   final _format = new DateFormat('yyyy/MM/dd(E) hh:mm', 'ja_JP');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -208,6 +221,10 @@ class ScheduleDetails extends StatelessWidget {
                 leading: Text('場所'),
                 title: Text(schedule.place),
               ),
+              ListTile(
+                leading: Text('内容'),
+                title: Text(schedule.details),
+              ),
             ],
           ),
         )),
@@ -223,9 +240,23 @@ class ScheduleDetails extends StatelessWidget {
 }
 
 class ScheduleAddPage extends HookWidget {
+  ScheduleAddPage(
+      {Key key, @required this.addSchedule, @required this.targetDate})
+      : super(key: key);
+  void Function(Schedule schedule) addSchedule;
   final DateTime targetDate;
   final _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
-  ScheduleAddPage({Key key, @required this.targetDate}) : super(key: key);
+
+  Schedule newSchedule = new Schedule(
+    title: '',
+    place: '',
+    start: DateTime.now(),
+    end: DateTime.now(),
+    details: '',
+  );
+
+  String start = '';
+  String end = '';
 
   @override
   Widget build(BuildContext context) {
@@ -237,22 +268,34 @@ class ScheduleAddPage extends HookWidget {
           padding: EdgeInsets.all(32),
           child: SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 TextField(
                   decoration: InputDecoration(
                       icon: Icon(Icons.title), labelText: 'タイトル'),
+                  onChanged: (value) {
+                    this.newSchedule.title = value;
+                  },
                 ),
                 TextField(
                   decoration:
                       InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
+                  onChanged: (value) {
+                    this.newSchedule.place = value;
+                  },
                 ),
                 TextField(
                   decoration: InputDecoration(
                       icon: Icon(Icons.timer), labelText: '開始時刻'),
+                  onChanged: (value) {
+                    this.start = value;
+                  },
                 ),
                 TextField(
                   decoration: InputDecoration(
                       icon: Icon(Icons.timer), labelText: '終了時刻'),
+                  onChanged: (value) {
+                    this.end = value;
+                  },
                 ),
                 TextField(
                   keyboardType: TextInputType.multiline,
@@ -261,6 +304,9 @@ class ScheduleAddPage extends HookWidget {
                     icon: Icon(Icons.content_copy),
                     labelText: '内容',
                   ),
+                  onChanged: (value) {
+                    this.newSchedule.details = value;
+                  },
                 ),
               ],
             ),
@@ -273,7 +319,13 @@ class ScheduleAddPage extends HookWidget {
                 height: 50,
                 child: Center(
                   child: TextButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        newSchedule.start = DateFormat('yyyy/MM/dd HH:mm')
+                            .parseStrict(this.start);
+                        newSchedule.end = DateFormat('yyyy/MM/dd HH:mm')
+                            .parseStrict(this.end);
+                        await storeService.addSchedule(this.newSchedule, true);
+                        addSchedule(this.newSchedule);
                         Navigator.of(context).pop();
                       },
                       child: const Text("追加")),
