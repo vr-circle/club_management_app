@@ -257,17 +257,25 @@ class ScheduleAddPage extends HookWidget {
   String start = '';
   String end = '';
 
-  Future<void> _selectTime(BuildContext context) async {
-    DateTime newSelectedTime = await showDatePicker(
+  TextEditingController startTextFiledController = new TextEditingController();
+  TextEditingController endTextFiledController = new TextEditingController();
+
+  Future<DateTime> _selectTime(BuildContext context) async {
+    TimeOfDay newSelectedTime = await showTimePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 3)),
+      initialTime: TimeOfDay.now(),
     );
     if (newSelectedTime != null) {
-      print('selected');
-      this.start = DateFormat('yyyy/MM/dd').format(newSelectedTime);
-      this.newSchedule.start = newSelectedTime;
+      DateTime newDate = DateTime(
+        targetDate.year,
+        targetDate.month,
+        targetDate.day,
+        newSelectedTime.hour,
+        newSelectedTime.minute,
+      );
+      return newDate;
+    } else {
+      return targetDate;
     }
   }
 
@@ -300,18 +308,29 @@ class ScheduleAddPage extends HookWidget {
                   decoration: InputDecoration(
                       icon: Icon(Icons.timer), labelText: '開始時刻'),
                   onTap: () async {
-                    await _selectTime(context);
+                    var newDate = await _selectTime(context);
+                    startTextFiledController.text =
+                        DateFormat('yyyy/MM/dd HH:mm').format(newDate);
+                    this.newSchedule.start = newDate;
                   },
-                  // onChanged: (value) {
-                  //   this.start = value;
-                  // },
+                  controller: this.startTextFiledController,
+                  enableInteractiveSelection: false,
+                  focusNode: FocusNode(),
+                  readOnly: true,
                 ),
                 TextField(
                   decoration: InputDecoration(
                       icon: Icon(Icons.timer), labelText: '終了時刻'),
-                  onChanged: (value) {
-                    this.end = value;
+                  onTap: () async {
+                    var newDate = await _selectTime(context);
+                    endTextFiledController.text =
+                        DateFormat('yyyy/MM/dd HH:mm').format(newDate);
+                    this.newSchedule.end = newDate;
                   },
+                  controller: this.endTextFiledController,
+                  enableInteractiveSelection: false,
+                  focusNode: FocusNode(),
+                  readOnly: true,
                 ),
                 TextField(
                   keyboardType: TextInputType.multiline,
