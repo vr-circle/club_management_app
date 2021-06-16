@@ -76,17 +76,30 @@ class StoreService {
             .get())
         .data();
 
-    final _format = DateFormat("yyyyMMdd");
+    final _format = DateFormat("yyyy-MM-dd");
     Map<DateTime, List<Schedule>> res = {};
     _scheduleList.forEach((key, value) {
-      res[_format.parseStrict(key)] = <Schedule>[
-        Schedule(
-            title: value['title'],
-            place: value['place'],
-            details: value['details'],
-            start: value['start'].toDate(),
-            end: value['end'].toDate()),
-      ];
+      var targetDateString;
+      try {
+        targetDateString = _format.parseStrict(key);
+      } catch (e) {
+        print('failed to parseStrict');
+        return res;
+      }
+      // Why couldn't use map() in 'value'.
+      List<Schedule> ttmp = [];
+      value.forEach((e) {
+        ttmp.add(Schedule(
+          title: e['title'],
+          place: e['place'],
+          details: e['details'],
+          start: e['start'].toDate(),
+          end: e['end'].toDate(),
+        ));
+      });
+      Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
+      res.addAll(tmp);
+      return res;
     });
     return res;
   }
@@ -101,15 +114,11 @@ class StoreService {
       DateFormat('yyyyMMdd').format(schedule.start): [
         {
           'title': schedule.title,
-        },
-        {
           'place': schedule.place,
-        },
-        {
           'start': Timestamp.fromDate(schedule.start),
-        },
-        {'end': Timestamp.fromDate(schedule.end)},
-        {'details': schedule.details},
+          'end': Timestamp.fromDate(schedule.end),
+          'details': schedule.details,
+        }
       ]
     }, SetOptions(merge: true));
   }

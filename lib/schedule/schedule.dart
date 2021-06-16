@@ -58,10 +58,9 @@ class _SchedulePageState extends State<SchedulePage> {
 
   void addSchedule(Schedule schedule) {
     setState(() {
-      _schedules[schedule.start] = [
-        ..._schedules[schedule.start],
-        ...[schedule]
-      ];
+      if (_schedules.containsKey(schedule.start) == false)
+        _schedules[schedule.start] = [];
+      _schedules[schedule.start].add(schedule);
     });
   }
 
@@ -258,6 +257,20 @@ class ScheduleAddPage extends HookWidget {
   String start = '';
   String end = '';
 
+  Future<void> _selectTime(BuildContext context) async {
+    DateTime newSelectedTime = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 3)),
+    );
+    if (newSelectedTime != null) {
+      print('selected');
+      this.start = DateFormat('yyyy/MM/dd').format(newSelectedTime);
+      this.newSchedule.start = newSelectedTime;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -286,9 +299,12 @@ class ScheduleAddPage extends HookWidget {
                 TextField(
                   decoration: InputDecoration(
                       icon: Icon(Icons.timer), labelText: '開始時刻'),
-                  onChanged: (value) {
-                    this.start = value;
+                  onTap: () async {
+                    await _selectTime(context);
                   },
+                  // onChanged: (value) {
+                  //   this.start = value;
+                  // },
                 ),
                 TextField(
                   decoration: InputDecoration(
