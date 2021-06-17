@@ -58,9 +58,11 @@ class _SchedulePageState extends State<SchedulePage> {
 
   void addSchedule(Schedule schedule) {
     setState(() {
+      print('start setState');
       if (_schedules.containsKey(schedule.start) == false)
         _schedules[schedule.start] = [];
       _schedules[schedule.start].add(schedule);
+      print('end setState');
     });
   }
 
@@ -144,15 +146,40 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 }
 
-class ScheduleListOnDay extends StatelessWidget {
+class ScheduleListOnDay extends StatefulWidget {
   ScheduleListOnDay(
+      {Key key,
+      @required this.addSchedule,
+      @required this.schedules,
+      this.targetDate})
+      : super(key: key);
+  void Function(Schedule schedule) addSchedule;
+  List<Schedule> schedules;
+  DateTime targetDate;
+  @override
+  _ScheduleListOnDayState createState() => _ScheduleListOnDayState(
+        addSchedule: addSchedule,
+        schedules: schedules,
+        targetDate: targetDate,
+      );
+}
+
+class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
+  _ScheduleListOnDayState(
       {Key key,
       @required this.targetDate,
       @required this.schedules,
-      @required this.addSchedule})
-      : super(key: key);
+      @required this.addSchedule});
   void Function(Schedule schedule) addSchedule;
-  final List<Schedule> schedules;
+
+  void addScheduleInListView(Schedule schedule) {
+    setState(() {
+      this.addSchedule(schedule);
+      this.schedules.add(schedule);
+    });
+  }
+
+  List<Schedule> schedules;
   final DateTime targetDate;
   var _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
   @override
@@ -183,7 +210,7 @@ class ScheduleListOnDay extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
             return ScheduleAddPage(
-                addSchedule: addSchedule, targetDate: targetDate);
+                addSchedule: addScheduleInListView, targetDate: targetDate);
           }));
         },
       ),
@@ -238,10 +265,19 @@ class ScheduleDetails extends StatelessWidget {
   }
 }
 
-class ScheduleAddPage extends HookWidget {
-  ScheduleAddPage(
-      {Key key, @required this.addSchedule, @required this.targetDate})
+class ScheduleAddPage extends StatefulWidget {
+  ScheduleAddPage({Key key, this.addSchedule, this.targetDate})
       : super(key: key);
+  void Function(Schedule schedule) addSchedule;
+  DateTime targetDate;
+  @override
+  _ScheduleAddPageState createState() => _ScheduleAddPageState(
+      key: key, addSchedule: addSchedule, targetDate: targetDate);
+}
+
+class _ScheduleAddPageState extends State<ScheduleAddPage> {
+  _ScheduleAddPageState(
+      {Key key, @required this.addSchedule, @required this.targetDate});
   void Function(Schedule schedule) addSchedule;
   final DateTime targetDate;
   final _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
@@ -355,12 +391,11 @@ class ScheduleAddPage extends HookWidget {
                 child: Center(
                   child: TextButton(
                       onPressed: () async {
-                        newSchedule.start = DateFormat('yyyy/MM/dd HH:mm')
-                            .parseStrict(this.start);
-                        newSchedule.end = DateFormat('yyyy/MM/dd HH:mm')
-                            .parseStrict(this.end);
+                        print('add button is clicked');
                         await storeService.addSchedule(this.newSchedule, true);
+                        print('start addSchedule');
                         addSchedule(this.newSchedule);
+                        print('end addSchedule');
                         Navigator.of(context).pop();
                       },
                       child: const Text("追加")),

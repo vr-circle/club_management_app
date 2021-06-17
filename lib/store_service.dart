@@ -105,13 +105,14 @@ class StoreService {
   }
 
   Future<void> addSchedule(Schedule schedule, bool isPrivate) async {
+    print('add schedule is strating in store_service');
     await FirebaseFirestore.instance
         .collection('users')
         .doc(isPrivate ? userId : 'circle')
         .collection('schedule')
         .doc('schedule')
         .set({
-      DateFormat('yyyyMMdd').format(schedule.start): [
+      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayUnion([
         {
           'title': schedule.title,
           'place': schedule.place,
@@ -119,7 +120,8 @@ class StoreService {
           'end': Timestamp.fromDate(schedule.end),
           'details': schedule.details,
         }
-      ]
+      ])
     }, SetOptions(merge: true));
+    print('add schedule is ending in store_service');
   }
 }
