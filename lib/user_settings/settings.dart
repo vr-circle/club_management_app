@@ -86,7 +86,7 @@ class SettingsPage extends HookWidget {
         ListTile(
           leading: Icon(Icons.info),
           title: Text("バージョン"),
-          subtitle: Text("1.0.0"),
+          subtitle: Text("0.0.1"),
         ),
       ]),
     ));

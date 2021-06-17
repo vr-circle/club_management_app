@@ -67,7 +67,9 @@ class StoreService {
     });
   }
 
-  Future<Map<DateTime, List<Schedule>>> getPrivateSchedule() async {
+  Future<Map<DateTime, List<Schedule>>> getSchedule() async {
+    final _format = DateFormat("yyyy-MM-dd");
+    // private
     final _scheduleList = (await FirebaseFirestore.instance
             .collection('users')
             .doc(userId)
@@ -75,32 +77,57 @@ class StoreService {
             .doc('schedule')
             .get())
         .data();
-
-    final _format = DateFormat("yyyy-MM-dd");
     Map<DateTime, List<Schedule>> res = {};
     _scheduleList.forEach((key, value) {
       var targetDateString;
       try {
         targetDateString = _format.parseStrict(key);
+        // Why couldn't use map() in 'value'.
+        List<Schedule> ttmp = [];
+        value.forEach((e) {
+          ttmp.add(Schedule(
+            title: e['title'],
+            place: e['place'],
+            details: e['details'],
+            start: e['start'].toDate(),
+            end: e['end'].toDate(),
+          ));
+        });
+        Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
+        res.addAll(tmp);
       } catch (e) {
-        print('failed to parseStrict');
-        return res;
+        print(e);
       }
-      // Why couldn't use map() in 'value'.
-      List<Schedule> ttmp = [];
-      value.forEach((e) {
-        ttmp.add(Schedule(
-          title: e['title'],
-          place: e['place'],
-          details: e['details'],
-          start: e['start'].toDate(),
-          end: e['end'].toDate(),
-        ));
-      });
-      Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
-      res.addAll(tmp);
-      return res;
     });
+    final _clubScheduleList = (await FirebaseFirestore.instance
+            .collection('users')
+            .doc('circle')
+            .collection('schedule')
+            .doc('schedule')
+            .get())
+        .data();
+    Map<DateTime, List<Schedule>> clubRes = {};
+    _clubScheduleList.forEach((key, value) {
+      var targetDateString;
+      try {
+        targetDateString = _format.parseStrict(key);
+        List<Schedule> ttmp = [];
+        value.forEach((e) {
+          ttmp.add(Schedule(
+            title: e['title'],
+            place: e['place'],
+            details: e['details'],
+            start: e['start'].toDate(),
+            end: e['end'].toDate(),
+          ));
+        });
+        Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
+        clubRes.addAll(tmp);
+      } catch (e) {
+        print(e);
+      }
+    });
+    res.addAll(clubRes);
     return res;
   }
 
@@ -122,6 +149,17 @@ class StoreService {
         }
       ])
     }, SetOptions(merge: true));
-    print('add schedule is ending in store_service');
+  }
+
+  Future<void> deleteSchedule(Schedule schedule, bool isPrivate) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(isPrivate ? userId : 'circle')
+        .collection('schedule')
+        .doc('schedule')
+        .update({
+      DateFormat('yyyy-MM-dd').format(schedule.start):
+          FieldValue.arrayRemove([schedule.title])
+    });
   }
 }

@@ -9,9 +9,6 @@ import 'package:uuid/uuid.dart';
 
 import '../user_settings/settings.dart';
 
-// todo: show timePicker in ScheduleAddPage
-// todo: cooperate with firestore
-
 var _uuid = Uuid();
 
 class Schedule {
@@ -40,7 +37,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
 
   Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
-    final res = await storeService.getPrivateSchedule();
+    final res = await storeService.getSchedule();
     _schedules = LinkedHashMap(equals: isSameDay, hashCode: getHashCode)
       ..addAll(res);
     return _schedules;
@@ -58,11 +55,9 @@ class _SchedulePageState extends State<SchedulePage> {
 
   void addSchedule(Schedule schedule) {
     setState(() {
-      print('start setState');
       if (_schedules.containsKey(schedule.start) == false)
         _schedules[schedule.start] = [];
       _schedules[schedule.start].add(schedule);
-      print('end setState');
     });
   }
 
@@ -220,7 +215,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
 
 class ScheduleDetails extends StatelessWidget {
   ScheduleDetails({@required this.schedule});
-  Schedule schedule;
+  final Schedule schedule;
   final _format = new DateFormat('yyyy/MM/dd(E) hh:mm', 'ja_JP');
 
   @override
@@ -268,19 +263,34 @@ class ScheduleDetails extends StatelessWidget {
 class ScheduleAddPage extends StatefulWidget {
   ScheduleAddPage({Key key, this.addSchedule, this.targetDate})
       : super(key: key);
-  void Function(Schedule schedule) addSchedule;
-  DateTime targetDate;
+  final void Function(Schedule schedule) addSchedule;
+  final DateTime targetDate;
   @override
-  _ScheduleAddPageState createState() => _ScheduleAddPageState(
-      key: key, addSchedule: addSchedule, targetDate: targetDate);
+  _ScheduleAddPageState createState() => _ScheduleAddPageState();
 }
 
 class _ScheduleAddPageState extends State<ScheduleAddPage> {
-  _ScheduleAddPageState(
-      {Key key, @required this.addSchedule, @required this.targetDate});
-  void Function(Schedule schedule) addSchedule;
-  final DateTime targetDate;
   final _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
+
+  TextEditingController startTextFiledController;
+  TextEditingController endTextFiledController;
+  List<String> targetUsers;
+  String _selectedTargetUsers;
+
+  @override
+  void initState() {
+    super.initState();
+    this.startTextFiledController = new TextEditingController(
+        text: DateFormat('yyyy/MM/dd HH:mm').format(widget.targetDate));
+    this.endTextFiledController = new TextEditingController(
+        text: DateFormat('yyyy/MM/dd HH:mm')
+            .format(widget.targetDate.add(Duration(days: 1))));
+    this.targetUsers = [
+      'Private',
+      'Club'
+    ]; // todo: generate list from user setting
+    this._selectedTargetUsers = 'Private';
+  }
 
   Schedule newSchedule = new Schedule(
     title: '',
@@ -290,12 +300,6 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
     details: '',
   );
 
-  String start = '';
-  String end = '';
-
-  TextEditingController startTextFiledController = new TextEditingController();
-  TextEditingController endTextFiledController = new TextEditingController();
-
   Future<DateTime> _selectTime(BuildContext context) async {
     TimeOfDay newSelectedTime = await showTimePicker(
       context: context,
@@ -303,15 +307,15 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
     );
     if (newSelectedTime != null) {
       DateTime newDate = DateTime(
-        targetDate.year,
-        targetDate.month,
-        targetDate.day,
+        widget.targetDate.year,
+        widget.targetDate.month,
+        widget.targetDate.day,
         newSelectedTime.hour,
         newSelectedTime.minute,
       );
       return newDate;
     } else {
-      return targetDate;
+      return widget.targetDate;
     }
   }
 
@@ -319,13 +323,35 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_format.format(targetDate)),
+        title: Text(_format.format(widget.targetDate)),
       ),
       body: Padding(
           padding: EdgeInsets.all(32),
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('対象'),
+                    DropdownButton(
+                      value: _selectedTargetUsers,
+                      items: this
+                          .targetUsers
+                          .map((e) => DropdownMenuItem(
+                                child: Text(e),
+                                value: e,
+                              ))
+                          .toList(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          this._selectedTargetUsers = newValue;
+                        });
+                      },
+                    ),
+                  ],
+                ),
                 TextField(
                   decoration: InputDecoration(
                       icon: Icon(Icons.title), labelText: 'タイトル'),
@@ -370,7 +396,6 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 ),
                 TextField(
                   keyboardType: TextInputType.multiline,
-                  maxLines: 5,
                   decoration: InputDecoration(
                     icon: Icon(Icons.content_copy),
                     labelText: '内容',
@@ -391,11 +416,9 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 child: Center(
                   child: TextButton(
                       onPressed: () async {
-                        print('add button is clicked');
-                        await storeService.addSchedule(this.newSchedule, true);
-                        print('start addSchedule');
-                        addSchedule(this.newSchedule);
-                        print('end addSchedule');
+                        await storeService.addSchedule(this.newSchedule,
+                            this._selectedTargetUsers == 'Private');
+                        widget.addSchedule(this.newSchedule);
                         Navigator.of(context).pop();
                       },
                       child: const Text("追加")),
