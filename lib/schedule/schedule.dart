@@ -261,7 +261,8 @@ class ScheduleDetails extends StatelessWidget {
 }
 
 class ScheduleAddPage extends StatefulWidget {
-  ScheduleAddPage({Key key, this.addSchedule, this.targetDate})
+  ScheduleAddPage(
+      {Key key, this.addSchedule, this.targetDate, DateTime initSchedule})
       : super(key: key);
   final void Function(Schedule schedule) addSchedule;
   final DateTime targetDate;

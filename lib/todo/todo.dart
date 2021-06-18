@@ -175,6 +175,8 @@ class TodoPrivatePage extends StatefulWidget {
 class _TodoPrivatePageState extends State<TodoPrivatePage> {
   Future<TaskList> _taskListFuture;
   TaskList _taskList = TaskList([]);
+  bool isDoneExpanded = false;
+  bool isnotDoneExpanded = false;
 
   Future<TaskList> getTaskData() async {
     final List<Task> res = await storeService.getPrivateTaskList();
@@ -198,6 +200,64 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
     setState(() {
       _taskList.deleteTask(task);
     });
+  }
+
+  void _showDialog(Task task) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            title: Text(task.title),
+            children: [
+              SimpleDialogOption(
+                child: Text('削除'),
+                onPressed: () async {
+                  // delete task by id
+                  await storeService.deleteTask(task, true);
+                  deleteTask(task);
+                  Navigator.pop(context);
+                },
+              ),
+              SimpleDialogOption(
+                child: Text('キャンセル'),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          );
+        });
+  }
+
+  ExpansionPanel _createPanel(TaskList taskList, String name) {
+    return ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) {
+        return Container(
+            child: Row(
+          children: [
+            Padding(
+                padding: EdgeInsets.only(right: 10.0), child: Icon(Icons.task)),
+            Text(
+              name,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            )
+          ],
+        ));
+      },
+      body: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          final task = taskList.taskList[index];
+          return TaskTile(
+            taskTitle: task.title,
+            isChecked: task.isDone,
+            checkboxCallback: (bool value) {},
+            longPressCallback: () {
+              _showDialog(task);
+            },
+          );
+        },
+        itemCount: taskList.taskList.length,
+      ),
+      isExpanded: false,
+    );
   }
 
   @override
