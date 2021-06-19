@@ -23,8 +23,7 @@ class ExpandedState extends StateNotifier<bool> {
 
 class SettingsPage extends HookWidget {
   SettingsPage(this.appState);
-  MyAppState appState;
-  static const String route = '/settings';
+  final MyAppState appState;
   @override
   Widget build(BuildContext context) {
     final isDarkMode = useProvider(darkModeProvider);
@@ -50,7 +49,6 @@ class SettingsPage extends HookWidget {
             style: TextStyle(color: Colors.red),
           ),
           onTap: () async {
-            // logout
             appState.signOut();
           },
         ),

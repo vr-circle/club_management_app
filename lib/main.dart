@@ -10,7 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'auth/login_page.dart';
 import 'todo/todo.dart';
-import 'schedule/schedule.dart';
+import 'schedule/schedule_page.dart';
 import 'user_settings/settings.dart';
 
 Future<void> main() async {
@@ -66,16 +66,17 @@ class MyAppState extends ChangeNotifier {
 
   Future<void> signOut() async {
     await _authService.signOut();
+    notifyListeners();
   }
 
   Future<void> signUpWithEmailAndPassword(String email, String password) async {
     await _authService.signUpWithEmailAndPassword(email, password);
+    notifyListeners();
   }
 
   User getCurrentUser() {
     return _authService.getCurrentUser();
   }
-  // todo: authService's function transfer to this
 }
 
 abstract class RoutePath {}
