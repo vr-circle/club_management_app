@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/store_service.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -61,7 +61,11 @@ class _SchedulePageState extends State<SchedulePage> {
     });
   }
 
-  void deleteSchedule(Schedule schedule) {}
+  void deleteSchedule(Schedule targetSchedule) {
+    _schedules[targetSchedule.start] = _schedules[targetSchedule.start]
+        .where((schedule) => schedule.title != targetSchedule.title)
+        .toList();
+  }
 
   void editSchedule(Schedule targeet) {}
 
@@ -148,68 +152,57 @@ class ScheduleListOnDay extends StatefulWidget {
       @required this.schedules,
       this.targetDate})
       : super(key: key);
-  void Function(Schedule schedule) addSchedule;
+  final void Function(Schedule schedule) addSchedule;
   List<Schedule> schedules;
   DateTime targetDate;
   @override
-  _ScheduleListOnDayState createState() => _ScheduleListOnDayState(
-        addSchedule: addSchedule,
-        schedules: schedules,
-        targetDate: targetDate,
-      );
+  _ScheduleListOnDayState createState() => _ScheduleListOnDayState();
 }
 
 class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
-  _ScheduleListOnDayState(
-      {Key key,
-      @required this.targetDate,
-      @required this.schedules,
-      @required this.addSchedule});
   void Function(Schedule schedule) addSchedule;
 
   void addScheduleInListView(Schedule schedule) {
     setState(() {
-      this.addSchedule(schedule);
-      this.schedules.add(schedule);
+      widget.addSchedule(schedule);
+      widget.schedules.add(schedule);
     });
   }
 
-  List<Schedule> schedules;
-  final DateTime targetDate;
   var _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_format.format(targetDate)),
-      ),
-      body: schedules.isEmpty
-          ? Center(child: Text('予定はありません'))
-          : ListView(
-              children: [
-                ...schedules
-                    .map((e) => Card(
-                            child: ListTile(
-                          title: Text(e.title),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    ScheduleDetails(schedule: e)));
-                          },
-                        )))
-                    .toList()
-              ],
-            ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ScheduleAddPage(
-                addSchedule: addScheduleInListView, targetDate: targetDate);
-          }));
-        },
-      ),
-    );
+        appBar: AppBar(
+          title: Text(_format.format(widget.targetDate)),
+        ),
+        body: widget.schedules.isEmpty
+            ? Center(child: Text('予定はありません'))
+            : ListView(
+                children: [
+                  ...widget.schedules
+                      .map((e) => Card(
+                              child: ListTile(
+                            title: Text(e.title),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      ScheduleDetails(schedule: e)));
+                            },
+                          )))
+                      .toList()
+                ],
+              ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return ScheduleAddPage(
+                  addSchedule: addScheduleInListView,
+                  targetDate: widget.targetDate);
+            }));
+          },
+        ));
   }
 }
 
@@ -221,42 +214,55 @@ class ScheduleDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(schedule.title), // fix
-      ),
-      body: Column(children: [
-        // show details
-        Expanded(
-            child: Container(
-          child: Column(
-            children: [
-              ListTile(
-                leading: Text('開始時刻'),
-                title: Text(_format.format(schedule.start)),
-              ),
-              ListTile(
-                leading: Text('終了時刻'),
-                title: Text(_format.format(schedule.end)),
-              ),
-              ListTile(
-                leading: Text('場所'),
-                title: Text(schedule.place),
-              ),
-              ListTile(
-                leading: Text('内容'),
-                title: Text(schedule.details),
-              ),
-            ],
-          ),
-        )),
-      ]),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.edit),
-        onPressed: () {
-          // edit schedule
-        },
-      ),
-    );
+        appBar: AppBar(
+          title: Text(schedule.title),
+        ),
+        body: Column(children: [
+          Expanded(
+              child: Container(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Text('開始時刻'),
+                  title: Text(_format.format(schedule.start)),
+                ),
+                ListTile(
+                  leading: Text('終了時刻'),
+                  title: Text(_format.format(schedule.end)),
+                ),
+                ListTile(
+                  leading: Text('場所'),
+                  title: Text(schedule.place),
+                ),
+                ListTile(
+                  leading: Text('内容'),
+                  title: Text(schedule.details),
+                ),
+              ],
+            ),
+          )),
+        ]),
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              child: Icon(Icons.edit),
+              onPressed: () {
+                // edit schedule
+              },
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            FloatingActionButton(
+              onPressed: () {
+                // delete
+              },
+              child: Icon(Icons.delete),
+              backgroundColor: Colors.red,
+            )
+          ],
+        ));
   }
 }
 
@@ -417,6 +423,11 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 child: Center(
                   child: TextButton(
                       onPressed: () async {
+                        final format = DateFormat('yyyy/MM/dd HH:mm');
+                        newSchedule.start =
+                            format.parseStrict(startTextFiledController.text);
+                        newSchedule.end =
+                            format.parseStrict(endTextFiledController.text);
                         await storeService.addSchedule(this.newSchedule,
                             this._selectedTargetUsers == 'Private');
                         widget.addSchedule(this.newSchedule);
@@ -437,5 +448,78 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
         ),
       ),
     );
+  }
+}
+
+class ScheduleEditPage extends StatelessWidget {
+  ScheduleEditPage(this._targetSchedule);
+  final Schedule _targetSchedule;
+  TextEditingController _endTimeTextEditingController;
+  TextEditingController _startTimeTextEditingController;
+  String newTitle = '';
+  String newPlace = '';
+  String newDetails = '';
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(_targetSchedule.title),
+        ),
+        body: Padding(
+            padding: EdgeInsets.all(32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.title), labelText: 'タイトル'),
+                  onChanged: (value) {
+                    newTitle = value;
+                  },
+                ),
+                TextField(
+                  decoration:
+                      InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
+                  onChanged: (value) {
+                    newPlace = value;
+                  },
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.timer), labelText: '開始時刻'),
+                  onTap: () async {
+                    // var newDate = await _selectTime(context);
+                    // endTextFiledController.text =
+                    //     DateFormat('yyyy/MM/dd HH:mm').format(newDate);
+                    // this.newSchedule.end = newDate;
+                  },
+                  controller: this._startTimeTextEditingController,
+                  enableInteractiveSelection: false,
+                  focusNode: FocusNode(),
+                  readOnly: true,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.timer), labelText: '終了時刻'),
+                  onTap: () async {
+                    // var newDate = await _selectTime(context);
+                    // endTextFiledController.text =
+                    //     DateFormat('yyyy/MM/dd HH:mm').format(newDate);
+                    // this.newSchedule.end = newDate;
+                  },
+                  controller: this._endTimeTextEditingController,
+                  enableInteractiveSelection: false,
+                  focusNode: FocusNode(),
+                  readOnly: true,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.content_copy), labelText: '内容'),
+                  onChanged: (value) {
+                    newDetails = value;
+                  },
+                ),
+              ],
+            )));
   }
 }

@@ -1,20 +1,16 @@
 import 'dart:html';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/store_service.dart';
+import 'package:flutter_application_1/auth/auth_service.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 
 import 'auth/login_page.dart';
 import 'todo/todo.dart';
 import 'schedule/schedule.dart';
 import 'user_settings/settings.dart';
-import 'user_state.dart';
 
 Future<void> main() async {
   await Firebase.initializeApp();
@@ -41,25 +37,19 @@ final myAppStateProvider =
 class MyApp extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final myAppState = useProvider(myAppStateProvider);
-    if (FirebaseAuth.instance.currentUser == null) {
-      // print("who are you");
-      // How to verify a user session?
-    }
+    final myRouteAppState = useProvider(myAppStateProvider);
     return MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: useProvider(darkModeProvider)
             ? ThemeData.dark()
             : ThemeData.light(),
-        routeInformationParser: myAppState.routeInformationParser,
-        routerDelegate: myAppState.routerDelegate);
+        routeInformationParser: myRouteAppState.routeInformationParser,
+        routerDelegate: myRouteAppState.routerDelegate);
   }
 }
 
 class MyAppState extends ChangeNotifier {
-  MyAppState()
-      : _selectedIndex = 0,
-        _authFlowStatus = AuthFlowStatus.login;
+  MyAppState() : _selectedIndex = 0;
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {
@@ -67,19 +57,13 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  AuthFlowStatus _authFlowStatus;
-  AuthFlowStatus get authFlowStatus => _authFlowStatus;
-  set authFlowStatus(AuthFlowStatus s) {
-    _authFlowStatus = s;
+  AuthService authService = AuthService();
+  Future<void> signInWithEmailAndPassword(String email, String password) async {
+    await authService.signInWithEmailAndPassword(
+        email: email, password: password);
     notifyListeners();
   }
-
-  User _user;
-  User get user => _user;
-  set user(User u) {
-    _user = u;
-    notifyListeners();
-  }
+  // todo: authService's function transfer to this
 }
 
 abstract class RoutePath {}
@@ -144,17 +128,15 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   }
 
   RoutePath get currentConfiguration {
-    if (appState.authFlowStatus == AuthFlowStatus.login) {
+    if (appState.authService.getCurrentUser() == null) {
       return LoginPath();
     }
+
     if (appState.selectedIndex == 0) {
-      // schedule
       return SchedulePath();
     } else if (appState.selectedIndex == 1) {
-      // todo
       return TodoPath();
     } else {
-      // settings
       return SettingsPath(); // UnknownPath?
     }
   }
@@ -164,8 +146,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        if (appState.authFlowStatus == AuthFlowStatus.login ||
-            appState.user == null)
+        if (appState.authService.getCurrentUser() == null)
           FadeAnimationPage(
               child: LoginPage(appState), key: ValueKey('LoginPage'))
         else
@@ -210,7 +191,8 @@ class _AppShellState extends State<AppShell> {
 
   void initState() {
     super.initState();
-    storeService = StoreService(userId: widget.appState.user.uid);
+    storeService =
+        StoreService(userId: widget.appState.authService.getCurrentUser().uid);
     _routerDelegate = InnerRouterDelegate(widget.appState);
   }
 
@@ -232,10 +214,60 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     var appState = widget.appState;
+    final Size size = MediaQuery.of(context).size;
 
     // Claim priority, If there are parallel sub router, you will need
     // to pick which one should take priority;
     _backButtonDispatcher.takePriority();
+
+    if (size.width > 500) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Club Management App'),
+          actions: [
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Icon(Icons.people),
+            )
+          ],
+        ),
+        body: Router(
+          routerDelegate: _routerDelegate,
+          backButtonDispatcher: _backButtonDispatcher,
+        ),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              DrawerHeader(child: Text('DrawerMenu')),
+              ListTile(
+                leading: Icon(Icons.schedule),
+                title: Text('Schedule'),
+                onTap: () {
+                  appState.selectedIndex = 0;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.task_rounded),
+                title: Text('ToDo'),
+                onTap: () {
+                  appState.selectedIndex = 1;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+                onTap: () {
+                  appState.selectedIndex = 2;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

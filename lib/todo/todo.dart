@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/store_service.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -278,28 +278,7 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
                   isChecked: task.isDone,
                   checkboxCallback: (bool value) {},
                   longPressCallback: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return SimpleDialog(
-                            title: Text(task.title),
-                            children: [
-                              SimpleDialogOption(
-                                child: Text('削除'),
-                                onPressed: () async {
-                                  // delete task by id
-                                  await storeService.deleteTask(task, true);
-                                  deleteTask(task);
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              SimpleDialogOption(
-                                child: Text('キャンセル'),
-                                onPressed: () => Navigator.pop(context),
-                              )
-                            ],
-                          );
-                        });
+                    _showDialog(task);
                   },
                 );
               },
@@ -320,7 +299,7 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
 
 class ToDoAddPage extends StatelessWidget {
   ToDoAddPage(this.isPrivate, this.addTask);
-  Function(String title) addTask;
+  final Function(String title) addTask;
   final bool isPrivate;
   @override
   Widget build(BuildContext context) {

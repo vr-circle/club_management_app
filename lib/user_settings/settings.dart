@@ -3,7 +3,6 @@ import 'package:flutter_application_1/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../user_state.dart';
 import '../auth/auth_service.dart';
 
 final darkModeProvider =
@@ -42,7 +41,7 @@ class SettingsPage extends HookWidget {
           title: Text("アカウントの管理"),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return UserAccountView(appState);
+              return UserAccountView(appState: appState);
             }));
           },
         ),
@@ -54,8 +53,7 @@ class SettingsPage extends HookWidget {
           ),
           onTap: () async {
             // logout
-            authService.signOut();
-            appState.authFlowStatus = AuthFlowStatus.login;
+            appState.authService.signOut();
           },
         ),
         Divider(
@@ -94,7 +92,7 @@ class SettingsPage extends HookWidget {
 }
 
 class UserAccountView extends HookWidget {
-  UserAccountView(this.appState);
+  UserAccountView({this.appState});
   MyAppState appState;
   @override
   Widget build(BuildContext context) {
@@ -107,13 +105,14 @@ class UserAccountView extends HookWidget {
           children: [
             ListTile(
               title: Text('名前'),
-              trailing: Text(appState.user.displayName == null
-                  ? '(表示名は設定されていません)'
-                  : appState.user.displayName),
+              trailing: Text(
+                  appState.authService.getCurrentUser().displayName == null
+                      ? '(表示名は設定されていません)'
+                      : appState.authService.getCurrentUser().displayName),
             ),
             ListTile(
               title: Text('Email'),
-              trailing: Text(appState.user.email),
+              trailing: Text(appState.authService.getCurrentUser().email),
             ),
           ],
         ),
