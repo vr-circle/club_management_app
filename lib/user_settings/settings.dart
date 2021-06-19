@@ -3,8 +3,6 @@ import 'package:flutter_application_1/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../auth/auth_service.dart';
-
 final darkModeProvider =
     StateNotifierProvider<DarkModeState, bool>((refs) => DarkModeState());
 
@@ -53,7 +51,7 @@ class SettingsPage extends HookWidget {
           ),
           onTap: () async {
             // logout
-            appState.authService.signOut();
+            appState.signOut();
           },
         ),
         Divider(
@@ -105,14 +103,13 @@ class UserAccountView extends HookWidget {
           children: [
             ListTile(
               title: Text('名前'),
-              trailing: Text(
-                  appState.authService.getCurrentUser().displayName == null
-                      ? '(表示名は設定されていません)'
-                      : appState.authService.getCurrentUser().displayName),
+              trailing: Text(appState.getCurrentUser().displayName == null
+                  ? '(表示名は設定されていません)'
+                  : appState.getCurrentUser().displayName),
             ),
             ListTile(
               title: Text('Email'),
-              trailing: Text(appState.authService.getCurrentUser().email),
+              trailing: Text(appState.getCurrentUser().email),
             ),
           ],
         ),

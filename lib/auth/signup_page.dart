@@ -39,8 +39,7 @@ class SignUpPage extends HookWidget {
                   onPressed: () async {
                     // signup function
                     try {
-                      appState.authService.signUpWithEmailAndPassword(
-                          email: email, password: password);
+                      appState.signUpWithEmailAndPassword(email, password);
                     } catch (e) {
                       // failed to signup
                       print('failed to signUp');

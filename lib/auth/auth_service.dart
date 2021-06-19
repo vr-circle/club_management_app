@@ -17,8 +17,7 @@ class AuthService {
     return true;
   }
 
-  Future<void> signUpWithEmailAndPassword(
-      {String email, String password}) async {
+  Future<void> signUpWithEmailAndPassword(String email, String password) async {
     try {
       final res = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -28,15 +27,14 @@ class AuthService {
     }
   }
 
-  Future<void> signInWithEmailAndPassword(
-      {String email, String password}) async {
+  Future<void> signInWithEmailAndPassword(String email, String password) async {
     this._user = (await _firebaseAuth.signInWithEmailAndPassword(
             email: email, password: password))
         .user;
   }
 
-  void signOut() {
-    _firebaseAuth.signOut();
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
   }
 
   User getCurrentUser() {

@@ -1,4 +1,5 @@
-import 'dart:html';
+// import 'dart:html';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/store/store_service.dart';
@@ -57,11 +58,22 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  AuthService authService = AuthService();
+  AuthService _authService = AuthService();
   Future<void> signInWithEmailAndPassword(String email, String password) async {
-    await authService.signInWithEmailAndPassword(
-        email: email, password: password);
+    await _authService.signInWithEmailAndPassword(email, password);
     notifyListeners();
+  }
+
+  Future<void> signOut() async {
+    await _authService.signOut();
+  }
+
+  Future<void> signUpWithEmailAndPassword(String email, String password) async {
+    await _authService.signUpWithEmailAndPassword(email, password);
+  }
+
+  User getCurrentUser() {
+    return _authService.getCurrentUser();
   }
   // todo: authService's function transfer to this
 }
@@ -128,7 +140,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   }
 
   RoutePath get currentConfiguration {
-    if (appState.authService.getCurrentUser() == null) {
+    if (appState.getCurrentUser() == null) {
       return LoginPath();
     }
 
@@ -146,7 +158,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        if (appState.authService.getCurrentUser() == null)
+        if (appState.getCurrentUser() == null)
           FadeAnimationPage(
               child: LoginPage(appState), key: ValueKey('LoginPage'))
         else
@@ -191,8 +203,7 @@ class _AppShellState extends State<AppShell> {
 
   void initState() {
     super.initState();
-    storeService =
-        StoreService(userId: widget.appState.authService.getCurrentUser().uid);
+    storeService = StoreService(userId: widget.appState.getCurrentUser().uid);
     _routerDelegate = InnerRouterDelegate(widget.appState);
   }
 
@@ -226,8 +237,8 @@ class _AppShellState extends State<AppShell> {
           title: Text('Club Management App'),
           actions: [
             Padding(
-              padding: EdgeInsets.all(8),
-              child: Icon(Icons.people),
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(Icons.person),
             )
           ],
         ),
