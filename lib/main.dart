@@ -50,7 +50,7 @@ class MyApp extends HookWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  MyAppState() : _selectedIndex = 0;
+  MyAppState() : _selectedIndex = 1;
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {

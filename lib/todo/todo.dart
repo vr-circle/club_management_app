@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_application_1/todo/task.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'task_list.dart';
 import 'todo_add.dart';
@@ -146,8 +145,6 @@ class TodoPrivatePage extends StatefulWidget {
 class _TodoPrivatePageState extends State<TodoPrivatePage> {
   Future<TaskList> _taskListFuture;
   TaskList _taskList = TaskList([]);
-  bool isDoneExpanded = false;
-  bool isnotDoneExpanded = false;
 
   Future<TaskList> getTaskData() async {
     final List<Task> res = await storeService.getPrivateTaskList();
@@ -167,7 +164,7 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
     });
   }
 
-  void deleteTask(Task task) {
+  void _deleteTask(Task task) {
     setState(() {
       _taskList.deleteTask(task);
     });
@@ -185,7 +182,7 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
                 onPressed: () async {
                   // delete task by id
                   await storeService.deleteTask(task, true);
-                  deleteTask(task);
+                  _deleteTask(task);
                   Navigator.pop(context);
                 },
               ),
@@ -198,7 +195,7 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
         });
   }
 
-  ExpansionPanel _createPanel(TaskList taskList, String name) {
+  ExpansionPanel _createPanel(TaskListItem taskListItem) {
     return ExpansionPanel(
       headerBuilder: (BuildContext context, bool isExpanded) {
         return Container(
@@ -207,27 +204,36 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
             Padding(
                 padding: EdgeInsets.only(right: 10.0), child: Icon(Icons.task)),
             Text(
-              name,
+              taskListItem.name,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             )
           ],
         ));
       },
-      body: ListView.builder(
+      body:
+          // TaskTile(
+          //   taskTitle: 'aaa',
+          //   isChecked: false,
+          //   longPressCallback: () {},
+          //   checkboxCallback: (bool value) {},
+          // ),
+          ListView.builder(
         itemBuilder: (BuildContext context, int index) {
-          final task = taskList.taskList[index];
+          final task = taskListItem.taskList.taskList[index];
           return TaskTile(
             taskTitle: task.title,
             isChecked: task.isDone,
-            checkboxCallback: (bool value) {},
+            checkboxCallback: (bool value) {
+              taskListItem.taskList.toggleDone(task.id);
+            },
             longPressCallback: () {
               _showDialog(task);
             },
           );
         },
-        itemCount: taskList.taskList.length,
+        itemCount: taskListItem.taskList.taskList.length,
       ),
-      isExpanded: false,
+      isExpanded: taskListItem.isExpanded,
     );
   }
 
@@ -240,21 +246,39 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
             if (snapshot.connectionState != ConnectionState.done) {
               return Center(child: CircularProgressIndicator());
             }
+            TaskList isNotDoneList = TaskList(_taskList.taskList
+                .where((element) => element.isDone == false)
+                .toList());
+            print(isNotDoneList.taskList);
+            TaskList isDoneList = TaskList(
+                _taskList.taskList.where((element) => element.isDone).toList());
+            print(isDoneList.taskList);
             return Container(
-                child: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                final task = _taskList.taskList[index];
-                return TaskTile(
-                  taskTitle: task.title,
-                  isChecked: task.isDone,
-                  checkboxCallback: (bool value) {},
-                  longPressCallback: () {
-                    _showDialog(task);
-                  },
+                padding: EdgeInsets.all(8),
+                child: ListView(
+                  children: [
+                    ExpansionPanelList(
+                      expansionCallback: (int index, bool isExpanded) {
+                        setState(() {});
+                      },
+                      children: [],
+                    )
+                  ],
+                )
+                //   child: ListView.builder(
+                // itemBuilder: (BuildContext context, int index) {
+                //   final task = _taskList.taskList[index];
+                //   return TaskTile(
+                //     taskTitle: task.title,
+                //     isChecked: task.isDone,
+                //     checkboxCallback: (bool value) {},
+                //     longPressCallback: () {
+                //       _showDialog(task);
+                //     },
+                //   );
+                // },
+                // itemCount: _taskList.taskList.length,
                 );
-              },
-              itemCount: _taskList.taskList.length,
-            ));
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -266,4 +290,11 @@ class _TodoPrivatePageState extends State<TodoPrivatePage> {
       ),
     );
   }
+}
+
+class TaskListItem {
+  bool isExpanded;
+  String name;
+  TaskList taskList;
+  TaskListItem(this.isExpanded, this.name, this.taskList);
 }
