@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -62,13 +63,16 @@ class SettingsPage extends HookWidget {
           return ListTile(
             leading: Icon(Icons.dark_mode),
             title: Text('ダークテーマ'),
-            onTap: () {
+            onTap: () async {
               watch(darkModeProvider.notifier).changeSwitch(!isDarkMode);
+              await storeService.setUserTheme(!isDarkMode ? 'dark' : 'normal');
             },
             trailing: Switch(
               value: isDarkMode,
-              onChanged: (value) {
+              onChanged: (value) async {
                 watch(darkModeProvider.notifier).changeSwitch(value);
+                await storeService
+                    .setUserTheme(!isDarkMode ? 'dark' : 'normal');
               },
             ),
           );

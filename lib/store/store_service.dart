@@ -12,6 +12,26 @@ class StoreService {
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
 
+  Future<String> getUserTheme() async {
+    final data = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('settings')
+        .doc('settings')
+        .get();
+    print(data['theme']);
+    return data['theme'];
+  }
+
+  Future<void> setUserTheme(String theme) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('settings')
+        .doc('settings')
+        .update({'theme': theme});
+  }
+
   Future<List<Task>> getTaskList(String target) async {
     final clubTaskList = (await FirebaseFirestore.instance
             .collection('users')

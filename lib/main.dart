@@ -202,9 +202,9 @@ class _AppShellState extends State<AppShell> {
   ChildBackButtonDispatcher _backButtonDispatcher;
 
   void initState() {
-    super.initState();
     storeService = StoreService(userId: widget.appState.getCurrentUser().uid);
     _routerDelegate = InnerRouterDelegate(widget.appState);
+    super.initState();
   }
 
   @override
@@ -227,8 +227,6 @@ class _AppShellState extends State<AppShell> {
     var appState = widget.appState;
     final Size size = MediaQuery.of(context).size;
 
-    // Claim priority, If there are parallel sub router, you will need
-    // to pick which one should take priority;
     _backButtonDispatcher.takePriority();
 
     if (size.width > 500) {
