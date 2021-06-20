@@ -3,8 +3,6 @@ import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:intl/intl.dart';
 
-// todo: isPrivate -> targetClub or something
-
 StoreService storeService;
 
 class StoreService {
@@ -13,16 +11,6 @@ class StoreService {
   Map<String, dynamic> privateJsonData;
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
-  Future<void> getUserData() async {
-    this.privateJsonData =
-        (await FirebaseFirestore.instance.collection('users').doc(userId).get())
-            .data();
-    this.clubJsonData = (await FirebaseFirestore.instance
-            .collection('users')
-            .doc('circle')
-            .get())
-        .data();
-  }
 
   Future<List<Task>> getTaskList(String target) async {
     final clubTaskList = (await FirebaseFirestore.instance
@@ -78,7 +66,7 @@ class StoreService {
               details: e['details'],
               start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
               end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-              createdBy: 'user'));
+              createdBy: 'private'));
         });
         Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
         res.addAll(tmp);
@@ -147,7 +135,7 @@ class StoreService {
     print(schedule.details);
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(schedule.createdBy == 'user' ? userId : schedule.createdBy)
+        .doc(schedule.createdBy == 'private' ? userId : schedule.createdBy)
         .collection('schedule')
         .doc('schedule')
         .update({

@@ -36,12 +36,12 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
   }
 
   Schedule newSchedule = new Schedule(
-    title: '',
-    place: '',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: '',
-  );
+      title: '',
+      place: '',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      details: '',
+      createdBy: 'private');
 
   Future<DateTime> _selectTime(BuildContext context) async {
     TimeOfDay newSelectedTime = await showTimePicker(
@@ -164,6 +164,18 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                             format.parseStrict(startTextFiledController.text);
                         newSchedule.end =
                             format.parseStrict(endTextFiledController.text);
+                        if (newSchedule.title.isEmpty) {
+                          print('タイトルは必須');
+                          Navigator.of(context).pop();
+                          return;
+                        }
+                        if (newSchedule.place.isEmpty) {
+                          newSchedule.place = '(Empty)';
+                        }
+                        if (newSchedule.details.isEmpty) {
+                          newSchedule.details = '(Empty)';
+                        }
+                        newSchedule.createdBy = _selectedTargetUsers;
                         widget.addSchedule(
                             this.newSchedule, this._selectedTargetUsers);
                         Navigator.of(context).pop();
