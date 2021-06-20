@@ -53,7 +53,8 @@ class StoreService {
     });
   }
 
-  Future<Map<DateTime, List<Schedule>>> getSchedule() async {
+  Future<Map<DateTime, List<Schedule>>> getSchedule(
+      List<String> targets) async {
     final _format = DateFormat("yyyy-MM-dd");
     // private
     final _scheduleList = (await FirebaseFirestore.instance
@@ -72,12 +73,12 @@ class StoreService {
         List<Schedule> ttmp = [];
         value.forEach((e) {
           ttmp.add(Schedule(
-            title: e['title'],
-            place: e['place'],
-            details: e['details'],
-            start: e['start'].toDate(),
-            end: e['end'].toDate(),
-          ));
+              title: e['title'],
+              place: e['place'],
+              details: e['details'],
+              start: e['start'].toDate(),
+              end: e['end'].toDate(),
+              createdBy: 'user'));
         });
         Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
         res.addAll(tmp);
@@ -85,43 +86,44 @@ class StoreService {
         print(e);
       }
     });
-    final _clubScheduleList = (await FirebaseFirestore.instance
-            .collection('users')
-            .doc('circle')
-            .collection('schedule')
-            .doc('schedule')
-            .get())
-        .data();
-    Map<DateTime, List<Schedule>> clubRes = {};
-    _clubScheduleList.forEach((key, value) {
-      var targetDateString;
-      try {
-        targetDateString = _format.parseStrict(key);
-        List<Schedule> ttmp = [];
-        value.forEach((e) {
-          ttmp.add(Schedule(
-            title: e['title'],
-            place: e['place'],
-            details: e['details'],
-            start: e['start'].toDate(),
-            end: e['end'].toDate(),
-          ));
-        });
-        Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
-        clubRes.addAll(tmp);
-      } catch (e) {
-        print(e);
-      }
+    targets.forEach((target) async {
+      final _clubScheduleList = (await FirebaseFirestore.instance
+              .collection('users')
+              .doc(target)
+              .collection('schedule')
+              .doc('schedule')
+              .get())
+          .data();
+      Map<DateTime, List<Schedule>> clubRes = {};
+      _clubScheduleList.forEach((key, value) {
+        var targetDateString;
+        try {
+          targetDateString = _format.parseStrict(key);
+          List<Schedule> ttmp = [];
+          value.forEach((e) {
+            ttmp.add(Schedule(
+                title: e['title'],
+                place: e['place'],
+                details: e['details'],
+                start: e['start'].toDate(),
+                end: e['end'].toDate(),
+                createdBy: target));
+          });
+          Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
+          clubRes.addAll(tmp);
+        } catch (e) {
+          print(e);
+        }
+      });
+      res.addAll(clubRes);
     });
-    res.addAll(clubRes);
     return res;
   }
 
-  Future<void> addSchedule(Schedule schedule, bool isPrivate) async {
-    print('add schedule is strating in store_service');
+  Future<void> addSchedule(Schedule schedule, String target) async {
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(isPrivate ? userId : 'circle')
+        .doc(target == 'private' ? userId : target)
         .collection('schedule')
         .doc('schedule')
         .set({
@@ -137,10 +139,10 @@ class StoreService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> deleteSchedule(Schedule schedule, bool isPrivate) async {
+  Future<void> deleteSchedule(Schedule schedule) async {
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(isPrivate ? userId : 'circle')
+        .doc(schedule.createdBy)
         .collection('schedule')
         .doc('schedule')
         .update({

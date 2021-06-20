@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
+import 'schedule_add.dart';
+import 'schedule_details.dart';
 
 class SchedulePage extends StatefulWidget {
   SchedulePage({Key key}) : super(key: key);
@@ -20,7 +22,8 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
 
   Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
-    final res = await storeService.getSchedule();
+    final res =
+        await storeService.getSchedule(['circle']); // todo: circle -> name
     _schedules = LinkedHashMap(equals: isSameDay, hashCode: getHashCode)
       ..addAll(res);
     return _schedules;
@@ -36,7 +39,8 @@ class _SchedulePageState extends State<SchedulePage> {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
-  void addSchedule(Schedule schedule) {
+  Future<void> addSchedule(Schedule schedule, String target) async {
+    await storeService.addSchedule(schedule, target);
     setState(() {
       if (_schedules.containsKey(schedule.start) == false)
         _schedules[schedule.start] = [];
@@ -44,7 +48,8 @@ class _SchedulePageState extends State<SchedulePage> {
     });
   }
 
-  void deleteSchedule(Schedule targetSchedule) {
+  Future<void> deleteSchedule(Schedule targetSchedule) async {
+    await storeService.deleteSchedule(targetSchedule);
     setState(() {
       _schedules[targetSchedule.start] = _schedules[targetSchedule.start]
           .where((schedule) => schedule.title != targetSchedule.title)
@@ -141,8 +146,8 @@ class ScheduleListOnDay extends StatefulWidget {
       @required this.schedules,
       this.targetDate})
       : super(key: key);
-  final void Function(Schedule schedule) addSchedule;
-  final void Function(Schedule schedule) deleteSchedule;
+  final Future<void> Function(Schedule schedule, String target) addSchedule;
+  final Future<void> Function(Schedule schedule) deleteSchedule;
   List<Schedule> schedules;
   DateTime targetDate;
   @override
@@ -150,9 +155,9 @@ class ScheduleListOnDay extends StatefulWidget {
 }
 
 class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
-  void addScheduleInListView(Schedule schedule) {
+  Future<void> addScheduleInListView(Schedule schedule, String target) async {
+    await widget.addSchedule(schedule, target);
     setState(() {
-      widget.addSchedule(schedule);
       widget.schedules.add(schedule);
     });
   }
@@ -193,329 +198,5 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
             }));
           },
         ));
-  }
-}
-
-class ScheduleDetails extends StatelessWidget {
-  ScheduleDetails({@required this.schedule, @required this.deleteSchedule});
-  final void Function(Schedule schedule) deleteSchedule;
-  final Schedule schedule;
-  final _format = new DateFormat('yyyy/MM/dd(E) hh:mm', 'ja_JP');
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(schedule.title),
-        ),
-        body: Column(children: [
-          Expanded(
-              child: Container(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Text('開始時刻'),
-                  title: Text(_format.format(schedule.start)),
-                ),
-                ListTile(
-                  leading: Text('終了時刻'),
-                  title: Text(_format.format(schedule.end)),
-                ),
-                ListTile(
-                  leading: Text('場所'),
-                  title: Text(schedule.place),
-                ),
-                ListTile(
-                  leading: Text('内容'),
-                  title: Text(schedule.details),
-                ),
-              ],
-            ),
-          )),
-        ]),
-        floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton(
-              child: Icon(Icons.edit),
-              onPressed: () {
-                // edit schedule
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return ScheduleEditPage(schedule);
-                }));
-              },
-            ),
-            SizedBox(
-              height: 16,
-            ),
-            FloatingActionButton(
-              onPressed: () {
-                deleteSchedule(schedule);
-                Navigator.pop(context);
-              },
-              child: Icon(Icons.delete),
-              backgroundColor: Colors.red,
-            )
-          ],
-        ));
-  }
-}
-
-class ScheduleAddPage extends StatefulWidget {
-  ScheduleAddPage(
-      {Key key, this.addSchedule, this.targetDate, DateTime initSchedule})
-      : super(key: key);
-  final void Function(Schedule schedule) addSchedule;
-  final DateTime targetDate;
-  @override
-  _ScheduleAddPageState createState() => _ScheduleAddPageState();
-}
-
-class _ScheduleAddPageState extends State<ScheduleAddPage> {
-  final _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
-
-  TextEditingController startTextFiledController;
-  TextEditingController endTextFiledController;
-  List<String> targetUsers;
-  String _selectedTargetUsers;
-
-  @override
-  void initState() {
-    super.initState();
-    this.startTextFiledController = new TextEditingController(
-        text: DateFormat('yyyy/MM/dd HH:mm').format(widget.targetDate));
-    this.endTextFiledController = new TextEditingController(
-        text: DateFormat('yyyy/MM/dd HH:mm')
-            .format(widget.targetDate.add(Duration(days: 1))));
-    this.targetUsers = [
-      'Private',
-      'Club'
-    ]; // todo: generate list from user setting
-    this._selectedTargetUsers = 'Private';
-  }
-
-  Schedule newSchedule = new Schedule(
-    title: '',
-    place: '',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: '',
-  );
-
-  Future<DateTime> _selectTime(BuildContext context) async {
-    TimeOfDay newSelectedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (newSelectedTime != null) {
-      DateTime newDate = DateTime(
-        widget.targetDate.year,
-        widget.targetDate.month,
-        widget.targetDate.day,
-        newSelectedTime.hour,
-        newSelectedTime.minute,
-      );
-      return newDate;
-    } else {
-      return widget.targetDate;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_format.format(widget.targetDate)),
-      ),
-      body: Padding(
-          padding: EdgeInsets.all(32),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('対象'),
-                    DropdownButton(
-                      value: _selectedTargetUsers,
-                      items: this
-                          .targetUsers
-                          .map((e) => DropdownMenuItem(
-                                child: Text(e),
-                                value: e,
-                              ))
-                          .toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          this._selectedTargetUsers = newValue;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.title), labelText: 'タイトル'),
-                  onChanged: (value) {
-                    this.newSchedule.title = value;
-                  },
-                ),
-                TextField(
-                  decoration:
-                      InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
-                  onChanged: (value) {
-                    this.newSchedule.place = value;
-                  },
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '開始時刻'),
-                  onTap: () async {
-                    var newDate = await _selectTime(context);
-                    startTextFiledController.text =
-                        DateFormat('yyyy/MM/dd HH:mm').format(newDate);
-                    this.newSchedule.start = newDate;
-                  },
-                  controller: this.startTextFiledController,
-                  enableInteractiveSelection: false,
-                  focusNode: FocusNode(),
-                  readOnly: true,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '終了時刻'),
-                  onTap: () async {
-                    var newDate = await _selectTime(context);
-                    endTextFiledController.text =
-                        DateFormat('yyyy/MM/dd HH:mm').format(newDate);
-                    this.newSchedule.end = newDate;
-                  },
-                  controller: this.endTextFiledController,
-                  enableInteractiveSelection: false,
-                  focusNode: FocusNode(),
-                  readOnly: true,
-                ),
-                TextField(
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.content_copy),
-                    labelText: '内容',
-                  ),
-                  onChanged: (value) {
-                    this.newSchedule.details = value;
-                  },
-                ),
-              ],
-            ),
-          )),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-                height: 50,
-                child: Center(
-                  child: TextButton(
-                      onPressed: () async {
-                        final format = DateFormat('yyyy/MM/dd HH:mm');
-                        newSchedule.start =
-                            format.parseStrict(startTextFiledController.text);
-                        newSchedule.end =
-                            format.parseStrict(endTextFiledController.text);
-                        await storeService.addSchedule(this.newSchedule,
-                            this._selectedTargetUsers == 'Private');
-                        widget.addSchedule(this.newSchedule);
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("追加")),
-                )),
-            SizedBox(
-                height: 50,
-                child: Center(
-                  child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("キャンセル")),
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ScheduleEditPage extends StatelessWidget {
-  ScheduleEditPage(this._targetSchedule);
-  final Schedule _targetSchedule;
-  TextEditingController _endTimeTextEditingController;
-  TextEditingController _startTimeTextEditingController;
-  String newTitle = '';
-  String newPlace = '';
-  String newDetails = '';
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(_targetSchedule.title),
-        ),
-        body: Padding(
-            padding: EdgeInsets.all(32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.title), labelText: 'タイトル'),
-                  onChanged: (value) {
-                    newTitle = value;
-                  },
-                ),
-                TextField(
-                  decoration:
-                      InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
-                  onChanged: (value) {
-                    newPlace = value;
-                  },
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '開始時刻'),
-                  onTap: () async {
-                    // var newDate = await _selectTime(context);
-                    // endTextFiledController.text =
-                    //     DateFormat('yyyy/MM/dd HH:mm').format(newDate);
-                    // this.newSchedule.end = newDate;
-                  },
-                  controller: this._startTimeTextEditingController,
-                  enableInteractiveSelection: false,
-                  focusNode: FocusNode(),
-                  readOnly: true,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '終了時刻'),
-                  onTap: () async {
-                    // var newDate = await _selectTime(context);
-                    // endTextFiledController.text =
-                    //     DateFormat('yyyy/MM/dd HH:mm').format(newDate);
-                    // this.newSchedule.end = newDate;
-                  },
-                  controller: this._endTimeTextEditingController,
-                  enableInteractiveSelection: false,
-                  focusNode: FocusNode(),
-                  readOnly: true,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.content_copy), labelText: '内容'),
-                  onChanged: (value) {
-                    newDetails = value;
-                  },
-                ),
-              ],
-            )));
   }
 }
