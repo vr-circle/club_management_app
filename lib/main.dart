@@ -2,6 +2,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
+import 'package:flutter_application_1/schedule/schedule.dart';
+import 'package:flutter_application_1/search/search.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -50,11 +52,37 @@ class MyApp extends HookWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  MyAppState() : _selectedIndex = 0;
+  MyAppState()
+      : _selectedIndex = 0,
+        _selectedDay = null,
+        _selectedSchedule = null,
+        _selectedTabInTodo = 0;
   int _selectedIndex;
+  DateTime _selectedDay;
+  Schedule _selectedSchedule;
+  int _selectedTabInTodo;
+
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {
     _selectedIndex = idx;
+    notifyListeners();
+  }
+
+  DateTime get selectedDay => _selectedDay;
+  set selectedDay(DateTime day) {
+    _selectedDay = day;
+    notifyListeners();
+  }
+
+  Schedule get selectedSchedule => _selectedSchedule;
+  set selectedSchedule(Schedule schedule) {
+    _selectedSchedule = schedule;
+    notifyListeners();
+  }
+
+  int get selectedTabInTodo => _selectedTabInTodo;
+  set selectedTabInTodo(int idx) {
+    _selectedTabInTodo = idx;
     notifyListeners();
   }
 
@@ -85,7 +113,14 @@ class LoginPath extends RoutePath {}
 
 class SchedulePath extends RoutePath {}
 
+class ScheduleDetailPath extends RoutePath {
+  final String id;
+  ScheduleDetailPath(this.id);
+}
+
 class TodoPath extends RoutePath {}
+
+class SearchPath extends RoutePath {}
 
 class SettingsPath extends RoutePath {}
 
@@ -105,6 +140,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       if (uri.pathSegments.first == 'todo') {
         return TodoPath();
       }
+      if (uri.pathSegments.first == 'search') {
+        return SearchPath();
+      }
       if (uri.pathSegments.first == 'settings') {
         return SettingsPath();
       }
@@ -122,6 +160,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     }
     if (path is TodoPath) {
       return RouteInformation(location: '/todo');
+    }
+    if (path is SearchPath) {
+      return RouteInformation(location: '/search');
     }
     if (path is SettingsPath) {
       return RouteInformation(location: '/settings');
@@ -145,9 +186,17 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     }
 
     if (appState.selectedIndex == 0) {
+      if (appState.selectedSchedule != null) {
+        return ScheduleDetailPath(appState.selectedSchedule.id);
+      }
+      if (appState.selectedDay != null) {
+        return ScheduleListViewPath();
+      }
       return SchedulePath();
     } else if (appState.selectedIndex == 1) {
       return TodoPath();
+    } else if (appState.selectedIndex == 2) {
+      return SearchPath();
     } else {
       return SettingsPath(); // UnknownPath?
     }
@@ -180,8 +229,10 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedIndex = 0;
     } else if (path is TodoPath) {
       appState.selectedIndex = 1;
-    } else if (path is SettingsPath) {
+    } else if (path is SearchPath) {
       appState.selectedIndex = 2;
+    } else if (path is SettingsPath) {
+      appState.selectedIndex = 3;
     }
   }
 }
@@ -265,10 +316,18 @@ class _AppShellState extends State<AppShell> {
                 },
               ),
               ListTile(
+                leading: Icon(Icons.search),
+                title: Text('Search'),
+                onTap: () {
+                  appState.selectedIndex = 2;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
                 leading: Icon(Icons.settings),
                 title: Text('Settings'),
                 onTap: () {
-                  appState.selectedIndex = 2;
+                  appState.selectedIndex = 3;
                   Navigator.pop(context);
                 },
               ),
@@ -299,6 +358,7 @@ class _AppShellState extends State<AppShell> {
               icon: Icon(Icons.schedule), label: 'Schedule'),
           BottomNavigationBarItem(
               icon: Icon(Icons.task_rounded), label: 'ToDo'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
         ],
@@ -336,6 +396,8 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
               child: SchedulePage(), key: ValueKey('SchedulePage'))
         else if (appState.selectedIndex == 1)
           FadeAnimationPage(child: TodoPage(), key: ValueKey('TodoPage'))
+        else if (appState.selectedIndex == 2)
+          FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage'))
         else
           FadeAnimationPage(
             child: SettingsPage(appState),
