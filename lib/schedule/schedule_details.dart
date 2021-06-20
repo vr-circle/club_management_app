@@ -58,8 +58,8 @@ class ScheduleDetails extends StatelessWidget {
               height: 16,
             ),
             FloatingActionButton(
-              onPressed: () {
-                deleteSchedule(schedule);
+              onPressed: () async {
+                await deleteSchedule(schedule);
                 Navigator.pop(context);
               },
               child: Icon(Icons.delete),

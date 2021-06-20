@@ -66,7 +66,7 @@ class StoreService {
         .data();
     Map<DateTime, List<Schedule>> res = {};
     _scheduleList.forEach((key, value) {
-      var targetDateString;
+      DateTime targetDateString;
       try {
         targetDateString = _format.parseStrict(key);
         // Why couldn't use map() in 'value'.
@@ -76,8 +76,8 @@ class StoreService {
               title: e['title'],
               place: e['place'],
               details: e['details'],
-              start: e['start'].toDate(),
-              end: e['end'].toDate(),
+              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
               createdBy: 'user'));
         });
         Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
@@ -105,8 +105,8 @@ class StoreService {
                 title: e['title'],
                 place: e['place'],
                 details: e['details'],
-                start: e['start'].toDate(),
-                end: e['end'].toDate(),
+                start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+                end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
                 createdBy: target));
           });
           Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
@@ -131,8 +131,8 @@ class StoreService {
         {
           'title': schedule.title,
           'place': schedule.place,
-          'start': Timestamp.fromDate(schedule.start),
-          'end': Timestamp.fromDate(schedule.end),
+          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
+          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
           'details': schedule.details,
         }
       ])
@@ -140,14 +140,29 @@ class StoreService {
   }
 
   Future<void> deleteSchedule(Schedule schedule) async {
+    print(schedule.title);
+    print(schedule.place);
+    print(DateFormat('yyyy-MM-dd HH:mm').format(schedule.start));
+    print(DateFormat('yyyy-MM-dd HH:mm').format(schedule.end));
+    print(schedule.details);
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(schedule.createdBy)
+        .doc(schedule.createdBy == 'user' ? userId : schedule.createdBy)
         .collection('schedule')
         .doc('schedule')
         .update({
-      DateFormat('yyyy-MM-dd').format(schedule.start):
-          FieldValue.arrayRemove([schedule.title])
-    });
+          DateFormat('yyyy-MM-dd').format(schedule.start):
+              FieldValue.arrayRemove([
+            {
+              'details': schedule.details,
+              'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
+              'place': schedule.place,
+              'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
+              'title': schedule.title,
+            }
+          ])
+        })
+        .then((value) => print('deleted!'))
+        .catchError((error) => {print(error)});
   }
 }

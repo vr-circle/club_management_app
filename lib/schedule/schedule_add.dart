@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'schedule.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 import 'package:intl/intl.dart';
 
 class ScheduleAddPage extends StatefulWidget {
@@ -169,7 +168,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                             this.newSchedule, this._selectedTargetUsers);
                         Navigator.of(context).pop();
                       },
-                      child: const Text("追加")),
+                      child: const Text('追加')),
                 )),
             SizedBox(
                 height: 50,
