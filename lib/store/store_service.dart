@@ -151,18 +151,15 @@ class StoreService {
         .collection('schedule')
         .doc('schedule')
         .update({
-          DateFormat('yyyy-MM-dd').format(schedule.start):
-              FieldValue.arrayRemove([
-            {
-              'details': schedule.details,
-              'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
-              'place': schedule.place,
-              'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
-              'title': schedule.title,
-            }
-          ])
-        })
-        .then((value) => print('deleted!'))
-        .catchError((error) => {print(error)});
+      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayRemove([
+        {
+          'details': schedule.details,
+          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
+          'place': schedule.place,
+          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
+          'title': schedule.title,
+        }
+      ])
+    });
   }
 }
