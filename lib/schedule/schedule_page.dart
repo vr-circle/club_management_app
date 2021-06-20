@@ -82,6 +82,17 @@ class _SchedulePageState extends State<SchedulePage> {
               }
               return Column(children: [
                 TableCalendar(
+                  // // if you wanna change colors in calendar markers
+                  // calendarBuilders: CalendarBuilders(singleMarkerBuilder:
+                  //     (BuildContext context, DateTime data, Schedule event) {
+                  //   Color color = event.createdBy == 'private'
+                  //       ? Colors.blue
+                  //       : Colors.red;
+                  //   return Container(
+                  //     decoration:
+                  //         BoxDecoration(shape: BoxShape.circle, color: color),
+                  //   );
+                  // }),
                   locale: 'en_US',
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
