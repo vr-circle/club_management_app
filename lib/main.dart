@@ -109,7 +109,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return SettingsPath();
       }
     }
-    // return HomePath();
     return null;
   }
 

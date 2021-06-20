@@ -24,39 +24,30 @@ class StoreService {
         .data();
   }
 
-  Future<List<Task>> getClubTaskList() async {
+  Future<List<Task>> getTaskList(String target) async {
     final clubTaskList = (await FirebaseFirestore.instance
             .collection('users')
-            .doc('circle')
+            .doc(target == 'private' ? userId : target)
             .get())
         .data()['todo'];
-    List<String> castedClubTaskList = clubTaskList.cast<String>();
-    var result = castedClubTaskList.map((e) => Task(title: e)).toList();
-    return result;
-  }
-
-  Future<List<Task>> getPrivateTaskList() async {
-    final clubTaskList =
-        (await FirebaseFirestore.instance.collection('users').doc(userId).get())
-            .data()['todo'];
     List<String> castedPrivateTaskList = clubTaskList.cast<String>();
     var result = castedPrivateTaskList.map((e) => Task(title: e)).toList();
     return result;
   }
 
-  Future<void> addTask(Task task, bool isPrivate) async {
+  Future<void> addTask(Task task, String target) async {
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(isPrivate ? userId : 'circle')
+        .doc(target == 'private' ? userId : 'circle')
         .update({
       'todo': FieldValue.arrayUnion([task.title])
     });
   }
 
-  Future<void> deleteTask(Task task, bool isPrivate) async {
+  Future<void> deleteTask(Task task, String target) async {
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(isPrivate ? userId : 'circle')
+        .doc(target == 'private' ? userId : 'circle')
         .update({
       'todo': FieldValue.arrayRemove([task.title])
     });

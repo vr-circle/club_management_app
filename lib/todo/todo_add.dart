@@ -4,9 +4,9 @@ import 'package:flutter_application_1/todo/task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ToDoAddPage extends StatelessWidget {
-  ToDoAddPage(this.isPrivate, this.addTask);
-  final Function(String title) addTask;
-  final bool isPrivate;
+  ToDoAddPage(this.target, this.addTask);
+  final Future<void> Function(Task task) addTask;
+  final String target;
   @override
   Widget build(BuildContext context) {
     String _newTaskTitle = '';
@@ -29,9 +29,7 @@ class ToDoAddPage extends StatelessWidget {
                       if (_newTaskTitle.isEmpty) {
                         return;
                       }
-                      addTask(_newTaskTitle);
-                      storeService.addTask(
-                          Task(title: _newTaskTitle), isPrivate);
+                      addTask(Task(title: _newTaskTitle));
                       Navigator.of(context).pop();
                     },
                   );
@@ -45,15 +43,16 @@ class ToDoAddPage extends StatelessWidget {
                   children: <Widget>[
                     Consumer(builder: (context, watch, child) {
                       return TextButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_newTaskTitle.isEmpty) {
                               return;
                             }
-                            addTask(_newTaskTitle);
-                            storeService.addTask(
-                                Task(title: _newTaskTitle), isPrivate);
+                            addTask(Task(title: _newTaskTitle));
+                            await storeService.addTask(
+                                Task(title: _newTaskTitle), target);
+                            Navigator.pop(context);
                           },
-                          child: Text('Add'));
+                          child: Text('追加'));
                     }),
                     TextButton(
                         onPressed: () {
