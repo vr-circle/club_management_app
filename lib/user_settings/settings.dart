@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -24,8 +23,8 @@ class ExpandedState extends StateNotifier<bool> {
 
 class SettingsPage extends HookWidget {
   SettingsPage({this.signOut, this.handleOpenUserSettings});
-  Future<void> Function() signOut;
-  void Function() handleOpenUserSettings;
+  final Future<void> Function() signOut;
+  final void Function() handleOpenUserSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -88,34 +87,5 @@ class SettingsPage extends HookWidget {
         ),
       ]),
     ));
-  }
-}
-
-class UserAccountView extends HookWidget {
-  UserAccountView({this.user});
-  User user;
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('アカウント情報'),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            ListTile(
-              title: Text('名前'),
-              trailing: Text(user.displayName == null
-                  ? '(表示名は設定されていません)'
-                  : user.displayName),
-            ),
-            ListTile(
-              title: Text('Email'),
-              trailing: Text(user.email),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

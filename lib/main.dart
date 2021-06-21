@@ -7,6 +7,7 @@ import 'package:flutter_application_1/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/search/search.dart';
 import 'package:flutter_application_1/store/store_service.dart';
+import 'package:flutter_application_1/user_settings/user_account_view.dart';
 import 'package:flutter_application_1/user_settings/user_settings.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
