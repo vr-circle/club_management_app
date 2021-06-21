@@ -9,8 +9,18 @@ class ScheduleCollection {
     this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
   }
   LinkedHashMap<DateTime, List<Schedule>> _schedules;
+  LinkedHashMap<DateTime, List<Schedule>> get schedules => _schedules;
   int _getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
+  }
+
+  void initScheduleCollection(Map<DateTime, List<Schedule>> collection) {
+    this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
+      ..addAll(collection);
+  }
+
+  List<Schedule> getScheduleList(DateTime day) {
+    return this._schedules[day];
   }
 
   Future<void> addSchedule(Schedule schedule, target) async {

@@ -7,11 +7,13 @@ import 'schedule_add.dart';
 class ScheduleListOnDay extends StatefulWidget {
   ScheduleListOnDay(
       {Key key,
+      @required this.handleOpenScheduleDetails,
       @required this.addSchedule,
       @required this.deleteSchedule,
       @required this.schedules,
-      this.targetDate})
+      @required this.targetDate})
       : super(key: key);
+  final void Function(Schedule schedule) handleOpenScheduleDetails;
   final Future<void> Function(Schedule schedule, String target) addSchedule;
   final Future<void> Function(Schedule schedule) deleteSchedule;
   final DateTime targetDate;
@@ -23,9 +25,9 @@ class ScheduleListOnDay extends StatefulWidget {
 class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
   Future<void> addScheduleInListView(Schedule schedule, String target) async {
     await widget.addSchedule(schedule, target);
-    setState(() {
-      widget.schedules.add(schedule);
-    });
+    // setState(() {
+    //   widget.schedules.add(schedule);
+    // });
   }
 
   Future<void> deleteScheduleInListView(Schedule schedule) async {
@@ -44,7 +46,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
         appBar: AppBar(
           title: Text(_format.format(widget.targetDate)),
         ),
-        body: widget.schedules.isEmpty
+        body: widget.schedules == null || widget.schedules.isEmpty
             ? Center(child: Text('予定はありません'))
             : ListView(
                 children: [
@@ -53,12 +55,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
                               child: ListTile(
                             title: Text(e.title),
                             onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => ScheduleDetails(
-                                        schedule: e,
-                                        deleteSchedule:
-                                            deleteScheduleInListView,
-                                      )));
+                              widget.handleOpenScheduleDetails(e);
                             },
                           )))
                       .toList()

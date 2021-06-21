@@ -1,14 +1,20 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
 import 'schedule_details.dart';
-import 'schedule_list_on_day.dart';
 
 class SchedulePage extends StatefulWidget {
-  SchedulePage({Key key}) : super(key: key);
+  SchedulePage(
+      {Key key,
+      @required this.handleOpenList,
+      @required this.scheduleCollection})
+      : super(key: key);
+  final void Function(DateTime day) handleOpenList;
+  final ScheduleCollection scheduleCollection;
   @override
   _SchedulePageState createState() => _SchedulePageState();
 }
@@ -17,15 +23,13 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime _focusDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
-  LinkedHashMap<DateTime, List<Schedule>> _schedules = LinkedHashMap();
   Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
 
   Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
-    final res =
+    final Map<DateTime, List<Schedule>> res =
         await storeService.getSchedule(['circle']); // todo: circle -> name
-    _schedules = LinkedHashMap(equals: isSameDay, hashCode: getHashCode)
-      ..addAll(res);
-    return _schedules;
+    widget.scheduleCollection.initScheduleCollection(res);
+    return widget.scheduleCollection.schedules;
   }
 
   @override
@@ -41,28 +45,23 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<void> addSchedule(Schedule schedule, String target) async {
     await storeService.addSchedule(schedule, target);
     setState(() {
-      if (_schedules.containsKey(schedule.start) == false) {
-        print('contain');
-        _schedules[schedule.start] = [];
+      if (widget.scheduleCollection.schedules.containsKey(schedule.start) ==
+          false) {
+        widget.scheduleCollection.schedules[schedule.start] = [];
       }
-      _schedules[schedule.start].add(schedule);
-      print('added');
+      widget.scheduleCollection.schedules[schedule.start].add(schedule);
     });
   }
 
   Future<void> deleteSchedule(Schedule targetSchedule) async {
-    await storeService.deleteSchedule(targetSchedule);
-    setState(() {
-      _schedules[targetSchedule.start] = _schedules[targetSchedule.start]
-          .where((schedule) => schedule.title != targetSchedule.title)
-          .toList();
-    });
+    widget.scheduleCollection.deleteSchedule(targetSchedule);
+    setState(() {});
   }
 
   void editSchedule(Schedule targeet) {}
 
   List<Schedule> getEventForDay(DateTime day) {
-    return _schedules[day] ?? [];
+    return widget.scheduleCollection.schedules[day] ?? [];
   }
 
   @override
@@ -111,21 +110,12 @@ class _SchedulePageState extends State<SchedulePage> {
                   eventLoader: getEventForDay,
                   onDaySelected: (selectedDay, focusedDay) {
                     if (!isSameDay(_selectedDay, selectedDay)) {
-                      // updateSelectedDay & update FocusDay
                       setState(() {
                         this._selectedDay = selectedDay;
                         this._focusDay = focusedDay;
                       });
                     } else if (isSameDay(_focusDay, selectedDay)) {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return ScheduleListOnDay(
-                          targetDate: selectedDay,
-                          schedules: getEventForDay(selectedDay),
-                          addSchedule: addSchedule,
-                          deleteSchedule: deleteSchedule,
-                        );
-                      }));
+                      widget.handleOpenList(selectedDay);
                     }
                   },
                 ),

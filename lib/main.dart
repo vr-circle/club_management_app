@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/schedule/schedule_details.dart';
 import 'package:flutter_application_1/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/search/search.dart';
 import 'package:flutter_application_1/store/store_service.dart';
@@ -99,23 +100,47 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // // ---------------- store ----------------
-  // StoreService storeService;
   // ---------------- todo ----------------
 
   // ---------------- schedule ----------------
-  ScheduleCollection schedules;
+  ScheduleCollection scheduleCollection = new ScheduleCollection();
+
+  void setSelectedDay(DateTime day) {
+    if (day == null) return;
+    selectedDay = day;
+    notifyListeners();
+  }
+
+  void setSelectedScheduleById(DateTime day, String id) {
+    final List<Schedule> targetSchedule = scheduleCollection.schedules[day]
+        .where((element) => element.id == id)
+        .toList();
+    if (targetSchedule.isEmpty) {
+      return;
+    }
+    selectedSchedule = targetSchedule.first;
+    notifyListeners();
+  }
 
   Future<void> addSchedule(Schedule schedule, String target) async {
     await storeService.addSchedule(schedule, target);
-    schedules.addSchedule(schedule, target);
+    scheduleCollection.addSchedule(schedule, target);
     notifyListeners();
   }
 
   Future<void> deleteSchedule(Schedule targetSchedule) async {
     await storeService.deleteSchedule(targetSchedule);
-    schedules.deleteSchedule(targetSchedule);
+    scheduleCollection.deleteSchedule(targetSchedule);
     notifyListeners();
+  }
+
+  Future<Map<DateTime, List<Schedule>>> getSchedule(
+      List<String> targets) async {
+    return (await storeService.getSchedule(targets));
+  }
+
+  List<Schedule> getScheduleList(DateTime day) {
+    return scheduleCollection.getScheduleList(day);
   }
 
   // ---------------- auth ----------------
@@ -193,6 +218,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           } catch (e) {
             print(e);
           }
+          return SchedulePath();
         }
         return SchedulePath();
       }
@@ -322,6 +348,10 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedIndex = 0;
       appState.selectedDay = null;
       appState.selectedSchedule = null;
+    } else if (path is ScheduleListViewPath) {
+      appState.setSelectedDay(path.day);
+    } else if (path is ScheduleDetailPath) {
+      appState.setSelectedScheduleById(path.day, path.id);
     } else if (path is TodoPath) {
       appState.selectedIndex = 1;
     } else if (path is SearchPath) {
@@ -518,10 +548,25 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
       pages: [
         if (appState.selectedIndex == 0) ...[
           FadeAnimationPage(
-              child: SchedulePage(), key: ValueKey('SchedulePage')),
-          // if(appState.selectedDay != null)
-          // MaterialPage(child: )
-          // ScheduleListOnDay(addSchedule: addSchedule, deleteSchedule: deleteSchedule, schedules: appState.selectedDay)
+              child: SchedulePage(
+                handleOpenList: _handleOpenScheduleList,
+                scheduleCollection: appState.scheduleCollection,
+              ),
+              key: ValueKey('SchedulePage')),
+          if (appState.selectedDay != null)
+            MaterialPage(
+                child: ScheduleListOnDay(
+                    handleOpenScheduleDetails: _handleOpenScheduleDetails,
+                    targetDate: appState.selectedDay,
+                    addSchedule: appState.addSchedule,
+                    deleteSchedule: appState.deleteSchedule,
+                    schedules: appState.getScheduleList(appState.selectedDay))),
+          if (appState.selectedSchedule != null)
+            MaterialPage(
+                child: ScheduleDetails(
+              schedule: appState.selectedSchedule,
+              deleteSchedule: appState.deleteSchedule,
+            )),
         ] else if (appState.selectedIndex == 1)
           FadeAnimationPage(child: TodoPage(), key: ValueKey('TodoPage'))
         else if (appState.selectedIndex == 2)
@@ -542,8 +587,27 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
         ]
       ],
       onPopPage: (route, result) {
-        if (appState.selectedIndex == 3)
-          appState.isSelectedUserSettings = false;
+        switch (appState.selectedIndex) {
+          case 0:
+            if (appState.selectedDay != null) {
+              if (appState.selectedSchedule != null) {
+                appState.selectedSchedule = null;
+              } else {
+                appState.selectedDay = null;
+              }
+            } else {
+              appState.selectedDay = null;
+              appState.selectedSchedule = null;
+            }
+            break;
+          case 1:
+            break;
+          case 2:
+            break;
+          case 3:
+            appState.isSelectedUserSettings = false;
+            break;
+        }
         notifyListeners();
         return route.didPop(result);
       },
@@ -564,6 +628,11 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
     appState.isSelectedUserSettings = true;
     notifyListeners();
   }
+
+  void _handleOpenScheduleDetails(Schedule schedule) {
+    appState.selectedSchedule = schedule;
+    notifyListeners();
+  }
 }
 
 class FadeAnimationPage extends Page {
@@ -575,7 +644,7 @@ class FadeAnimationPage extends Page {
     return PageRouteBuilder(
       settings: this,
       pageBuilder: (context, animation, animation2) {
-        var curveTween = CurveTween(curve: Curves.easeIn);
+        var curveTween = CurveTween(curve: Curves.easeInOut);
         return FadeTransition(
           opacity: animation.drive(curveTween),
           child: child,
