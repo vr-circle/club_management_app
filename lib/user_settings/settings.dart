@@ -1,5 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -23,8 +23,10 @@ class ExpandedState extends StateNotifier<bool> {
 }
 
 class SettingsPage extends HookWidget {
-  SettingsPage(this.appState);
-  final MyAppState appState;
+  SettingsPage({this.signOut, this.handleOpenUserSettings});
+  Future<void> Function() signOut;
+  void Function() handleOpenUserSettings;
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = useProvider(darkModeProvider);
@@ -38,9 +40,7 @@ class SettingsPage extends HookWidget {
           leading: Icon(Icons.account_box),
           title: Text("アカウントの管理"),
           onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return UserAccountView(appState: appState);
-            }));
+            handleOpenUserSettings();
           },
         ),
         ListTile(
@@ -50,7 +50,7 @@ class SettingsPage extends HookWidget {
             style: TextStyle(color: Colors.red),
           ),
           onTap: () async {
-            appState.signOut();
+            await signOut();
           },
         ),
         Divider(
@@ -92,8 +92,8 @@ class SettingsPage extends HookWidget {
 }
 
 class UserAccountView extends HookWidget {
-  UserAccountView({this.appState});
-  MyAppState appState;
+  UserAccountView({this.user});
+  User user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,13 +105,13 @@ class UserAccountView extends HookWidget {
           children: [
             ListTile(
               title: Text('名前'),
-              trailing: Text(appState.getCurrentUser().displayName == null
+              trailing: Text(user.displayName == null
                   ? '(表示名は設定されていません)'
-                  : appState.getCurrentUser().displayName),
+                  : user.displayName),
             ),
             ListTile(
               title: Text('Email'),
-              trailing: Text(appState.getCurrentUser().email),
+              trailing: Text(user.email),
             ),
           ],
         ),

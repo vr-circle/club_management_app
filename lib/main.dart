@@ -3,12 +3,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
+import 'package:flutter_application_1/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/search/search.dart';
 import 'package:flutter_application_1/store/store_service.dart';
+import 'package:flutter_application_1/user_settings/user_settings.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/intl.dart';
 
 import 'auth/login_page.dart';
 import 'todo/todo.dart';
@@ -56,11 +60,19 @@ class MyAppState extends ChangeNotifier {
       : _selectedIndex = 0,
         _selectedDay = null,
         _selectedSchedule = null,
-        _selectedTabInTodo = 0;
+        _selectedTabInTodo = 0,
+        _isSelectedUserSettings = false;
   int _selectedIndex;
   DateTime _selectedDay;
   Schedule _selectedSchedule;
   int _selectedTabInTodo;
+  bool _isSelectedUserSettings;
+
+  bool get isSelectedUserSettings => _isSelectedUserSettings;
+  set isSelectedUserSettings(bool value) {
+    _isSelectedUserSettings = value;
+    notifyListeners();
+  }
 
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int idx) {
@@ -86,6 +98,26 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // // ---------------- store ----------------
+  // StoreService storeService;
+  // ---------------- todo ----------------
+
+  // ---------------- schedule ----------------
+  ScheduleCollection schedules;
+
+  Future<void> addSchedule(Schedule schedule, String target) async {
+    await storeService.addSchedule(schedule, target);
+    schedules.addSchedule(schedule, target);
+    notifyListeners();
+  }
+
+  Future<void> deleteSchedule(Schedule targetSchedule) async {
+    await storeService.deleteSchedule(targetSchedule);
+    schedules.deleteSchedule(targetSchedule);
+    notifyListeners();
+  }
+
+  // ---------------- auth ----------------
   AuthService _authService = AuthService();
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     await _authService.signInWithEmailAndPassword(email, password);
@@ -115,7 +147,13 @@ class SchedulePath extends RoutePath {}
 
 class ScheduleDetailPath extends RoutePath {
   final String id;
-  ScheduleDetailPath(this.id);
+  final DateTime day;
+  ScheduleDetailPath(this.day, this.id);
+}
+
+class ScheduleListViewPath extends RoutePath {
+  final DateTime day;
+  ScheduleListViewPath(this.day);
 }
 
 class TodoPath extends RoutePath {}
@@ -123,6 +161,8 @@ class TodoPath extends RoutePath {}
 class SearchPath extends RoutePath {}
 
 class SettingsPath extends RoutePath {}
+
+class UserSettingsPath extends RoutePath {}
 
 class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   @override
@@ -135,6 +175,24 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return LoginPath();
       }
       if (uri.pathSegments.first == 'schedule') {
+        if (uri.pathSegments.length == 2) {
+          try {
+            var x = DateFormat('yyyyMMdd').parseStrict(uri.pathSegments[1]);
+            return ScheduleListViewPath(x);
+          } catch (e) {
+            print(e);
+          }
+          return SchedulePath();
+        } else if (uri.pathSegments.length == 3) {
+          // does this need?
+          try {
+            var x = DateFormat('yyyyMMdd').parseStrict(uri.pathSegments[1]);
+            var scheduleId = uri.pathSegments[2];
+            return ScheduleDetailPath(x, scheduleId);
+          } catch (e) {
+            print(e);
+          }
+        }
         return SchedulePath();
       }
       if (uri.pathSegments.first == 'todo') {
@@ -144,10 +202,15 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return SearchPath();
       }
       if (uri.pathSegments.first == 'settings') {
+        if (uri.pathSegments.length >= 2) {
+          if (uri.pathSegments[1] == 'user') {
+            return UserSettingsPath();
+          }
+        }
         return SettingsPath();
       }
     }
-    return null;
+    return SchedulePath();
   }
 
   @override
@@ -155,17 +218,33 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is LoginPath) {
       return RouteInformation(location: '/login');
     }
+
     if (path is SchedulePath) {
       return RouteInformation(location: '/schedule');
     }
+    if (path is ScheduleDetailPath) {
+      return RouteInformation(
+          location:
+              '/schedule/${DateFormat("yyyyMMdd").format(path.day)}/${path.id}');
+    }
+    if (path is ScheduleListViewPath) {
+      var p = DateFormat('yyyyMMdd').format(path.day);
+      return RouteInformation(location: '/schedule/$p');
+    }
+
     if (path is TodoPath) {
       return RouteInformation(location: '/todo');
     }
+
     if (path is SearchPath) {
       return RouteInformation(location: '/search');
     }
+
     if (path is SettingsPath) {
       return RouteInformation(location: '/settings');
+    }
+    if (path is UserSettingsPath) {
+      return RouteInformation(location: '/settings/user');
     }
     return null;
   }
@@ -182,23 +261,36 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   RoutePath get currentConfiguration {
     if (appState.getCurrentUser() == null) {
+      // login
       return LoginPath();
     }
 
     if (appState.selectedIndex == 0) {
-      if (appState.selectedSchedule != null) {
-        return ScheduleDetailPath(appState.selectedSchedule.id);
-      }
+      // /schedule
       if (appState.selectedDay != null) {
-        return ScheduleListViewPath();
+        if (appState.selectedSchedule != null) {
+          // /schedule/$dateTime/$id
+          return ScheduleDetailPath(
+              appState.selectedDay, appState.selectedSchedule.id);
+        } else {
+          // /schedule/$dateTime
+          return ScheduleListViewPath(appState.selectedDay);
+        }
       }
       return SchedulePath();
     } else if (appState.selectedIndex == 1) {
+      // /todo
       return TodoPath();
     } else if (appState.selectedIndex == 2) {
+      // /search
       return SearchPath();
     } else {
-      return SettingsPath(); // UnknownPath?
+      // /settings
+      if (appState.isSelectedUserSettings) {
+        // /settings/user
+        return UserSettingsPath();
+      }
+      return SettingsPath();
     }
   }
 
@@ -227,12 +319,17 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   Future<void> setNewRoutePath(RoutePath path) async {
     if (path is SchedulePath) {
       appState.selectedIndex = 0;
+      appState.selectedDay = null;
+      appState.selectedSchedule = null;
     } else if (path is TodoPath) {
       appState.selectedIndex = 1;
     } else if (path is SearchPath) {
       appState.selectedIndex = 2;
     } else if (path is SettingsPath) {
       appState.selectedIndex = 3;
+      appState.isSelectedUserSettings = false;
+    } else if (path is UserSettingsPath) {
+      appState.isSelectedUserSettings = true;
     }
   }
 }
@@ -287,7 +384,13 @@ class _AppShellState extends State<AppShell> {
           actions: [
             Padding(
               padding: EdgeInsets.only(right: 16),
-              child: Icon(Icons.person),
+              child: IconButton(
+                icon: Icon(Icons.person),
+                onPressed: () {
+                  appState.isSelectedUserSettings = true;
+                  appState.selectedIndex = 3;
+                },
+              ),
             )
           ],
         ),
@@ -343,7 +446,13 @@ class _AppShellState extends State<AppShell> {
         actions: [
           Padding(
             padding: EdgeInsets.all(8),
-            child: Icon(Icons.people),
+            child: IconButton(
+              icon: Icon(Icons.person),
+              onPressed: () {
+                appState.isSelectedUserSettings = true;
+                appState.selectedIndex = 3;
+              },
+            ),
           )
         ],
       ),
@@ -364,6 +473,21 @@ class _AppShellState extends State<AppShell> {
         ],
         currentIndex: appState.selectedIndex,
         onTap: (newIndex) {
+          if (appState.selectedIndex == newIndex) {
+            switch (appState.selectedIndex) {
+              case 0: // schedule
+                appState.selectedDay = null;
+                appState.selectedSchedule = null;
+                break;
+              case 1: // todo
+                break;
+              case 2: // search
+                break;
+              case 3: // settings
+                appState.isSelectedUserSettings = false;
+                break;
+            }
+          }
           appState.selectedIndex = newIndex;
         },
       ),
@@ -391,20 +515,34 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        if (appState.selectedIndex == 0)
+        if (appState.selectedIndex == 0) ...[
           FadeAnimationPage(
-              child: SchedulePage(), key: ValueKey('SchedulePage'))
-        else if (appState.selectedIndex == 1)
+              child: SchedulePage(), key: ValueKey('SchedulePage')),
+          // if(appState.selectedDay != null)
+          // MaterialPage(child: )
+          // ScheduleListOnDay(addSchedule: addSchedule, deleteSchedule: deleteSchedule, schedules: appState.selectedDay)
+        ] else if (appState.selectedIndex == 1)
           FadeAnimationPage(child: TodoPage(), key: ValueKey('TodoPage'))
         else if (appState.selectedIndex == 2)
           FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage'))
-        else
+        else ...[
           FadeAnimationPage(
-            child: SettingsPage(appState),
+            child: SettingsPage(
+                handleOpenUserSettings: this._handleOpenUserSettings,
+                signOut: appState.signOut),
             key: ValueKey('SettingsPage'),
           ),
+          if (appState.isSelectedUserSettings)
+            MaterialPage(
+                key: ValueKey('UserSettingPage'),
+                child: UserAccountView(
+                  user: appState.getCurrentUser(),
+                ))
+        ]
       ],
       onPopPage: (route, result) {
+        if (appState.selectedIndex == 3)
+          appState.isSelectedUserSettings = false;
         notifyListeners();
         return route.didPop(result);
       },
@@ -414,6 +552,16 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
     assert(false);
+  }
+
+  void _handleOpenScheduleList(DateTime day) {
+    appState.selectedDay = day;
+    notifyListeners();
+  }
+
+  void _handleOpenUserSettings() {
+    appState.isSelectedUserSettings = true;
+    notifyListeners();
   }
 }
 

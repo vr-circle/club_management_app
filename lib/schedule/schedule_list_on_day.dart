@@ -14,8 +14,8 @@ class ScheduleListOnDay extends StatefulWidget {
       : super(key: key);
   final Future<void> Function(Schedule schedule, String target) addSchedule;
   final Future<void> Function(Schedule schedule) deleteSchedule;
+  final DateTime targetDate;
   List<Schedule> schedules;
-  DateTime targetDate;
   @override
   _ScheduleListOnDayState createState() => _ScheduleListOnDayState();
 }
@@ -37,7 +37,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
     });
   }
 
-  var _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
+  var _format = new DateFormat('yyyy/MM/dd(E)');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
