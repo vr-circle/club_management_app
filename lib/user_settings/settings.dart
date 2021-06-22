@@ -33,11 +33,11 @@ class SettingsPage extends HookWidget {
         body: SingleChildScrollView(
       child: Column(children: [
         const ListTile(
-          title: Text("アカウント"),
+          title: Text('Account'),
         ),
         ListTile(
           leading: Icon(Icons.account_box),
-          title: Text("アカウントの管理"),
+          title: Text('Account management'),
           onTap: () {
             handleOpenUserSettings();
           },
@@ -45,7 +45,7 @@ class SettingsPage extends HookWidget {
         ListTile(
           leading: Icon(Icons.logout),
           title: Text(
-            'ログアウト',
+            'SignOut',
             style: TextStyle(color: Colors.red),
           ),
           onTap: () async {
@@ -56,12 +56,12 @@ class SettingsPage extends HookWidget {
           color: isDarkMode ? Colors.white : Colors.black,
         ),
         const ListTile(
-          title: Text("全般"),
+          title: Text('General'),
         ),
         Consumer(builder: (context, watch, child) {
           return ListTile(
             leading: Icon(Icons.dark_mode),
-            title: Text('ダークテーマ'),
+            title: Text('Dark mode'),
             onTap: () async {
               watch(darkModeProvider.notifier).changeSwitch(!isDarkMode);
               await storeService.setUserTheme(!isDarkMode ? 'dark' : 'normal');
@@ -79,11 +79,11 @@ class SettingsPage extends HookWidget {
         Divider(
           color: isDarkMode ? Colors.white : Colors.black,
         ),
-        ListTile(title: Text("情報")),
+        ListTile(title: Text('Information')),
         ListTile(
           leading: Icon(Icons.info),
-          title: Text("バージョン"),
-          subtitle: Text("0.0.1"),
+          title: Text('Version'),
+          subtitle: Text('0.0.1'),
         ),
       ]),
     ));

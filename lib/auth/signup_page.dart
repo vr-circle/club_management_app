@@ -11,7 +11,7 @@ class SignUpPage extends HookWidget {
     String password = '';
     return Scaffold(
       appBar: AppBar(
-        title: Text('アカウントを登録'),
+        title: Text('SignUp'),
       ),
       body: Center(
         child: Padding(
@@ -35,11 +35,9 @@ class SignUpPage extends HookWidget {
               ),
               TextButton(
                   onPressed: () async {
-                    // signup function
                     try {
                       appState.signUpWithEmailAndPassword(email, password);
                     } catch (e) {
-                      // failed to signup
                       print('failed to signUp');
                     }
                     Navigator.of(context).pop();

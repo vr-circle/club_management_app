@@ -47,7 +47,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
           title: Text(_format.format(widget.targetDate)),
         ),
         body: widget.schedules == null || widget.schedules.isEmpty
-            ? Center(child: Text('予定はありません'))
+            ? Center(child: Text('There are no plans'))
             : ListView(
                 children: [
                   ...widget.schedules

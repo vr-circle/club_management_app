@@ -23,21 +23,21 @@ class ScheduleEditPage extends StatelessWidget {
               children: [
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.title), labelText: 'タイトル'),
+                      icon: Icon(Icons.title), labelText: 'Title'),
                   onChanged: (value) {
                     newTitle = value;
                   },
                 ),
                 TextField(
-                  decoration:
-                      InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.place), labelText: 'Place'),
                   onChanged: (value) {
                     newPlace = value;
                   },
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '開始時刻'),
+                      icon: Icon(Icons.timer), labelText: 'Start time'),
                   onTap: () async {
                     // var newDate = await _selectTime(context);
                     // endTextFiledController.text =
@@ -51,7 +51,7 @@ class ScheduleEditPage extends StatelessWidget {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '終了時刻'),
+                      icon: Icon(Icons.timer), labelText: 'End time'),
                   onTap: () async {
                     // var newDate = await _selectTime(context);
                     // endTextFiledController.text =
@@ -65,7 +65,7 @@ class ScheduleEditPage extends StatelessWidget {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.content_copy), labelText: '内容'),
+                      icon: Icon(Icons.content_copy), labelText: 'Details'),
                   onChanged: (value) {
                     newDetails = value;
                   },

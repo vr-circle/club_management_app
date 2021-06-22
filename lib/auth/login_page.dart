@@ -81,13 +81,9 @@ class LoginPage extends HookWidget {
                     String password =
                         context.read(loginInfoStateProvider.notifier).password;
                     try {
-                      // login with email and password
                       await appState.signInWithEmailAndPassword(
                           email, password);
-                      // if success to login
                     } catch (e) {
-                      // if failed to login
-                      // show error message by widget
                       print('failed to login');
                     }
                   },
@@ -103,7 +99,7 @@ class LoginPage extends HookWidget {
                     return SignUpPage(appState);
                   }));
                 },
-                child: Text('アカウントをお持ちでない場合'))
+                child: Text('Do you have an account?'))
           ]),
         )));
   }

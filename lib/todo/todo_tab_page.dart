@@ -51,14 +51,14 @@ class _TodoPageState extends State<TodoTabPage> {
             title: Text(task.title),
             children: [
               SimpleDialogOption(
-                child: Text('削除'),
+                child: Text('Delete'),
                 onPressed: () async {
                   await _deleteTask(task);
                   Navigator.pop(context);
                 },
               ),
               SimpleDialogOption(
-                child: Text('キャンセル'),
+                child: Text('Cancel'),
                 onPressed: () => Navigator.pop(context),
               )
             ],
@@ -74,7 +74,7 @@ class _TodoPageState extends State<TodoTabPage> {
         children: taskListItem.taskList.taskList.length == 0
             ? [
                 ListTile(
-                  title: Text('タスクはありません'),
+                  title: Text('There are no tasks'),
                 )
               ]
             : taskListItem.taskList.taskList.map((e) {
@@ -115,8 +115,9 @@ class _TodoPageState extends State<TodoTabPage> {
             return SingleChildScrollView(
                 child: Column(
               children: [
-                _createExpansionTile(TaskListPanel('未完了', _isNotDoneList)),
-                _createExpansionTile(TaskListPanel('完了', _isDoneList)),
+                _createExpansionTile(
+                    TaskListPanel('Incomplete', _isNotDoneList)),
+                _createExpansionTile(TaskListPanel('Completed', _isDoneList)),
               ],
             ));
           }),

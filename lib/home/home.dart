@@ -14,7 +14,7 @@ class HomePage extends HookWidget {
               Consumer(
                 builder: (context, watch, child) {
                   return ListTile(
-                    title: Text("全体のイベント"),
+                    title: Text('all events'),
                     onTap: () {},
                   );
                 },
@@ -27,13 +27,10 @@ class HomePage extends HookWidget {
           Column(
             children: [
               const ListTile(
-                title: Text("所属サークルのイベント"),
+                title: Text('Club to which you belong'),
               ),
               Card(
-                child: Text("aaaaaaaaaaaaaaaaaaa"),
-              ),
-              Card(
-                child: Text("hogehoge"),
+                child: Text('event sample'),
               ),
             ],
           )

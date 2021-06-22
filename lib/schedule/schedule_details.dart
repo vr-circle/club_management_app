@@ -8,7 +8,7 @@ class ScheduleDetails extends StatelessWidget {
   ScheduleDetails({@required this.schedule, @required this.deleteSchedule});
   final Future<void> Function(Schedule schedule) deleteSchedule;
   final Schedule schedule;
-  final _format = new DateFormat('yyyy/MM/dd(E) hh:mm', 'ja_JP');
+  final _format = new DateFormat('yyyy/MM/dd(E) hh:mm');
 
   @override
   Widget build(BuildContext context) {
@@ -22,19 +22,19 @@ class ScheduleDetails extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: Text('開始時刻'),
+                  leading: Text('Start time'),
                   title: Text(_format.format(schedule.start)),
                 ),
                 ListTile(
-                  leading: Text('終了時刻'),
+                  leading: Text('End time'),
                   title: Text(_format.format(schedule.end)),
                 ),
                 ListTile(
-                  leading: Text('場所'),
+                  leading: Text('Place'),
                   title: Text(schedule.place),
                 ),
                 ListTile(
-                  leading: Text('内容'),
+                  leading: Text('Details'),
                   title: Text(schedule.details),
                 ),
               ],

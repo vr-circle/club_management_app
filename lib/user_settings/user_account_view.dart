@@ -9,16 +9,15 @@ class UserAccountView extends HookWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('アカウント情報'),
+        title: Text('Account information'),
       ),
       body: Center(
         child: Column(
           children: [
             ListTile(
-              title: Text('名前'),
-              trailing: Text(user.displayName == null
-                  ? '(表示名は設定されていません)'
-                  : user.displayName),
+              title: Text('name'),
+              trailing:
+                  Text(user.displayName == null ? '(Empty)' : user.displayName),
             ),
             ListTile(
               title: Text('Email'),

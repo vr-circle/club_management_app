@@ -13,7 +13,7 @@ class ToDoAddPage extends StatelessWidget {
     final _textEditingController = TextEditingController();
     return Scaffold(
         appBar: AppBar(
-          title: Text('タスクの追加'),
+          title: Text('Add a task'),
         ),
         body: Container(
             padding: EdgeInsets.all(32),
@@ -52,14 +52,14 @@ class ToDoAddPage extends StatelessWidget {
                                 Task(title: _newTaskTitle), target);
                             Navigator.pop(context);
                           },
-                          child: Text('追加'));
+                          child: Text('Add'));
                     }),
                     TextButton(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                         child: Text(
-                          'キャンセル',
+                          'Cancel',
                           style: TextStyle(color: Colors.red),
                         )),
                   ],

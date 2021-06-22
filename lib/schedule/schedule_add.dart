@@ -13,7 +13,7 @@ class ScheduleAddPage extends StatefulWidget {
 }
 
 class _ScheduleAddPageState extends State<ScheduleAddPage> {
-  final _format = new DateFormat('yyyy/MM/dd(E)', 'ja_JP');
+  final _format = new DateFormat('yyyy/MM/dd(E)');
 
   TextEditingController startTextFiledController;
   TextEditingController endTextFiledController;
@@ -77,7 +77,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('対象'),
+                    Text('target'),
                     DropdownButton(
                       value: _selectedTargetUsers,
                       items: this
@@ -97,21 +97,21 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.title), labelText: 'タイトル'),
+                      icon: Icon(Icons.title), labelText: 'Title'),
                   onChanged: (value) {
                     this.newSchedule.title = value;
                   },
                 ),
                 TextField(
-                  decoration:
-                      InputDecoration(icon: Icon(Icons.place), labelText: '場所'),
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.place), labelText: 'Place'),
                   onChanged: (value) {
                     this.newSchedule.place = value;
                   },
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '開始時刻'),
+                      icon: Icon(Icons.timer), labelText: 'Start time'),
                   onTap: () async {
                     var newDate = await _selectTime(context);
                     startTextFiledController.text =
@@ -125,7 +125,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: '終了時刻'),
+                      icon: Icon(Icons.timer), labelText: 'End time'),
                   onTap: () async {
                     var newDate = await _selectTime(context);
                     endTextFiledController.text =
@@ -141,7 +141,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(
                     icon: Icon(Icons.content_copy),
-                    labelText: '内容',
+                    labelText: 'Details',
                   ),
                   onChanged: (value) {
                     this.newSchedule.details = value;
@@ -165,7 +165,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                         newSchedule.end =
                             format.parseStrict(endTextFiledController.text);
                         if (newSchedule.title.isEmpty) {
-                          print('タイトルは必須');
+                          print('this is mandatory');
                           Navigator.of(context).pop();
                           return;
                         }
@@ -180,7 +180,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                             this.newSchedule, this._selectedTargetUsers);
                         Navigator.of(context).pop();
                       },
-                      child: const Text('追加')),
+                      child: const Text('Add')),
                 )),
             SizedBox(
                 height: 50,
@@ -189,7 +189,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: const Text("キャンセル")),
+                      child: const Text('Cancel')),
                 )),
           ],
         ),

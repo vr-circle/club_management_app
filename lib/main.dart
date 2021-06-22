@@ -1,4 +1,4 @@
-// import 'dart:html';
+import 'dart:html';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
@@ -9,7 +9,6 @@ import 'package:flutter_application_1/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/search/search.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_application_1/user_settings/user_account_view.dart';
-import 'package:flutter_application_1/user_settings/user_settings.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
