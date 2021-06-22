@@ -58,7 +58,7 @@ class MyApp extends HookWidget {
 
 class MyAppState extends ChangeNotifier {
   MyAppState()
-      : _selectedIndex = 0,
+      : _selectedIndex = 1,
         _selectedDay = null,
         _selectedSchedule = null,
         _selectedTabInTodo = 0,
@@ -164,9 +164,74 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
+// 0 -> location -> name -> path
+
+class NavigationState {
+  String name;
+  String location;
+  Icon icon;
+  RoutePath Function(MyAppState appState) getRoutePath;
+  NavigationState(
+      {@required this.name,
+      @required this.icon,
+      @required this.location,
+      @required this.getRoutePath});
+}
+
+final List<NavigationState> navigationList = [
+  NavigationState(
+      name: 'Home',
+      icon: Icon(Icons.home),
+      location: '/home',
+      getRoutePath: (appState) {
+        return HomePath();
+      }),
+  NavigationState(
+      name: 'Schedule',
+      icon: Icon(Icons.calendar_today),
+      location: '/schedule',
+      getRoutePath: (appState) {
+        if (appState.selectedDay != null) {
+          if (appState.selectedSchedule != null) {
+            return ScheduleDetailPath(
+                appState.selectedDay, appState.selectedSchedule.id);
+          } else {
+            return ScheduleListViewPath(appState.selectedDay);
+          }
+        }
+        return SchedulePath();
+      }),
+  NavigationState(
+      name: 'Todo',
+      icon: Icon(Icons.task_outlined),
+      location: '/todo',
+      getRoutePath: (appState) {
+        return HomePath();
+      }),
+  NavigationState(
+      name: 'Search',
+      icon: Icon(Icons.search),
+      location: '/search',
+      getRoutePath: (appState) {
+        return SearchPath();
+      }),
+  NavigationState(
+      name: 'Settings',
+      icon: Icon(Icons.settings),
+      location: '/settings',
+      getRoutePath: (appState) {
+        if (appState.isSelectedUserSettings) {
+          return UserSettingsPath();
+        }
+        return SettingsPath();
+      }),
+];
+
 abstract class RoutePath {}
 
 class LoginPath extends RoutePath {}
+
+class HomePath extends RoutePath {}
 
 class SchedulePath extends RoutePath {}
 
@@ -244,7 +309,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is LoginPath) {
       return RouteInformation(location: '/login');
     }
-
+    if (path is HomePath) {
+      return RouteInformation(location: '/home');
+    }
     if (path is SchedulePath) {
       return RouteInformation(location: '/schedule');
     }
@@ -287,37 +354,10 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   RoutePath get currentConfiguration {
     if (appState.getCurrentUser() == null) {
-      // login
+      // /login
       return LoginPath();
     }
-
-    if (appState.selectedIndex == 0) {
-      // /schedule
-      if (appState.selectedDay != null) {
-        if (appState.selectedSchedule != null) {
-          // /schedule/$dateTime/$id
-          return ScheduleDetailPath(
-              appState.selectedDay, appState.selectedSchedule.id);
-        } else {
-          // /schedule/$dateTime
-          return ScheduleListViewPath(appState.selectedDay);
-        }
-      }
-      return SchedulePath();
-    } else if (appState.selectedIndex == 1) {
-      // /todo
-      return TodoPath();
-    } else if (appState.selectedIndex == 2) {
-      // /search
-      return SearchPath();
-    } else {
-      // /settings
-      if (appState.isSelectedUserSettings) {
-        // /settings/user
-        return UserSettingsPath();
-      }
-      return SettingsPath();
-    }
+    return navigationList[appState.selectedIndex].getRoutePath(appState);
   }
 
   @override
@@ -429,44 +469,25 @@ class _AppShellState extends State<AppShell> {
           backButtonDispatcher: _backButtonDispatcher,
         ),
         drawer: Drawer(
-          child: ListView(
-            children: [
-              DrawerHeader(child: Text('DrawerMenu')),
-              ListTile(
-                leading: Icon(Icons.schedule),
-                title: Text('Schedule'),
-                onTap: () {
-                  appState.selectedIndex = 0;
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.task_rounded),
-                title: Text('ToDo'),
-                onTap: () {
-                  appState.selectedIndex = 1;
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.search),
-                title: Text('Search'),
-                onTap: () {
-                  appState.selectedIndex = 2;
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings'),
-                onTap: () {
-                  appState.selectedIndex = 3;
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          children: [
+            DrawerHeader(child: Text('DrawerMenu')),
+            Container(
+              child: Column(
+                  children: navigationList
+                      .asMap()
+                      .entries
+                      .map((e) => ListTile(
+                            title: Text(e.value.name),
+                            leading: e.value.icon,
+                            onTap: () {
+                              appState.selectedIndex = e.key;
+                            },
+                          ))
+                      .toList()),
+            )
+          ],
+        )),
       );
     }
 

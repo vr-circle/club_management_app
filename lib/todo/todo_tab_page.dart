@@ -80,7 +80,6 @@ class _TodoPageState extends State<TodoTabPage> {
             : taskListItem.taskList.taskList.map((e) {
                 return TaskTile(
                   task: e,
-                  isChecked: e.isDone,
                   checkboxCallback: (value) {
                     setState(() {
                       taskListItem.taskList.toggleDone(e.id);
