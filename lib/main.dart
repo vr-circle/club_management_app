@@ -62,24 +62,24 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return HomePath();
       }
       if (uri.pathSegments.first == 'schedule') {
+        print(uri.pathSegments);
         if (uri.pathSegments.length == 2) {
           try {
-            var x = DateFormat('yyyyMMdd').parseStrict(uri.pathSegments[1]);
+            print(uri.pathSegments[1]);
+            var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
             return ScheduleListViewPath(x);
           } catch (e) {
             print(e);
           }
-          return SchedulePath();
         } else if (uri.pathSegments.length == 3) {
-          // does this need?
+          print(3);
           try {
-            var x = DateFormat('yyyyMMdd').parseStrict(uri.pathSegments[1]);
+            var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
             var scheduleId = uri.pathSegments[2];
             return ScheduleDetailPath(x, scheduleId);
           } catch (e) {
             print(e);
           }
-          return SchedulePath();
         }
         return SchedulePath();
       }
@@ -121,24 +121,24 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is ScheduleDetailPath) {
       return RouteInformation(
           location:
-              '/schedule/${DateFormat("yyyyMMdd").format(path.day)}/${path.id}');
+              '/schedule/${DateFormat("yyyy-MM-dd").format(path.day)}/${path.id}');
     }
     if (path is ScheduleListViewPath) {
-      var p = DateFormat('yyyyMMdd').format(path.day);
+      var p = DateFormat('yyyy-MM-dd').format(path.day);
       return RouteInformation(location: '/schedule/$p');
     }
 
-// todo
+    // todo
     if (path is TodoPath) {
       return RouteInformation(location: '/todo');
     }
 
-// search
+    // search
     if (path is SearchPath) {
       return RouteInformation(location: '/search');
     }
 
-// settings
+    // settings
     if (path is SettingsPath) {
       return RouteInformation(location: '/settings');
     }
@@ -198,9 +198,11 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedSchedule = null;
       return;
     } else if (path is ScheduleListViewPath) {
+      appState.selectedIndex = 1;
       appState.setSelectedDay(path.day);
       return;
     } else if (path is ScheduleDetailPath) {
+      appState.selectedIndex = 1;
       appState.setSelectedScheduleById(path.day, path.id);
       return;
     }
@@ -216,6 +218,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedIndex = 4;
       appState.isSelectedUserSettings = false;
     } else if (path is UserSettingsPath) {
+      appState.selectedIndex = 4;
       appState.isSelectedUserSettings = true;
       return;
     }
@@ -265,7 +268,7 @@ class _AppShellState extends State<AppShell> {
 
     _backButtonDispatcher.takePriority();
 
-    if (size.width > 500) {
+    if (size.width > 600) {
       return Scaffold(
         appBar: AppBar(
           title: Text('Club Management App'),
@@ -320,7 +323,7 @@ class _AppShellState extends State<AppShell> {
               icon: Icon(Icons.person),
               onPressed: () {
                 appState.isSelectedUserSettings = true;
-                appState.selectedIndex = 3;
+                appState.selectedIndex = 4;
               },
             ),
           )

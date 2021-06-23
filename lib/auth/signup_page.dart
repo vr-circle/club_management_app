@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class SignUpPage extends HookWidget {

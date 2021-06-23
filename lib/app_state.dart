@@ -60,14 +60,17 @@ class MyAppState extends ChangeNotifier {
   }
 
   void setSelectedScheduleById(DateTime day, String id) {
-    final List<Schedule> targetSchedule = scheduleCollection.schedules[day]
+    final List<Schedule> targetScheduleList = scheduleCollection
+        .getScheduleList(day)
         .where((element) => element.id == id)
         .toList();
-    if (targetSchedule.isEmpty) {
+    print(targetScheduleList);
+    if (targetScheduleList.isEmpty) {
       return;
     }
-    selectedSchedule = targetSchedule.first;
-    notifyListeners();
+    setSelectedDay(day);
+    selectedSchedule = targetScheduleList[0];
+    // notifyListeners();
   }
 
   Future<void> addSchedule(Schedule schedule, String target) async {

@@ -11,7 +11,6 @@ import 'package:flutter_application_1/user_settings/user_account_view.dart';
 import 'main.dart';
 import 'package:flutter/material.dart';
 import 'home/home.dart';
-// 0 -> location -> name -> path
 
 class NavigationState {
   String name;
