@@ -69,10 +69,15 @@ final List<NavigationState> navigationList = [
             appState.selectedSchedule = null;
           } else {
             appState.selectedDay = null;
+            appState.selectedSchedule = null;
           }
         } else {
-          appState.selectedDay = null;
-          appState.selectedSchedule = null;
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          } else {
+            appState.selectedDay = null;
+            appState.selectedSchedule = null;
+          }
         }
       },
       getPages: (appState) {

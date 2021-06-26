@@ -12,6 +12,16 @@ class StoreService {
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
 
+  Future<List<String>> getClubIDs() async {
+    final data = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('settings')
+        .doc('clubs')
+        .get();
+    return data['ids'];
+  }
+
   Future<String> getUserTheme() async {
     final data = await FirebaseFirestore.instance
         .collection('users')
@@ -128,6 +138,46 @@ class StoreService {
     return res;
   }
 
+  Future<void> addClubSchedule(
+      Schedule schedule, String targetClubId, bool isPublic) async {
+    await FirebaseFirestore.instance
+        .collection('clubs')
+        .doc(targetClubId)
+        .collection('schedule')
+        .doc(isPublic ? 'public' : 'private')
+        .set({
+      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayUnion([
+        {
+          'title': schedule.title,
+          'place': schedule.place,
+          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
+          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
+          'details': schedule.details,
+        }
+      ])
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteClubSchedule(
+      Schedule schedule, String targetClubId, bool isPublic) async {
+    await FirebaseFirestore.instance
+        .collection('clubs')
+        .doc(targetClubId)
+        .collection('schedule')
+        .doc(isPublic ? 'public' : 'private')
+        .update({
+      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayRemove([
+        {
+          'details': schedule.details,
+          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
+          'place': schedule.place,
+          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
+          'title': schedule.title,
+        }
+      ])
+    });
+  }
+
   Future<void> addSchedule(Schedule schedule, String target) async {
     await FirebaseFirestore.instance
         .collection('users')
@@ -148,11 +198,6 @@ class StoreService {
   }
 
   Future<void> deleteSchedule(Schedule schedule) async {
-    print(schedule.title);
-    print(schedule.place);
-    print(DateFormat('yyyy-MM-dd HH:mm').format(schedule.start));
-    print(DateFormat('yyyy-MM-dd HH:mm').format(schedule.end));
-    print(schedule.details);
     await FirebaseFirestore.instance
         .collection('users')
         .doc(schedule.createdBy == 'private' ? userId : schedule.createdBy)
