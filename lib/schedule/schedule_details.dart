@@ -50,7 +50,7 @@ class ScheduleDetails extends StatelessWidget {
                 // edit schedule
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) {
-                  return ScheduleEditPage(schedule);
+                  return ScheduleEditPage(targetSchedule: schedule);
                 }));
               },
             ),

@@ -1,4 +1,4 @@
-// import 'dart:html';
+import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -167,6 +167,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
+    print(appState.getCurrentUser() == null);
     return Navigator(
       key: navigatorKey,
       pages: [
