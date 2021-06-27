@@ -85,6 +85,7 @@ final List<NavigationState> navigationList = [
         return [
           FadeAnimationPage(
               child: SchedulePage(
+                appState: appState,
                 handleOpenList: (DateTime day) {
                   appState.selectedDay = day;
                 },

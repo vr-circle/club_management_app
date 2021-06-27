@@ -1,9 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/todo/task.dart';
 import 'package:intl/intl.dart';
 
 StoreService storeService;
+
+class Club {
+  String id;
+  String name;
+  List<String> members;
+}
 
 class StoreService {
   StoreService({this.userId});
@@ -12,7 +19,11 @@ class StoreService {
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
 
-  Future<List<String>> getClubIDs() async {
+  Future<List<Club>> getClubs() async {
+    final data = await FirebaseFirestore.instance.collection('clubs').get();
+  }
+
+  Future<List<String>> getBelongingClubIDs() async {
     final data = await FirebaseFirestore.instance
         .collection('users')
         .doc(userId)

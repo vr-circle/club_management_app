@@ -1,18 +1,20 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
-import 'schedule_details.dart';
 
 class SchedulePage extends StatefulWidget {
-  SchedulePage(
-      {Key key,
-      @required this.handleOpenList,
-      @required this.scheduleCollection})
-      : super(key: key);
+  SchedulePage({
+    Key key,
+    @required this.handleOpenList,
+    @required this.scheduleCollection,
+    @required this.appState,
+  }) : super(key: key);
+  final MyAppState appState;
   final void Function(DateTime day) handleOpenList;
   final ScheduleCollection scheduleCollection;
   @override
@@ -127,11 +129,8 @@ class _SchedulePageState extends State<SchedulePage> {
                                   child: ListTile(
                                 title: Text(e.title),
                                 onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => ScheduleDetails(
-                                            schedule: e,
-                                            deleteSchedule: deleteSchedule,
-                                          )));
+                                  widget.appState.selectedSchedule = e;
+                                  widget.appState.selectedDay = e.start;
                                 },
                               )))
                           .toList()),
