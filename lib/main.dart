@@ -1,4 +1,4 @@
-import 'dart:html';
+// import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,6 +11,7 @@ import 'auth/login_page.dart';
 import 'user_settings/settings.dart';
 import 'route_path.dart';
 import 'app_state.dart';
+import 'pages/fade_animation_page.dart';
 
 Future<void> main() async {
   await Firebase.initializeApp();
@@ -67,6 +68,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           try {
             print(uri.pathSegments[1]);
             var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
+            print('return schedule list view path');
             return ScheduleListViewPath(x);
           } catch (e) {
             print(e);
@@ -76,6 +78,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           try {
             var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
             var scheduleId = uri.pathSegments[2];
+            print('return schedule details path');
             return ScheduleDetailPath(x, scheduleId);
           } catch (e) {
             print(e);
@@ -167,7 +170,6 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
-    print(appState.getCurrentUser() == null);
     return Navigator(
       key: navigatorKey,
       pages: [
@@ -200,6 +202,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       return;
     } else if (path is ScheduleListViewPath) {
       appState.selectedIndex = 1;
+      appState.selectedSchedule = null;
       appState.setSelectedDay(path.day);
       return;
     } else if (path is ScheduleDetailPath) {
@@ -383,24 +386,5 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
     assert(false);
-  }
-}
-
-class FadeAnimationPage extends Page {
-  final Widget child;
-
-  FadeAnimationPage({Key key, this.child}) : super(key: key);
-
-  Route createRoute(BuildContext context) {
-    return PageRouteBuilder(
-      settings: this,
-      pageBuilder: (context, animation, animation2) {
-        var curveTween = CurveTween(curve: Curves.easeInOut);
-        return FadeTransition(
-          opacity: animation.drive(curveTween),
-          child: child,
-        );
-      },
-    );
   }
 }

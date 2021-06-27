@@ -11,6 +11,7 @@ import 'package:flutter_application_1/user_settings/user_account_view.dart';
 import 'main.dart';
 import 'package:flutter/material.dart';
 import 'home/home.dart';
+import 'pages/fade_animation_page.dart';
 
 class NavigationState {
   String name;
