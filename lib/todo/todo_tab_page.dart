@@ -8,41 +8,20 @@ import '../store/store_service.dart';
 import 'todo_add.dart';
 
 class TodoTabPage extends StatefulWidget {
-  TodoTabPage({Key key, @required this.target}) : super(key: key);
-  final String target;
+  TodoTabPage(
+      {Key key,
+      @required this.tasks,
+      @required this.addTask,
+      @required this.deleteTask})
+      : super(key: key);
+  final TaskList tasks;
+  final Future<void> Function(Task task, String target) addTask;
+  final Future<void> Function(Task task, String target) deleteTask;
   @override
   _TodoPageState createState() => _TodoPageState();
 }
 
 class _TodoPageState extends State<TodoTabPage> {
-  Future<TaskList> _taskListFuture;
-  TaskList _taskList = TaskList([]);
-  Future<TaskList> getTaskData() async {
-    final List<Task> res = await storeService.getTaskList(widget.target);
-    _taskList = TaskList(res);
-    return _taskList;
-  }
-
-  @override
-  void initState() {
-    _taskListFuture = getTaskData();
-    super.initState();
-  }
-
-  Future<void> addTask(Task task) async {
-    await storeService.addTask(task, widget.target);
-    setState(() {
-      _taskList.addTask(task.title);
-    });
-  }
-
-  Future<void> _deleteTask(Task task) async {
-    await storeService.deleteTask(task, widget.target);
-    setState(() {
-      _taskList.deleteTask(task);
-    });
-  }
-
   void _showDialog(Task task) {
     showDialog(
         context: context,
@@ -53,7 +32,7 @@ class _TodoPageState extends State<TodoTabPage> {
               SimpleDialogOption(
                 child: Text('Delete'),
                 onPressed: () async {
-                  await _deleteTask(task);
+                  await widget.deleteTask(task);
                   Navigator.pop(context);
                 },
               ),
@@ -94,32 +73,18 @@ class _TodoPageState extends State<TodoTabPage> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDoneList = TaskList(
+        widget.tasks.taskList.where((element) => element.isDone).toList());
+    final _isNotDoneList = TaskList(
+        widget.tasks.taskList.where((element) => !element.isDone).toList());
     return Scaffold(
-      body: FutureBuilder(
-          future: _taskListFuture,
-          builder: (context, AsyncSnapshot<TaskList> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Center(child: CircularProgressIndicator());
-            }
-            final _isDoneList = TaskList(this
-                ._taskList
-                .taskList
-                .where((element) => element.isDone)
-                .toList());
-            final _isNotDoneList = TaskList(this
-                ._taskList
-                .taskList
-                .where((element) => !element.isDone)
-                .toList());
-            return SingleChildScrollView(
-                child: Column(
-              children: [
-                _createExpansionTile(
-                    TaskListPanel('Incomplete', _isNotDoneList)),
-                _createExpansionTile(TaskListPanel('Completed', _isDoneList)),
-              ],
-            ));
-          }),
+      body: SingleChildScrollView(
+          child: Column(
+        children: [
+          _createExpansionTile(TaskListPanel('Incomplete', _isNotDoneList)),
+          _createExpansionTile(TaskListPanel('Completed', _isDoneList)),
+        ],
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {

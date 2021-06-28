@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/todo/task.dart';
+import 'package:flutter_application_1/todo/task_list.dart';
 import 'package:intl/intl.dart';
 
 StoreService storeService;
@@ -14,6 +15,7 @@ class Club {
 
 class StoreService {
   StoreService({this.userId});
+  final _store = FirebaseFirestore.instance;
   String userId;
   Map<String, dynamic> privateJsonData;
   Map<String, dynamic> clubJsonData;
@@ -24,13 +26,12 @@ class StoreService {
   }
 
   Future<List<String>> getBelongingClubIDs() async {
-    final data = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('settings')
-        .doc('clubs')
-        .get();
-    return data['ids'];
+    final clubIds = (await FirebaseFirestore.instance
+        .collection('clubs')
+        .where('members', arrayContains: this.userId)
+        .get()) as List<String>;
+    print(clubIds);
+    return clubIds;
   }
 
   Future<String> getUserTheme() async {
@@ -53,15 +54,22 @@ class StoreService {
         .update({'theme': theme});
   }
 
-  Future<List<Task>> getTaskList(String target) async {
-    final clubTaskList = (await FirebaseFirestore.instance
-            .collection('users')
-            .doc(target == 'private' ? userId : target)
-            .get())
-        .data()['todo'];
-    List<String> castedPrivateTaskList = clubTaskList.cast<String>();
-    var result = castedPrivateTaskList.map((e) => Task(title: e)).toList();
-    return result;
+  Future<Map<String, TaskList>> getTaskMap() async {
+    Map<String, TaskList> taskMap = new Map<String, TaskList>();
+    final privateTaskList =
+        (await this._store.collection('users').doc(userId).get())
+            .data()['todo']
+            .cast<String>();
+    taskMap['private'] =
+        TaskList(privateTaskList.map((e) => Task(title: e)).toList());
+
+    final clubIds = (await this
+        ._store
+        .collection('clubs')
+        .where('members', arrayContains: this.userId)
+        .get());
+    print(clubIds);
+    return taskMap;
   }
 
   Future<void> addTask(Task task, String target) async {
