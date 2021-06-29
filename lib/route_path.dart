@@ -4,11 +4,10 @@ import 'package:flutter_application_1/schedule/schedule_details.dart';
 import 'package:flutter_application_1/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/schedule/schedule_page.dart';
 import 'package:flutter_application_1/search/search.dart';
-import 'package:flutter_application_1/todo/todo.dart';
+import 'package:flutter_application_1/todo/todo_page.dart';
 import 'package:flutter_application_1/user_settings/settings.dart';
 import 'package:flutter_application_1/user_settings/user_account_view.dart';
 
-import 'main.dart';
 import 'package:flutter/material.dart';
 import 'home/home.dart';
 import 'pages/fade_animation_page.dart';
@@ -115,13 +114,21 @@ final List<NavigationState> navigationList = [
       icon: Icon(Icons.task_outlined),
       location: '/todo',
       getRoutePath: (appState) {
-        return TodoPath();
+        return TodoPath(appState.selectedTabInTodo);
       },
-      initAppState: (appState) {},
-      onPopPage: (appState) {},
+      initAppState: (appState) {
+        appState.selectedTabInTodo = 'private';
+      },
+      onPopPage: (appState) {
+        appState.selectedTabInTodo = 'private';
+      },
       getPages: (appState) {
         return [
-          FadeAnimationPage(child: TodoPage(), key: ValueKey('TodoPage'))
+          FadeAnimationPage(
+              child: TodoPage(
+                todoCollection: appState.todoCollection,
+              ),
+              key: ValueKey('TodoPage'))
         ];
       }),
   NavigationState(
@@ -193,7 +200,15 @@ class ScheduleListViewPath extends RoutePath {
   ScheduleListViewPath(this.day);
 }
 
-class TodoPath extends RoutePath {}
+class TodoPath extends RoutePath {
+  final String targetID;
+  TodoPath(this.targetID);
+}
+
+class TodoAddPath extends RoutePath {
+  final String targetID;
+  TodoAddPath(this.targetID);
+}
 
 class SearchPath extends RoutePath {}
 

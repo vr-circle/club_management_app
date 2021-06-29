@@ -6,14 +6,18 @@ class TaskList {
   }
   List<Task> taskList;
 
-  void addTask(String title) {
-    taskList = [...taskList, Task(title: title)];
+  void addTask(Task newTask) {
+    taskList = [...taskList, newTask];
   }
 
   void addTaskList(List<Task> taskList) {
     taskList.forEach((element) {
-      addTask(element.title);
+      addTask(element);
     });
+  }
+
+  void deleteTask(Task target) {
+    taskList = taskList.where((task) => task.id != target.id).toList();
   }
 
   void toggleDone(String id) {
@@ -24,9 +28,5 @@ class TaskList {
         else
           task
     ];
-  }
-
-  void deleteTask(Task target) {
-    taskList = taskList.where((task) => task.id != target.id).toList();
   }
 }

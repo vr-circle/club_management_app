@@ -4,18 +4,20 @@ import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
+import 'package:flutter_application_1/todo/task.dart';
+import 'package:flutter_application_1/todo/todo_collection.dart';
 
 class MyAppState extends ChangeNotifier {
   MyAppState()
       : _selectedIndex = 1,
         _selectedDay = null,
         _selectedSchedule = null,
-        _selectedTabInTodo = 0,
+        _selectedTabInTodo = 'private',
         _isSelectedUserSettings = false;
   int _selectedIndex;
   DateTime _selectedDay;
   Schedule _selectedSchedule;
-  int _selectedTabInTodo;
+  String _selectedTabInTodo;
   bool _isSelectedUserSettings;
 
   bool get isSelectedUserSettings => _isSelectedUserSettings;
@@ -42,13 +44,23 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  int get selectedTabInTodo => _selectedTabInTodo;
-  set selectedTabInTodo(int idx) {
-    _selectedTabInTodo = idx;
+  // ---------------- todo ----------------
+  TodoCollection todoCollection;
+  String get selectedTabInTodo => _selectedTabInTodo;
+  set selectedTabInTodo(String target) {
+    _selectedTabInTodo = target;
     notifyListeners();
   }
 
-  // ---------------- todo ----------------
+  void addTask(Task newTask, String target) {
+    todoCollection.addTask(newTask, target);
+    notifyListeners();
+  }
+
+  void deleteTask(Task targetTask, String targetGroupID) {
+    todoCollection.deleteTask(targetTask, targetGroupID);
+    notifyListeners();
+  }
 
   // ---------------- schedule ----------------
   ScheduleCollection scheduleCollection = new ScheduleCollection();

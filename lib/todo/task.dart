@@ -10,6 +10,10 @@ class Task {
   }) : id = id ?? _uuid.v4();
 
   final String id;
-  final String title;
-  final bool isDone;
+  String title;
+  bool isDone;
+
+  void toggleDone() {
+    this.isDone = !isDone;
+  }
 }

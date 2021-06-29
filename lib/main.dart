@@ -63,22 +63,17 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return HomePath();
       }
       if (uri.pathSegments.first == 'schedule') {
-        print(uri.pathSegments);
         if (uri.pathSegments.length == 2) {
           try {
-            print(uri.pathSegments[1]);
             var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
-            print('return schedule list view path');
             return ScheduleListViewPath(x);
           } catch (e) {
             print(e);
           }
         } else if (uri.pathSegments.length == 3) {
-          print(3);
           try {
             var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
             var scheduleId = uri.pathSegments[2];
-            print('return schedule details path');
             return ScheduleDetailPath(x, scheduleId);
           } catch (e) {
             print(e);
@@ -87,7 +82,14 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return SchedulePath();
       }
       if (uri.pathSegments.first == 'todo') {
-        return TodoPath();
+        if (uri.pathSegments.length == 2) {
+          try {
+            return TodoPath(uri.pathSegments[1]);
+          } catch (e) {
+            print(e);
+          }
+        }
+        return TodoPath('private');
       }
       if (uri.pathSegments.first == 'search') {
         return SearchPath();
@@ -133,7 +135,10 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
     // todo
     if (path is TodoPath) {
-      return RouteInformation(location: '/todo');
+      return RouteInformation(location: '/todo/${path.targetID}');
+    }
+    if (path is TodoAddPath) {
+      return RouteInformation(location: '/todo/${path.targetID}/add');
     }
 
     // search
@@ -195,6 +200,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedIndex = 0;
       return;
     }
+
     if (path is SchedulePath) {
       appState.selectedIndex = 1;
       appState.selectedDay = null;
@@ -210,10 +216,16 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.setSelectedScheduleById(path.day, path.id);
       return;
     }
+
     if (path is TodoPath) {
       appState.selectedIndex = 2;
+      appState.selectedTabInTodo = path.targetID;
       return;
+    } else if (path is TodoAddPath) {
+      appState.selectedIndex = 2;
+      appState.selectedTabInTodo = path.targetID;
     }
+
     if (path is SearchPath) {
       appState.selectedIndex = 3;
       return;

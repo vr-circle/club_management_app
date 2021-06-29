@@ -4,19 +4,18 @@ import 'task_list.dart';
 import 'task_list_panel.dart';
 import 'task.dart';
 import 'task_tile.dart';
-import '../store/store_service.dart';
-import 'todo_add.dart';
 
 class TodoTabPage extends StatefulWidget {
-  TodoTabPage(
-      {Key key,
-      @required this.tasks,
-      @required this.addTask,
-      @required this.deleteTask})
-      : super(key: key);
+  TodoTabPage({
+    Key key,
+    @required this.groupName,
+    @required this.tasks,
+    @required this.addTask,
+  }) : super(key: key);
+  final String groupName;
   final TaskList tasks;
-  final Future<void> Function(Task task, String target) addTask;
-  final Future<void> Function(Task task, String target) deleteTask;
+  final Future<void> Function({@required Task task, @required String target})
+      addTask;
   @override
   _TodoPageState createState() => _TodoPageState();
 }
@@ -32,7 +31,7 @@ class _TodoPageState extends State<TodoTabPage> {
               SimpleDialogOption(
                 child: Text('Delete'),
                 onPressed: () async {
-                  await widget.deleteTask(task);
+                  await widget.deleteTask(target: widget.target, task: task);
                   Navigator.pop(context);
                 },
               ),
@@ -87,9 +86,9 @@ class _TodoPageState extends State<TodoTabPage> {
       )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ToDoAddPage(widget.target, this.addTask);
-          }));
+          // Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+          //   return ToDoAddPage();
+          // }));
         },
         child: Icon(Icons.add),
       ),

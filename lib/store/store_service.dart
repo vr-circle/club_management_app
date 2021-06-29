@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/schedule/schedule.dart';
 import 'package:flutter_application_1/todo/task.dart';
-import 'package:flutter_application_1/todo/task_list.dart';
 import 'package:intl/intl.dart';
 
 StoreService storeService;
@@ -21,8 +19,9 @@ class StoreService {
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
 
-  Future<List<Club>> getClubs() async {
-    final data = await FirebaseFirestore.instance.collection('clubs').get();
+  Future<String> getClubName(String targetID) async {
+    final data = await this._store.collection('clubs').doc(targetID).get();
+    return data.data()['name'];
   }
 
   Future<List<String>> getBelongingClubIDs() async {
@@ -54,29 +53,31 @@ class StoreService {
         .update({'theme': theme});
   }
 
-  Future<Map<String, TaskList>> getTaskMap() async {
-    Map<String, TaskList> taskMap = new Map<String, TaskList>();
+  Future<Map<String, List<Task>>> getTaskMap() async {
+    Map<String, List<Task>> taskMap = new Map<String, List<Task>>();
     final privateTaskList =
         (await this._store.collection('users').doc(userId).get())
             .data()['todo']
             .cast<String>();
-    taskMap['private'] =
-        TaskList(privateTaskList.map((e) => Task(title: e)).toList());
+    taskMap['private'] = privateTaskList.map((e) => Task(title: e)).toList();
 
-    final clubIds = (await this
+    final clubIds = await this
         ._store
         .collection('clubs')
         .where('members', arrayContains: this.userId)
-        .get());
+        .get();
     print(clubIds);
     return taskMap;
   }
 
-  Future<void> addTask(Task task, String target) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(target == 'private' ? userId : 'circle')
-        .update({
+  Future<void> addTask(Task task, String targetGroup) async {
+    if (targetGroup == 'private') {
+      await _store.collection('users').doc(userId).update({
+        'todo': FieldValue.arrayUnion([task.title])
+      });
+      return;
+    }
+    await _store.collection('clubs').doc(targetGroup).update({
       'todo': FieldValue.arrayUnion([task.title])
     });
   }
