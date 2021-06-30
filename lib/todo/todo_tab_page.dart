@@ -11,11 +11,14 @@ class TodoTabPage extends StatefulWidget {
     @required this.groupName,
     @required this.tasks,
     @required this.addTask,
+    @required this.deleteTask,
   }) : super(key: key);
   final String groupName;
-  final TaskList tasks;
+  final List<Task> tasks;
   final Future<void> Function({@required Task task, @required String target})
       addTask;
+  final Future<void> Function({@required Task task, @required String target})
+      deleteTask;
   @override
   _TodoPageState createState() => _TodoPageState();
 }
@@ -72,10 +75,10 @@ class _TodoPageState extends State<TodoTabPage> {
 
   @override
   Widget build(BuildContext context) {
-    final _isDoneList = TaskList(
-        widget.tasks.taskList.where((element) => element.isDone).toList());
-    final _isNotDoneList = TaskList(
-        widget.tasks.taskList.where((element) => !element.isDone).toList());
+    final _isDoneList =
+        TaskList(widget.tasks.where((element) => element.isDone).toList());
+    final _isNotDoneList =
+        TaskList(widget.tasks.where((element) => !element.isDone).toList());
     return Scaffold(
       body: SingleChildScrollView(
           child: Column(

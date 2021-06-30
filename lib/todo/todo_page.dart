@@ -49,7 +49,10 @@ class TodoPageState extends State<TodoPage> {
             ),
             body: TabBarView(
               children: widget.todoCollection.taskMap.entries
-                  .map((element) => TodoTabPage())
+                  .map((element) => TodoTabPage(
+                        groupName: widget.todoCollection.clubNames[element.key],
+                        tasks: element.value,
+                      ))
                   .toList(),
             ),
           ),
