@@ -85,6 +85,9 @@ final List<NavigationState> navigationList = [
           FadeAnimationPage(
               child: SchedulePage(
                 appState: appState,
+                handleChangePage: (DateTime day) {
+                  appState.selectedCalendarPage = day;
+                },
                 handleOpenList: (DateTime day) {
                   appState.selectedDay = day;
                 },
@@ -109,28 +112,28 @@ final List<NavigationState> navigationList = [
             )),
         ];
       }),
-  NavigationState(
-      name: 'Todo',
-      icon: Icon(Icons.task_outlined),
-      location: '/todo',
-      getRoutePath: (appState) {
-        return TodoPath(appState.selectedTabInTodo);
-      },
-      initAppState: (appState) {
-        appState.selectedTabInTodo = 'private';
-      },
-      onPopPage: (appState) {
-        appState.selectedTabInTodo = 'private';
-      },
-      getPages: (appState) {
-        return [
-          FadeAnimationPage(
-              child: TodoPage(
-                todoCollection: appState.todoCollection,
-              ),
-              key: ValueKey('TodoPage'))
-        ];
-      }),
+  // NavigationState(
+  //     name: 'Todo',
+  //     icon: Icon(Icons.task_outlined),
+  //     location: '/todo',
+  //     getRoutePath: (appState) {
+  //       return TodoPath(appState.selectedTabInTodo);
+  //     },
+  //     initAppState: (appState) {
+  //       appState.selectedTabInTodo = 'private';
+  //     },
+  //     onPopPage: (appState) {
+  //       appState.selectedTabInTodo = 'private';
+  //     },
+  //     getPages: (appState) {
+  //       return [
+  //         FadeAnimationPage(
+  //             child: TodoPage(
+  //               todoCollection: appState.todoCollection,
+  //             ),
+  //             key: ValueKey('TodoPage'))
+  //       ];
+  //     }),
   NavigationState(
       name: 'Search',
       icon: Icon(Icons.search),
@@ -185,9 +188,13 @@ abstract class RoutePath {}
 
 class LoginPath extends RoutePath {}
 
-class HomePath extends RoutePath {}
+class HomePath extends RoutePath {
+  static final int index = 0;
+}
 
-class SchedulePath extends RoutePath {}
+class SchedulePath extends RoutePath {
+  static final int index = 1;
+}
 
 class ScheduleDetailPath extends RoutePath {
   final String id;
@@ -201,6 +208,7 @@ class ScheduleListViewPath extends RoutePath {
 }
 
 class TodoPath extends RoutePath {
+  static final int index = 2;
   final String targetID;
   TodoPath(this.targetID);
 }
@@ -210,8 +218,12 @@ class TodoAddPath extends RoutePath {
   TodoAddPath(this.targetID);
 }
 
-class SearchPath extends RoutePath {}
+class SearchPath extends RoutePath {
+  static final int index = 2;
+}
 
-class SettingsPath extends RoutePath {}
+class SettingsPath extends RoutePath {
+  static final int index = 3;
+}
 
 class UserSettingsPath extends RoutePath {}

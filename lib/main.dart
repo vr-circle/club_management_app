@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 import 'auth/login_page.dart';
 import 'user_settings/settings.dart';
@@ -14,6 +15,7 @@ import 'app_state.dart';
 import 'pages/fade_animation_page.dart';
 
 Future<void> main() async {
+  setPathUrlStrategy();
   await Firebase.initializeApp();
   initializeDateFormatting()
       .then((value) => runApp(ProviderScope(child: MyApp())));
@@ -85,6 +87,13 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         if (uri.pathSegments.length == 2) {
           try {
             return TodoPath(uri.pathSegments[1]);
+          } catch (e) {
+            print(e);
+          }
+        } else if (uri.pathSegments.length == 3 &&
+            uri.pathSegments[2] == 'add') {
+          try {
+            return TodoAddPath(uri.pathSegments[1]);
           } catch (e) {
             print(e);
           }
@@ -197,44 +206,44 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
     if (path is HomePath) {
-      appState.selectedIndex = 0;
+      appState.selectedIndex = HomePath.index;
       return;
     }
 
     if (path is SchedulePath) {
-      appState.selectedIndex = 1;
+      appState.selectedIndex = SchedulePath.index;
       appState.selectedDay = null;
       appState.selectedSchedule = null;
       return;
     } else if (path is ScheduleListViewPath) {
-      appState.selectedIndex = 1;
+      appState.selectedIndex = SchedulePath.index;
       appState.selectedSchedule = null;
       appState.setSelectedDay(path.day);
       return;
     } else if (path is ScheduleDetailPath) {
-      appState.selectedIndex = 1;
+      appState.selectedIndex = SchedulePath.index;
       appState.setSelectedScheduleById(path.day, path.id);
       return;
     }
 
     if (path is TodoPath) {
-      appState.selectedIndex = 2;
+      appState.selectedIndex = TodoPath.index;
       appState.selectedTabInTodo = path.targetID;
       return;
     } else if (path is TodoAddPath) {
-      appState.selectedIndex = 2;
+      appState.selectedIndex = TodoPath.index;
       appState.selectedTabInTodo = path.targetID;
     }
 
     if (path is SearchPath) {
-      appState.selectedIndex = 3;
+      appState.selectedIndex = SearchPath.index;
       return;
     }
     if (path is SettingsPath) {
-      appState.selectedIndex = 4;
+      appState.selectedIndex = SettingsPath.index;
       appState.isSelectedUserSettings = false;
     } else if (path is UserSettingsPath) {
-      appState.selectedIndex = 4;
+      appState.selectedIndex = SettingsPath.index;
       appState.isSelectedUserSettings = true;
       return;
     }
@@ -295,7 +304,7 @@ class _AppShellState extends State<AppShell> {
                 icon: Icon(Icons.person),
                 onPressed: () {
                   appState.isSelectedUserSettings = true;
-                  appState.selectedIndex = 4;
+                  appState.selectedIndex = SettingsPath.index;
                 },
               ),
             )
@@ -339,7 +348,7 @@ class _AppShellState extends State<AppShell> {
               icon: Icon(Icons.person),
               onPressed: () {
                 appState.isSelectedUserSettings = true;
-                appState.selectedIndex = 4;
+                appState.selectedIndex = SettingsPath.index;
               },
             ),
           )

@@ -9,16 +9,23 @@ import 'package:flutter_application_1/todo/todo_collection.dart';
 
 class MyAppState extends ChangeNotifier {
   MyAppState()
-      : _selectedIndex = 1,
+      : _selectedIndex = 0,
         _selectedDay = null,
         _selectedSchedule = null,
         _selectedTabInTodo = 'private',
         _isSelectedUserSettings = false;
   int _selectedIndex;
   DateTime _selectedDay;
+  DateTime _selectedCalendarPage;
   Schedule _selectedSchedule;
   String _selectedTabInTodo;
   bool _isSelectedUserSettings;
+
+  DateTime get selectedCalendarPage => _selectedCalendarPage;
+  set selectedCalendarPage(DateTime day) {
+    _selectedCalendarPage = day;
+    notifyListeners();
+  }
 
   bool get isSelectedUserSettings => _isSelectedUserSettings;
   set isSelectedUserSettings(bool value) {
@@ -76,7 +83,6 @@ class MyAppState extends ChangeNotifier {
         .getScheduleList(day)
         .where((element) => element.id == id)
         .toList();
-    print(targetScheduleList);
     if (targetScheduleList.isEmpty) {
       return;
     }

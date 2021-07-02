@@ -12,10 +12,12 @@ class SchedulePage extends StatefulWidget {
     Key key,
     @required this.handleOpenList,
     @required this.scheduleCollection,
+    @required this.handleChangePage,
     @required this.appState,
   }) : super(key: key);
   final MyAppState appState;
   final void Function(DateTime day) handleOpenList;
+  final void Function(DateTime day) handleChangePage;
   final ScheduleCollection scheduleCollection;
   @override
   _SchedulePageState createState() => _SchedulePageState();
@@ -119,6 +121,10 @@ class _SchedulePageState extends State<SchedulePage> {
                     } else if (isSameDay(_focusDay, selectedDay)) {
                       widget.handleOpenList(selectedDay);
                     }
+                  },
+                  onPageChanged: (DateTime day) {
+                    widget.handleChangePage(day);
+                    print(day);
                   },
                 ),
                 Expanded(

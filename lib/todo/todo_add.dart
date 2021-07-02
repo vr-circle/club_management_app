@@ -4,9 +4,9 @@ import 'package:flutter_application_1/todo/task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ToDoAddPage extends StatelessWidget {
-  ToDoAddPage(this.target, this.addTask);
+  ToDoAddPage(this.targetId, this.addTask);
   final Future<void> Function(Task task) addTask;
-  final String target;
+  final String targetId;
   @override
   Widget build(BuildContext context) {
     String _newTaskTitle = '';
@@ -49,7 +49,7 @@ class ToDoAddPage extends StatelessWidget {
                             }
                             addTask(Task(title: _newTaskTitle));
                             await storeService.addTask(
-                                Task(title: _newTaskTitle), target);
+                                Task(title: _newTaskTitle), targetId);
                             Navigator.pop(context);
                           },
                           child: Text('Add'));
