@@ -1,5 +1,5 @@
+import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/store/store_service.dart';
-import 'package:flutter_application_1/todo/task.dart';
 
 class TodoCollection {
   Map<String, List<Task>> taskMap; // {target id, List<Task>}

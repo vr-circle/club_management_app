@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
-import 'package:flutter_application_1/schedule/schedule.dart';
-import 'package:flutter_application_1/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/pages/schedule/schedule.dart';
+import 'package:flutter_application_1/pages/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/pages/todo/task.dart';
+import 'package:flutter_application_1/pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
-import 'package:flutter_application_1/todo/task.dart';
-import 'package:flutter_application_1/todo/todo_collection.dart';
 
 class MyAppState extends ChangeNotifier {
   MyAppState()

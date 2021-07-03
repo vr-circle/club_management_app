@@ -1,15 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/schedule/schedule.dart';
-import 'package:flutter_application_1/todo/task.dart';
+import 'package:flutter_application_1/pages/schedule/schedule.dart';
+import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:intl/intl.dart';
 
 StoreService storeService;
-
-class Club {
-  String id;
-  String name;
-  List<String> members;
-}
 
 class StoreService {
   StoreService({this.userId});
@@ -196,6 +190,11 @@ class StoreService {
         }
       ])
     });
+  }
+
+  Future<Schedule> getScheduleToday(String targetId) async {
+    final today = DateTime.now();
+    final data = (await _store.collection('users').doc(targetId).get());
   }
 
   Future<void> addSchedule(Schedule schedule, String target) async {

@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/user_settings/settings.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,13 +10,12 @@ import 'package:intl/intl.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import 'auth/login_page.dart';
-import 'user_settings/settings.dart';
 import 'route_path.dart';
 import 'app_state.dart';
-import 'pages/fade_animation_page.dart';
+import 'animation_pages/fade_animation_page.dart';
 
 Future<void> main() async {
-  setPathUrlStrategy();
+  setPathUrlStrategy(); // remove # in url
   await Firebase.initializeApp();
   initializeDateFormatting()
       .then((value) => runApp(ProviderScope(child: MyApp())));

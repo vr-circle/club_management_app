@@ -1,16 +1,15 @@
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/schedule/schedule.dart';
-import 'package:flutter_application_1/schedule/schedule_details.dart';
-import 'package:flutter_application_1/schedule/schedule_list_on_day.dart';
-import 'package:flutter_application_1/schedule/schedule_page.dart';
-import 'package:flutter_application_1/search/search.dart';
-import 'package:flutter_application_1/todo/todo_page.dart';
-import 'package:flutter_application_1/user_settings/settings.dart';
-import 'package:flutter_application_1/user_settings/user_account_view.dart';
 
 import 'package:flutter/material.dart';
-import 'home/home.dart';
-import 'pages/fade_animation_page.dart';
+import 'package:flutter_application_1/pages/home/home.dart';
+import 'package:flutter_application_1/pages/schedule/schedule.dart';
+import 'package:flutter_application_1/pages/schedule/schedule_details.dart';
+import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
+import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
+import 'package:flutter_application_1/pages/search/search.dart';
+import 'package:flutter_application_1/pages/user_settings/settings.dart';
+import 'package:flutter_application_1/pages/user_settings/user_account_view.dart';
+import 'animation_pages/fade_animation_page.dart';
 
 class NavigationState {
   String name;

@@ -1,4 +1,4 @@
-import 'package:flutter_application_1/todo/task.dart';
+import 'package:flutter_application_1/pages/todo/task.dart';
 
 class TaskList {
   TaskList(List<Task> initialTask) {
