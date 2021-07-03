@@ -6,7 +6,7 @@ import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
-import 'package:flutter_application_1/pages/search/search.dart';
+import 'package:flutter_application_1/pages/search/search_page.dart';
 import 'package:flutter_application_1/pages/user_settings/settings.dart';
 import 'package:flutter_application_1/pages/user_settings/user_account_view.dart';
 import 'animation_pages/fade_animation_page.dart';
@@ -140,11 +140,17 @@ final List<NavigationState> navigationList = [
       getRoutePath: (appState) {
         return SearchPath();
       },
-      initAppState: (appState) {},
-      onPopPage: (appState) {},
+      initAppState: (appState) {
+        appState.selectedSearchingClubId = null;
+      },
+      onPopPage: (appState) {
+        appState.selectedSearchingClubId = null;
+      },
       getPages: (appState) {
         return [
-          FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage'))
+          FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage')),
+          // if(appState.selectedSearchingClubId != null)
+          //   FadeAnimationPage(child: )
         ];
       }),
   NavigationState(

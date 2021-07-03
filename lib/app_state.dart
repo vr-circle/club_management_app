@@ -13,13 +13,21 @@ class MyAppState extends ChangeNotifier {
         _selectedDay = null,
         _selectedSchedule = null,
         _selectedTabInTodo = 'private',
-        _isSelectedUserSettings = false;
+        _isSelectedUserSettings = false,
+        _selectedSearchingClubId = null;
   int _selectedIndex;
   DateTime _selectedDay;
   DateTime _selectedCalendarPage;
   Schedule _selectedSchedule;
   String _selectedTabInTodo;
   bool _isSelectedUserSettings;
+  String _selectedSearchingClubId;
+
+  String get selectedSearchingClubId => _selectedSearchingClubId;
+  set selectedSearchingClubId(String id) {
+    _selectedSearchingClubId = id;
+    notifyListeners();
+  }
 
   DateTime get selectedCalendarPage => _selectedCalendarPage;
   set selectedCalendarPage(DateTime day) {
