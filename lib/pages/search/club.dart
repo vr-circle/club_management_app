@@ -1,6 +1,7 @@
-class Club {
-  String id;
+class ClubInfo {
+  ClubInfo({this.id, this.name, this.details, this.memberNum});
+  int id;
   String name;
-  DateTime activityDate;
+  int memberNum;
   String details;
 }

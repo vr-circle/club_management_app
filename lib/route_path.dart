@@ -141,16 +141,14 @@ final List<NavigationState> navigationList = [
         return SearchPath();
       },
       initAppState: (appState) {
-        appState.selectedSearchingClubId = null;
+        // appState.selectedSearchingClubId = null;
       },
       onPopPage: (appState) {
-        appState.selectedSearchingClubId = null;
+        // appState.selectedSearchingClubId = null;
       },
       getPages: (appState) {
         return [
           FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage')),
-          // if(appState.selectedSearchingClubId != null)
-          //   FadeAnimationPage(child: )
         ];
       }),
   NavigationState(

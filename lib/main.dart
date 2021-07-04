@@ -177,6 +177,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   RoutePath get currentConfiguration {
     if (appState.getCurrentUser() == null) {
+      print("user account is null");
       return LoginPath();
     }
     return navigationList[appState.selectedIndex].getRoutePath(appState);
