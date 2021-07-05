@@ -9,15 +9,19 @@ class SearchPage extends StatefulWidget {
 int i = 0;
 final dummyClubInfoList = <ClubInfo>[
   ClubInfo(
-      id: i++,
-      name: 'Hitech',
-      details:
-          'hogehogeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      memberNum: 10),
-  ClubInfo(id: i++, name: 'Hitech', details: 'hogehoge', memberNum: 10),
-  ClubInfo(id: i++, name: 'Hitech', details: 'hogehoge', memberNum: 10),
-  ClubInfo(id: i++, name: 'Hitech', details: 'hogehoge', memberNum: 10),
-  ClubInfo(id: i++, name: 'Hitech', details: 'hogehoge', memberNum: 10),
+    id: i++,
+    name: 'Hitech',
+    introduction: 'hogehog',
+    memberNum: 10,
+    otherInfo: [
+      {'hogehoge': 'fugafuga'}
+    ],
+  ),
+  ClubInfo(id: i++, name: 'Hitech', introduction: 'hogehog', memberNum: 10),
+  ClubInfo(id: i++, name: 'Hitech', introduction: 'hogehog', memberNum: 10),
+  ClubInfo(id: i++, name: 'Hitech', introduction: 'hogehog', memberNum: 10),
+  ClubInfo(id: i++, name: 'Hitech', introduction: 'hogehog', memberNum: 10),
+  ClubInfo(id: i++, name: 'Hitech', introduction: 'hogehog', memberNum: 10),
 ];
 
 class SearchPageState extends State<SearchPage> {
@@ -26,16 +30,6 @@ class SearchPageState extends State<SearchPage> {
     return Scaffold(
         body: Column(
       children: [
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: TextField(
-            decoration: InputDecoration(
-                icon: Icon(Icons.search), labelText: 'Search by name'),
-          ),
-        ),
-        SizedBox(
-          height: 16,
-        ),
         ListTile(title: Text('Club list')),
         Expanded(
             child: ListView.builder(
@@ -77,7 +71,8 @@ class SearchPageState extends State<SearchPage> {
                                       SizedBox(
                                         height: 16,
                                       ),
-                                      Text(dummyClubInfoList[index].details),
+                                      Text(dummyClubInfoList[index]
+                                          .introduction),
                                     ]))
                               ],
                             )))));

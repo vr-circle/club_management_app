@@ -297,7 +297,7 @@ class _AppShellState extends State<AppShell> {
     if (size.width > 600) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Club Management App'),
+          title: Text('CMA'),
           actions: [
             Padding(
               padding: EdgeInsets.only(right: 16),
@@ -341,8 +341,12 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Club Management App'),
+        title: Text('CMA'),
         actions: [
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+          ),
           Padding(
             padding: EdgeInsets.all(8),
             child: IconButton(

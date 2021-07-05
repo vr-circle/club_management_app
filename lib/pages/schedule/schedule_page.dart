@@ -124,7 +124,6 @@ class _SchedulePageState extends State<SchedulePage> {
                   },
                   onPageChanged: (DateTime day) {
                     widget.handleChangePage(day);
-                    print(day);
                   },
                 ),
                 Expanded(
