@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
@@ -14,7 +16,8 @@ class MyAppState extends ChangeNotifier {
         _selectedSchedule = null,
         _selectedTabInTodo = 'private',
         _isSelectedUserSettings = false,
-        _selectedSearchingClubId = null;
+        _selectedSearchingClubId = null,
+        _isSelectedSearching = false;
   int _selectedIndex;
   DateTime _selectedDay;
   DateTime _selectedCalendarPage;
@@ -22,6 +25,12 @@ class MyAppState extends ChangeNotifier {
   String _selectedTabInTodo;
   bool _isSelectedUserSettings;
   String _selectedSearchingClubId;
+  bool _isSelectedSearching;
+  bool get isSelectedSearching => _isSelectedSearching;
+  set isSelectedSearching(bool value) {
+    _isSelectedSearching = value;
+    notifyListeners();
+  }
 
   String get selectedSearchingClubId => _selectedSearchingClubId;
   set selectedSearchingClubId(String id) {

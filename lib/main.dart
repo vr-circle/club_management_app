@@ -299,6 +299,19 @@ class _AppShellState extends State<AppShell> {
         appBar: AppBar(
           title: Text('CMA'),
           actions: [
+            Container(
+                width: MediaQuery.of(context).size.width / 3,
+                child: TextField(
+                  onSubmitted: (value) {
+                    // navigate for search page (param = value)
+                  },
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.search),
+                      labelText: 'Search clubs by name or categories'),
+                )),
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 4,
+            ),
             Padding(
               padding: EdgeInsets.only(right: 16),
               child: IconButton(
@@ -345,7 +358,12 @@ class _AppShellState extends State<AppShell> {
         actions: [
           Padding(
             padding: EdgeInsets.all(8),
-            child: IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+            child: IconButton(
+                onPressed: () {
+                  // appState.selectedIndex = SearchPath.index;
+                  // appState.isSelectedSearching = true;
+                },
+                icon: Icon(Icons.search)),
           ),
           Padding(
             padding: EdgeInsets.all(8),

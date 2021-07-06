@@ -5,6 +5,7 @@ class ClubInfo {
     this.introduction,
     this.memberNum,
     this.otherInfo,
+    this.categoryList,
   });
   int id;
   String name;

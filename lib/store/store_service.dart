@@ -1,9 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
+import 'package:flutter_application_1/pages/search/club.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
+import 'package:flutter_application_1/pages/todo/task_list.dart';
 import 'package:intl/intl.dart';
 
 StoreService storeService;
+
+abstract class DatabaseService {
+  // club
+  Future<void> createClub();
+  Future<List<ClubInfo>> getClubList();
+  Future<void> joinClub(ClubInfo targetClub);
+  Future<void> withdrawClub(ClubInfo targetClub);
+
+  // schedule
+  Future<Map<DateTime, List<Schedule>>> getSchedules();
+  Future<void> setSchedule(Schedule schedule);
+  Future<void> deleteSchedule(Schedule schedule);
+
+  // todo
+  Future<TaskList> getTaskList();
+  Future<void> setTask(Task task);
+  Future<void> deleteTask(Task task);
+
+  // settings
+  Future<void> setTheme(ThemeData userTheme);
+}
 
 class StoreService {
   StoreService({this.userId});
