@@ -6,7 +6,10 @@ import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
+import 'package:flutter_application_1/pages/search/search_option_page.dart';
 import 'package:flutter_application_1/pages/search/search_page.dart';
+import 'package:flutter_application_1/pages/todo/todo_add.dart';
+import 'package:flutter_application_1/pages/todo/todo_page.dart';
 import 'package:flutter_application_1/pages/user_settings/settings.dart';
 import 'package:flutter_application_1/pages/user_settings/user_account_view.dart';
 import 'animation_pages/fade_animation_page.dart';
@@ -111,34 +114,34 @@ final List<NavigationState> navigationList = [
             )),
         ];
       }),
-  // NavigationState(
-  //     name: 'Todo',
-  //     icon: Icon(Icons.task_outlined),
-  //     location: '/todo',
-  //     getRoutePath: (appState) {
-  //       return TodoPath(appState.selectedTabInTodo);
-  //     },
-  //     initAppState: (appState) {
-  //       appState.selectedTabInTodo = 'private';
-  //     },
-  //     onPopPage: (appState) {
-  //       appState.selectedTabInTodo = 'private';
-  //     },
-  //     getPages: (appState) {
-  //       return [
-  //         FadeAnimationPage(
-  //             child: TodoPage(
-  //               todoCollection: appState.todoCollection,
-  //             ),
-  //             key: ValueKey('TodoPage'))
-  //       ];
-  //     }),
+  NavigationState(
+      name: 'Todo',
+      icon: Icon(Icons.task_outlined),
+      location: '/todo',
+      getRoutePath: (appState) {
+        return TodoPath(appState.selectedTabInTodo);
+      },
+      initAppState: (appState) {
+        appState.selectedTabInTodo = 'private';
+      },
+      onPopPage: (appState) {
+        appState.selectedTabInTodo = 'private';
+      },
+      getPages: (appState) {
+        return [
+          FadeAnimationPage(
+              child: TodoPage(
+                appState: appState,
+              ),
+              key: ValueKey('TodoPage'))
+        ];
+      }),
   NavigationState(
       name: 'Search',
       icon: Icon(Icons.search),
       location: '/search',
       getRoutePath: (appState) {
-        return SearchPath();
+        return SearchPath(appState.searchingParams);
       },
       initAppState: (appState) {
         // appState.selectedSearchingClubId = null;
@@ -149,6 +152,12 @@ final List<NavigationState> navigationList = [
       getPages: (appState) {
         return [
           FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage')),
+          if (appState.isSearchingMode)
+            MaterialPage(
+                key: ValueKey('SearchOptionPage'),
+                child: SearchOptionPage(
+                  appState: appState,
+                )),
         ];
       }),
   NavigationState(
@@ -221,12 +230,17 @@ class TodoAddPath extends RoutePath {
   TodoAddPath(this.targetID);
 }
 
+class GroupViewPath extends RoutePath {
+  static final int index = 3;
+}
+
 class SearchPath extends RoutePath {
-  static final int index = 2;
+  final List<String> keywords;
+  SearchPath(this.keywords);
 }
 
 class SettingsPath extends RoutePath {
-  static final int index = 3;
+  static final int index = 4;
 }
 
 class UserSettingsPath extends RoutePath {}

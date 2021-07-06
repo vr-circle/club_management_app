@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/pages/search/club.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
@@ -17,7 +18,9 @@ class MyAppState extends ChangeNotifier {
         _selectedTabInTodo = 'private',
         _isSelectedUserSettings = false,
         _selectedSearchingClubId = null,
-        _isSelectedSearching = false;
+        _isSelectedSearching = false,
+        _searchingParams = <String>[],
+        _isSearchMode = false;
   int _selectedIndex;
   DateTime _selectedDay;
   DateTime _selectedCalendarPage;
@@ -26,6 +29,25 @@ class MyAppState extends ChangeNotifier {
   bool _isSelectedUserSettings;
   String _selectedSearchingClubId;
   bool _isSelectedSearching;
+  List<String> _searchingParams;
+  bool _isSearchMode;
+
+  Future<List<ClubInfo>> getClubList() async {
+    return (await storeService.getClubList());
+  }
+
+  bool get isSearchingMode => _isSearchMode;
+  set isSearchingMode(bool v) {
+    _isSearchMode = v;
+    notifyListeners();
+  }
+
+  List<String> get searchingParams => _searchingParams;
+  set searchingParams(List<String> value) {
+    _searchingParams = value;
+    notifyListeners();
+  }
+
   bool get isSelectedSearching => _isSelectedSearching;
   set isSelectedSearching(bool value) {
     _isSelectedSearching = value;

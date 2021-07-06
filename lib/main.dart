@@ -100,8 +100,12 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         }
         return TodoPath('private');
       }
+      if (uri.pathSegments.first == 'groupview') {
+        return GroupViewPath();
+      }
       if (uri.pathSegments.first == 'search') {
-        return SearchPath();
+        print(uri.queryParameters['keywords']);
+        return SearchPath([]);
       }
       if (uri.pathSegments.first == 'settings') {
         if (uri.pathSegments.length >= 2) {
@@ -236,8 +240,12 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedTabInTodo = path.targetID;
     }
 
+    if (path is GroupViewPath) {
+      appState.selectedIndex = GroupViewPath.index;
+    }
+
     if (path is SearchPath) {
-      appState.selectedIndex = SearchPath.index;
+      // appState.searchingParam = null;
       return;
     }
     if (path is SettingsPath) {
@@ -354,14 +362,13 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('CMA'),
+        title: const Text('CMA'),
         actions: [
           Padding(
             padding: EdgeInsets.all(8),
             child: IconButton(
                 onPressed: () {
-                  // appState.selectedIndex = SearchPath.index;
-                  // appState.isSelectedSearching = true;
+                  appState.isSearchingMode = true;
                 },
                 icon: Icon(Icons.search)),
           ),

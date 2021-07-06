@@ -8,6 +8,7 @@ class ScheduleCollection {
   ScheduleCollection() {
     this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
   }
+  void Function() notifyListeners;
   LinkedHashMap<DateTime, List<Schedule>> _schedules;
   LinkedHashMap<DateTime, List<Schedule>> get schedules => _schedules;
   int _getHashCode(DateTime key) {

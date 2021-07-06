@@ -37,6 +37,11 @@ class StoreService {
   Map<String, dynamic> clubJsonData;
   List<String> taskTitleList;
 
+  Future<List<ClubInfo>> getClubList() async {
+    await Future.delayed(Duration(seconds: 2));
+    return dummyClubInfoList;
+  }
+
   Future<String> getClubName(String targetID) async {
     final data = await this._store.collection('clubs').doc(targetID).get();
     return data.data()['name'];
@@ -259,3 +264,37 @@ class StoreService {
     });
   }
 }
+
+int i = 0;
+final dummyClubInfoList = <ClubInfo>[
+  ClubInfo(
+      id: i++,
+      name: 'Hitech',
+      introduction: 'hogehog',
+      memberNum: 10,
+      otherInfo: [
+        {'hogehoge': 'fugafuga'}
+      ],
+      categoryList: [
+        '文化',
+        'circle'
+      ]),
+  ClubInfo(
+      id: i++,
+      name: 'soccer club',
+      introduction: 'hogehog',
+      memberNum: 10,
+      categoryList: ['club', '運動']),
+  ClubInfo(
+      id: i++,
+      name: 'soccer club',
+      introduction: 'hogehog',
+      memberNum: 10,
+      categoryList: ['club', '運動']),
+  ClubInfo(
+      id: i++,
+      name: 'soccer club',
+      introduction: 'hogehog',
+      memberNum: 10,
+      categoryList: ['club', '運動']),
+];
