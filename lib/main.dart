@@ -86,19 +86,19 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       if (uri.pathSegments.first == 'todo') {
         if (uri.pathSegments.length == 2) {
           try {
-            return TodoPath(uri.pathSegments[1]);
+            return TodoPath(int.parse(uri.pathSegments[1]));
           } catch (e) {
             print(e);
           }
         } else if (uri.pathSegments.length == 3 &&
             uri.pathSegments[2] == 'add') {
           try {
-            return TodoAddPath(uri.pathSegments[1]);
+            return TodoAddPath(int.parse(uri.pathSegments[1]));
           } catch (e) {
             print(e);
           }
         }
-        return TodoPath('private');
+        return TodoPath(0);
       }
       if (uri.pathSegments.first == 'groupview') {
         return GroupViewPath();
@@ -148,10 +148,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
     // todo
     if (path is TodoPath) {
-      return RouteInformation(location: '/todo/${path.targetID}');
+      // get target tab name from tab index.
+      return RouteInformation(location: '/todo/${path.targetTabIndex}');
     }
     if (path is TodoAddPath) {
-      return RouteInformation(location: '/todo/${path.targetID}/add');
+      return RouteInformation(location: '/todo/${path.targetTabIndex}/add');
     }
 
     // search
@@ -233,11 +234,11 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
     if (path is TodoPath) {
       appState.selectedIndex = TodoPath.index;
-      appState.selectedTabInTodo = path.targetID;
+      appState.selectedTabInTodo = path.targetTabIndex;
       return;
     } else if (path is TodoAddPath) {
       appState.selectedIndex = TodoPath.index;
-      appState.selectedTabInTodo = path.targetID;
+      appState.selectedTabInTodo = path.targetTabIndex;
     }
 
     if (path is GroupViewPath) {

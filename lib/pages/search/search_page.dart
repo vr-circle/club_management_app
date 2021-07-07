@@ -72,7 +72,6 @@ class SearchPageState extends State<SearchPage> {
       for (final keyword in keywordList) {
         if (element.categoryList.contains(keyword) ||
             element.name.contains(keyword)) {
-          print(element.id);
           res.add(element);
           break;
         }

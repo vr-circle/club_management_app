@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/pages/todo/todo_collection.dart';
-import 'package:flutter_application_1/route_path.dart';
 
 class TodoPage extends StatefulWidget {
   TodoPage({Key key, @required this.appState}) : super(key: key);
@@ -9,123 +8,100 @@ class TodoPage extends StatefulWidget {
   TodoPageState createState() => TodoPageState();
 }
 
-class TodoPageState extends State<TodoPage>
-    with SingleTickerProviderStateMixin {
-  TodoRouterDelegate _routerDelegate;
-  ChildBackButtonDispatcher _backButtonDispatcher;
+class TodoPageState extends State<TodoPage> {
+  Future<Map<String, TodoCollection>> futureTabs;
+  Map<String, TodoCollection> tabs;
 
-  Future<List<String>> futureTabs;
-  List<String> tabs;
-
-  Future<List<String>> getTabs() async {
-    await Future.delayed(Duration(seconds: 1));
-    tabs = ['private', 'circle'];
+  Future<Map<String, TodoCollection>> getTabs() async {
+    await Future.delayed(Duration(seconds: 2));
+    tabs = {'Private': TodoCollection(), 'ClubA': TodoCollection()};
     return tabs;
   }
 
   @override
   void initState() {
-    _routerDelegate = TodoRouterDelegate(widget.appState);
     futureTabs = getTabs();
     super.initState();
   }
 
   @override
-  void didUpdateWidget(covariant TodoPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _routerDelegate.appState = widget.appState;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Defer back button dispatching to the child router
-    _backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher
-        .createChildBackButtonDispatcher();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: futureTabs,
-      builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        return DefaultTabController(
-            length: tabs.length,
-            child: Scaffold(
-                appBar: AppBar(
-                  flexibleSpace: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TabBar(
-                          tabs: this
-                              .tabs
-                              .map((e) => Tab(
-                                    text: e,
-                                  ))
-                              .toList())
-                    ],
-                  ),
-                ),
-                body: Router(
-                  routerDelegate: _routerDelegate,
-                  backButtonDispatcher: _backButtonDispatcher,
-                )));
-      },
-    );
+        future: futureTabs,
+        builder: (BuildContext context,
+            AsyncSnapshot<Map<String, TodoCollection>> snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return TodoTabController(tabs: tabs, appState: widget.appState);
+        });
   }
 }
 
-class TodoRouterDelegate extends RouterDelegate<RoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  MyAppState get appState => _appState;
-  MyAppState _appState;
-  set appState(MyAppState value) {
-    if (value == _appState) {
-      return;
-    }
-    _appState = value;
-    notifyListeners();
+class TodoTabController extends StatefulWidget {
+  TodoTabController({Key key, @required this.tabs, @required this.appState})
+      : super(key: key);
+  MyAppState appState;
+  Map<String, TodoCollection> tabs;
+  @override
+  TodoTabControllerState createState() => TodoTabControllerState();
+}
+
+class TodoTabControllerState extends State<TodoTabController>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
+
+  @override
+  void initState() {
+    _tabController = TabController(
+        length: widget.tabs.length,
+        vsync: this,
+        initialIndex: widget.appState.selectedTabInTodo);
+    _tabController.addListener(_handleTabSelection);
+    super.initState();
   }
 
-  TodoRouterDelegate(this._appState);
+  @override
+  void dispose() {
+    this._tabController.dispose();
+    super.dispose();
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    widget.appState.selectedTabInTodo = _tabController.index;
+    print(widget.appState.selectedTabInTodo);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      pages: [
-        MaterialPage(
-          child: TabBarView(children: [
-            Container(
-              child: Center(
-                child: Text('private'),
-              ),
-            ),
-            Container(
-              child: Center(
-                child: Text('circle'),
-              ),
-            )
-          ]),
-        )
-      ],
-      onPopPage: (route, result) {
-        // navigationList[appState.selectedIndex].onPopPage(appState);
-        notifyListeners();
-        return route.didPop(result);
-      },
+    return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TabBar(
+                controller: _tabController,
+                tabs: widget.tabs.entries
+                    .map((e) => Tab(
+                          text: e.key,
+                        ))
+                    .toList())
+          ],
+        ),
+      ),
+      body: Builder(builder: (context) {
+        return TabBarView(
+          controller: _tabController,
+          children: widget.tabs.entries
+              .map((e) => Center(
+                    child: Text(e.key),
+                  ))
+              .toList(),
+        );
+      }),
     );
-  }
-
-  @override
-  Future<void> setNewRoutePath(RoutePath path) async {
-    assert(false);
   }
 }

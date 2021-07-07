@@ -15,7 +15,7 @@ class MyAppState extends ChangeNotifier {
       : _selectedIndex = 0,
         _selectedDay = null,
         _selectedSchedule = null,
-        _selectedTabInTodo = 'private',
+        _selectedTabInTodo = 0,
         _isSelectedUserSettings = false,
         _selectedSearchingClubId = null,
         _isSelectedSearching = false,
@@ -25,7 +25,7 @@ class MyAppState extends ChangeNotifier {
   DateTime _selectedDay;
   DateTime _selectedCalendarPage;
   Schedule _selectedSchedule;
-  String _selectedTabInTodo;
+  int _selectedTabInTodo;
   bool _isSelectedUserSettings;
   String _selectedSearchingClubId;
   bool _isSelectedSearching;
@@ -92,14 +92,14 @@ class MyAppState extends ChangeNotifier {
 
   // ---------------- todo ----------------
   TodoCollection todoCollection;
-  String get selectedTabInTodo => _selectedTabInTodo;
-  set selectedTabInTodo(String target) {
+  int get selectedTabInTodo => _selectedTabInTodo;
+  set selectedTabInTodo(int target) {
     _selectedTabInTodo = target;
     notifyListeners();
   }
 
-  void addTask(Task newTask, String target) {
-    todoCollection.addTask(newTask, target);
+  void addTask(Task newTask, String targetGroupID) {
+    todoCollection.addTask(newTask, targetGroupID);
     notifyListeners();
   }
 

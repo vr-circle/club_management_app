@@ -44,7 +44,12 @@ final List<NavigationState> navigationList = [
       initAppState: (appState) {},
       onPopPage: (appState) {},
       getPages: (appState) {
-        return [FadeAnimationPage(child: HomePage())];
+        return [
+          FadeAnimationPage(
+              child: HomePage(
+            appState: appState,
+          ))
+        ];
       }),
   NavigationState(
       name: 'Schedule',
@@ -122,10 +127,10 @@ final List<NavigationState> navigationList = [
         return TodoPath(appState.selectedTabInTodo);
       },
       initAppState: (appState) {
-        appState.selectedTabInTodo = 'private';
+        appState.selectedTabInTodo = 0;
       },
       onPopPage: (appState) {
-        appState.selectedTabInTodo = 'private';
+        appState.selectedTabInTodo = 0;
       },
       getPages: (appState) {
         return [
@@ -144,10 +149,12 @@ final List<NavigationState> navigationList = [
         return SearchPath(appState.searchingParams);
       },
       initAppState: (appState) {
-        // appState.selectedSearchingClubId = null;
+        appState.selectedSearchingClubId = null;
+        appState.isSearchingMode = false;
       },
       onPopPage: (appState) {
-        // appState.selectedSearchingClubId = null;
+        appState.selectedSearchingClubId = null;
+        appState.isSearchingMode = false;
       },
       getPages: (appState) {
         return [
@@ -221,13 +228,13 @@ class ScheduleListViewPath extends RoutePath {
 
 class TodoPath extends RoutePath {
   static final int index = 2;
-  final String targetID;
-  TodoPath(this.targetID);
+  final int targetTabIndex;
+  TodoPath(this.targetTabIndex);
 }
 
 class TodoAddPath extends RoutePath {
-  final String targetID;
-  TodoAddPath(this.targetID);
+  final int targetTabIndex;
+  TodoAddPath(this.targetTabIndex);
 }
 
 class GroupViewPath extends RoutePath {
