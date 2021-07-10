@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
 
 // handle delete, add and toggle
+// todo : add task in specific group
 
 class TaskList {
   List<Task> taskList;
