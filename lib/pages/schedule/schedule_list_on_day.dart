@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'schedule.dart';
-import 'schedule_details.dart';
 import 'schedule_add.dart';
 
 class ScheduleListOnDay extends StatefulWidget {

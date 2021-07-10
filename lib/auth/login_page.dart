@@ -45,6 +45,7 @@ class LoginPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('build login page');
     return Scaffold(
         appBar: AppBar(
           title: Text('Club Management App'),

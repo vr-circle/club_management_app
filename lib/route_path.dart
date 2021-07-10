@@ -8,7 +8,6 @@ import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
 import 'package:flutter_application_1/pages/search/search_option_page.dart';
 import 'package:flutter_application_1/pages/search/search_page.dart';
-import 'package:flutter_application_1/pages/todo/todo_add.dart';
 import 'package:flutter_application_1/pages/todo/todo_page.dart';
 import 'package:flutter_application_1/pages/user_settings/settings.dart';
 import 'package:flutter_application_1/pages/user_settings/user_account_view.dart';

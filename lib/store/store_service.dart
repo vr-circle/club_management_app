@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/pages/search/club.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
-import 'package:flutter_application_1/pages/todo/task_list.dart';
 import 'package:intl/intl.dart';
 
 StoreService storeService;
@@ -222,8 +221,15 @@ class StoreService {
   }
 
   Future<Schedule> getScheduleToday(String targetId) async {
-    final today = DateTime.now();
-    final data = (await _store.collection('users').doc(targetId).get());
+    // final today = DateTime.now();
+    // final data = (await _store.collection('users').doc(targetId).get());
+    return Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'hogehoge',
+        place: 'place',
+        createdBy: 'suine');
   }
 
   Future<void> addSchedule(Schedule schedule, String target) async {

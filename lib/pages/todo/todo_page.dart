@@ -166,6 +166,10 @@ class TaskListTabState extends State<TaskListTab> {
                 return TaskExpansionTile(
                   groupName: e.key,
                   taskList: TaskList(e.value),
+                  deleteGroup: (String groupName) async {
+                    await todoCollection.deleteGroup(groupName);
+                    setState(() {});
+                  },
                 );
               }).toList(),
             ),
@@ -175,9 +179,15 @@ class TaskListTabState extends State<TaskListTab> {
 }
 
 class TaskExpansionTile extends StatefulWidget {
-  TaskExpansionTile({Key key, this.groupName, this.taskList}) : super(key: key);
+  TaskExpansionTile(
+      {Key key,
+      @required this.groupName,
+      @required this.taskList,
+      @required this.deleteGroup})
+      : super(key: key);
   final String groupName;
   final TaskList taskList;
+  final Future<void> Function(String groupName) deleteGroup;
   TaskExpansionTileState createState() => TaskExpansionTileState();
 }
 
@@ -214,62 +224,87 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionTile(
-        trailing: IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () async {
-            TextEditingController controller = TextEditingController();
-            await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return SimpleDialog(
-                    title: Text(''),
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(8),
-                        child: TextField(
-                          controller: controller,
-                          decoration: InputDecoration(
-                            labelText: 'Enter new task title',
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            addTask(Task(title: controller.text));
-                            Navigator.pop(context);
-                          },
-                          child: Text('add')),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text('cancel')),
-                    ],
-                  );
-                });
-          },
-        ),
-        initiallyExpanded: isOpenExpansion,
-        leading: isOpenExpansion ? Icon(Icons.folder_open) : Icon(Icons.folder),
-        onExpansionChanged: (value) {
-          setState(() {
-            isOpenExpansion = value;
-          });
-        },
-        title: Text(widget.groupName),
-        children: widget.taskList.taskList.map((Task task) {
-          return TaskListTile(
-              task: task,
-              deleteTask: () {
-                deleteTask(task);
-              },
-              addTask: () {
-                addTask(task);
-              },
-              toggleDone: () {
-                toggleDone(task);
+    return GestureDetector(
+        onLongPress: () async {
+          await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SimpleDialog(
+                  title: Text(widget.groupName),
+                  children: [
+                    TextButton(
+                        onPressed: () async {
+                          print('Delete');
+                          await widget.deleteGroup(widget.groupName);
+                          Navigator.pop(context);
+                        },
+                        child: Text('Delete')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('Cancel')),
+                  ],
+                );
               });
-        }).toList());
+        },
+        child: ExpansionTile(
+            trailing: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () async {
+                TextEditingController controller = TextEditingController();
+                await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SimpleDialog(
+                        title: Text(''),
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8),
+                            child: TextField(
+                              controller: controller,
+                              decoration: InputDecoration(
+                                labelText: 'Enter new task title',
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                addTask(Task(title: controller.text));
+                                Navigator.pop(context);
+                              },
+                              child: Text('add')),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('cancel')),
+                        ],
+                      );
+                    });
+              },
+            ),
+            initiallyExpanded: isOpenExpansion,
+            leading:
+                isOpenExpansion ? Icon(Icons.folder_open) : Icon(Icons.folder),
+            onExpansionChanged: (value) {
+              setState(() {
+                isOpenExpansion = value;
+              });
+            },
+            title: Text(widget.groupName),
+            children: widget.taskList.taskList.map((Task task) {
+              return TaskListTile(
+                  task: task,
+                  deleteTask: () {
+                    deleteTask(task);
+                  },
+                  addTask: () {
+                    addTask(task);
+                  },
+                  toggleDone: () {
+                    toggleDone(task);
+                  });
+            }).toList()));
   }
 }

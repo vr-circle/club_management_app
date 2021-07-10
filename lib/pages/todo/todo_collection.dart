@@ -67,6 +67,11 @@ class TodoCollection {
         .toList();
   }
 
+  Future<void> deleteGroup(String groupName) async {
+    await Future.delayed(Duration(seconds: 1));
+    this.taskMap.remove(groupName);
+  }
+
   Future<void> toggleDone(Task task, String target) async {
     task.toggleDone();
   }

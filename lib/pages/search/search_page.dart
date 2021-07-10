@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/pages/search/club.dart';
 
 class SearchPage extends StatefulWidget {

@@ -117,7 +117,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       }
     }
     // if not true in any case
-    return HomePath();
+    return LoginPath();
   }
 
   @override
@@ -184,8 +184,10 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     if (appState.getCurrentUser() == null) {
       print("user account is null");
       return LoginPath();
+    } else {
+      print("user account is not null");
+      return navigationList[appState.selectedIndex].getRoutePath(appState);
     }
-    return navigationList[appState.selectedIndex].getRoutePath(appState);
   }
 
   @override
@@ -306,7 +308,19 @@ class _AppShellState extends State<AppShell> {
     if (size.width > 600) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('CMA'),
+          title: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: 90,
+              child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      appState.selectedIndex = HomePath.index;
+                    },
+                    child: Row(
+                      children: [FlutterLogo(), Text('CMA')],
+                    ),
+                  ))),
           actions: [
             Container(
                 width: MediaQuery.of(context).size.width / 3,
@@ -363,16 +377,28 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CMA'),
+        title: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: 90,
+            child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    appState.selectedIndex = HomePath.index;
+                  },
+                  child: Row(
+                    children: [FlutterLogo(), Text('CMA')],
+                  ),
+                ))),
         actions: [
-          Padding(
-            padding: EdgeInsets.all(8),
-            child: IconButton(
-                onPressed: () {
-                  appState.isSearchingMode = true;
-                },
-                icon: Icon(Icons.search)),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.all(8),
+          //   child: IconButton(
+          //       onPressed: () {
+          //         appState.isSearchingMode = true;
+          //       },
+          //       icon: Icon(Icons.search)),
+          // ),
           Padding(
             padding: EdgeInsets.all(8),
             child: IconButton(
