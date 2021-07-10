@@ -21,7 +21,7 @@ abstract class DatabaseService {
   Future<void> deleteSchedule(Schedule schedule);
 
   // todo
-  Future<TaskList> getTaskList();
+  // Future<TaskList> getTaskList();
   Future<void> setTask(Task task);
   Future<void> deleteTask(Task task);
 

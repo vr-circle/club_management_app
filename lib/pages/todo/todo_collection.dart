@@ -2,26 +2,53 @@ import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class TodoCollection {
-  Map<String, List<Task>> taskMap; // {target id, List<Task>}
-  Map<String, String> clubNames; // {target id, target name}
+  Map<String, List<Task>> taskMap; // {target group id, List<Task>}
   TodoCollection() {
-    taskMap = Map<String, List<Task>>();
+    this.taskMap = Map<String, List<Task>>();
   }
 
-  Future<void> getClubNames() async {
-    this.taskMap.keys.forEach((element) async {
-      clubNames[element] = (await storeService.getClubName(element));
-    });
+  get length => taskMap.length;
+
+  Future<Map<String, List<Task>>> initTasks() async {
+    await Future.delayed(Duration(seconds: 1));
+    taskMap = {
+      'all0': [
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+      ],
+      'all1': [
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+      ],
+      'all2': [
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+      ],
+      'all3': [
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+      ],
+      'seconds': [
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+        Task(title: 'hogehoge'),
+      ]
+    };
+    return taskMap;
   }
 
-  Future<void> initTasks() async {
-    this.taskMap = await storeService.getTaskMap();
-    await getClubNames();
-  }
-
-  Future<void> addTask(Task newTask, String target) async {
-    await storeService.addTask(newTask, target);
-    this.taskMap[target] = [...this.taskMap[target], newTask];
+  Future<void> addTask(Task newTask, String targetGroupId) async {
+    await storeService.addTask(newTask, targetGroupId);
+    this.taskMap[targetGroupId] = [...this.taskMap[targetGroupId], newTask];
   }
 
   Future<void> deleteTask(Task targetTask, String targetGroupId) async {

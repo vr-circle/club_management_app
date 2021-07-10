@@ -169,6 +169,8 @@ class MyAppState extends ChangeNotifier {
   }
 
   User getCurrentUser() {
-    return _authService.getCurrentUser();
+    final x = _authService.getCurrentUser();
+    notifyListeners();
+    return x;
   }
 }

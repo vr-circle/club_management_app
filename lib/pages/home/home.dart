@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/route_path.dart';
 
-// class HomePage extends StatefulWidget
-
 class HomePage extends StatelessWidget {
   HomePage({Key key, @required this.appState}) : super(key: key);
   final MyAppState appState;
