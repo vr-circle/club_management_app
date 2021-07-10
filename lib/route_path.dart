@@ -6,6 +6,7 @@ import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
+import 'package:flutter_application_1/pages/search/club_details.dart';
 import 'package:flutter_application_1/pages/search/search_option_page.dart';
 import 'package:flutter_application_1/pages/search/search_page.dart';
 import 'package:flutter_application_1/pages/todo/todo_page.dart';
@@ -15,7 +16,6 @@ import 'animation_pages/fade_animation_page.dart';
 
 class NavigationState {
   String name;
-  String location;
   Icon icon;
   RoutePath Function(MyAppState appState) getRoutePath;
   void Function(MyAppState appState) initAppState;
@@ -24,7 +24,6 @@ class NavigationState {
   NavigationState({
     @required this.name,
     @required this.icon,
-    @required this.location,
     @required this.getRoutePath,
     @required this.initAppState,
     @required this.onPopPage,
@@ -36,7 +35,6 @@ final List<NavigationState> navigationList = [
   NavigationState(
       name: 'Home',
       icon: Icon(Icons.home),
-      location: '/home',
       getRoutePath: (appState) {
         return HomePath();
       },
@@ -53,7 +51,6 @@ final List<NavigationState> navigationList = [
   NavigationState(
       name: 'Schedule',
       icon: Icon(Icons.calendar_today),
-      location: '/schedule',
       getRoutePath: (appState) {
         if (appState.selectedDay != null) {
           if (appState.selectedSchedule != null) {
@@ -121,7 +118,6 @@ final List<NavigationState> navigationList = [
   NavigationState(
       name: 'Todo',
       icon: Icon(Icons.task_outlined),
-      location: '/todo',
       getRoutePath: (appState) {
         return TodoPath(appState.selectedTabInTodo);
       },
@@ -143,33 +139,39 @@ final List<NavigationState> navigationList = [
   NavigationState(
       name: 'Search',
       icon: Icon(Icons.search),
-      location: '/search',
       getRoutePath: (appState) {
-        return SearchPath(appState.searchingParams);
+        if (appState.selectedSearchingClubId.isNotEmpty) {
+          return ClubDetailViewPath(appState.selectedSearchingClubId);
+        }
+        return GroupViewPath(appState.searchingParams);
       },
       initAppState: (appState) {
-        appState.selectedSearchingClubId = null;
         appState.isSearchingMode = false;
+        appState.selectedSearchingClubId = '';
       },
       onPopPage: (appState) {
-        appState.selectedSearchingClubId = null;
         appState.isSearchingMode = false;
+        appState.selectedSearchingClubId = '';
       },
       getPages: (appState) {
         return [
-          FadeAnimationPage(child: SearchPage(), key: ValueKey('SearchPage')),
-          if (appState.isSearchingMode)
+          FadeAnimationPage(
+            key: ValueKey('SearchPage'),
+            child: SearchPage(
+              appState: appState,
+            ),
+          ),
+          if (appState.selectedSearchingClubId.isNotEmpty)
             MaterialPage(
-                key: ValueKey('SearchOptionPage'),
-                child: SearchOptionPage(
-                  appState: appState,
+                key: ValueKey('ClubDetail'),
+                child: ClubDetailPage(
+                  clubId: appState.selectedSearchingClubId,
                 )),
         ];
       }),
   NavigationState(
       name: 'Settings',
       icon: Icon(Icons.settings),
-      location: '/settings',
       getRoutePath: (appState) {
         if (appState.isSelectedUserSettings) {
           return UserSettingsPath();
@@ -238,12 +240,19 @@ class TodoAddPath extends RoutePath {
 
 class GroupViewPath extends RoutePath {
   static final int index = 3;
+  String searchParam;
+  GroupViewPath(this.searchParam);
 }
 
-class SearchPath extends RoutePath {
-  final List<String> keywords;
-  SearchPath(this.keywords);
+class ClubDetailViewPath extends RoutePath {
+  final String id;
+  ClubDetailViewPath(this.id);
 }
+
+// class SearchPath extends RoutePath {
+//   final List<String> keywords;
+//   SearchPath(this.keywords);
+// }
 
 class SettingsPath extends RoutePath {
   static final int index = 4;

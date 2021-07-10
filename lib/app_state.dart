@@ -15,9 +15,9 @@ class MyAppState extends ChangeNotifier {
         _selectedSchedule = null,
         _selectedTabInTodo = 0,
         _isSelectedUserSettings = false,
-        _selectedSearchingClubId = null,
+        _selectedSearchingClubId = '',
         _isSelectedSearching = false,
-        _searchingParams = <String>[],
+        _searchingParams = '',
         _isSearchMode = false;
   int _selectedIndex;
   DateTime _selectedDay;
@@ -27,7 +27,7 @@ class MyAppState extends ChangeNotifier {
   bool _isSelectedUserSettings;
   String _selectedSearchingClubId;
   bool _isSelectedSearching;
-  List<String> _searchingParams;
+  String _searchingParams;
   bool _isSearchMode;
 
   Future<List<ClubInfo>> getClubList() async {
@@ -40,8 +40,8 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> get searchingParams => _searchingParams;
-  set searchingParams(List<String> value) {
+  String get searchingParams => _searchingParams;
+  set searchingParams(String value) {
     _searchingParams = value;
     notifyListeners();
   }

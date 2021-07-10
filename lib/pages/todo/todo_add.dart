@@ -13,10 +13,10 @@ class ToDoAddPage extends StatelessWidget {
     final _textEditingController = TextEditingController();
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add a task'),
+          title: const Text('Add a task'),
         ),
         body: Container(
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Consumer(builder: (context, watch, child) {
@@ -52,7 +52,7 @@ class ToDoAddPage extends StatelessWidget {
                                 Task(title: _newTaskTitle), targetId);
                             Navigator.pop(context);
                           },
-                          child: Text('Add'));
+                          child: const Text('Add'));
                     }),
                     TextButton(
                         onPressed: () {
@@ -60,7 +60,7 @@ class ToDoAddPage extends StatelessWidget {
                         },
                         child: Text(
                           'Cancel',
-                          style: TextStyle(color: Colors.red),
+                          style: const TextStyle(color: Colors.red),
                         )),
                   ],
                 )),

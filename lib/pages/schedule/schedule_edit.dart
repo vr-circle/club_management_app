@@ -91,7 +91,7 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
               // widget.addSchedule(this.newSchedule, this._selectedTargetUsers);
               Navigator.of(context).pop();
             },
-            child: Text('Edit'),
+            child: const Text('Edit'),
           ),
         ],
       ),
@@ -103,7 +103,7 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('target'),
+                  const Text('target'),
                   DropdownButton(
                     value: this._selectedTargetUser,
                     items: ['private', 'circle']
@@ -122,17 +122,17 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
               ),
               TextField(
                 controller: this._titleTextEditingController,
-                decoration: InputDecoration(
-                    icon: Icon(Icons.title), labelText: 'Title'),
+                decoration: const InputDecoration(
+                    icon: const Icon(Icons.title), labelText: 'Title'),
               ),
               TextField(
                 controller: this._placeTextEditingController,
-                decoration: InputDecoration(
-                    icon: Icon(Icons.place), labelText: 'Place'),
+                decoration: const InputDecoration(
+                    icon: const Icon(Icons.place), labelText: 'Place'),
               ),
               TextField(
-                decoration: InputDecoration(
-                    icon: Icon(Icons.timer), labelText: 'Start time'),
+                decoration: const InputDecoration(
+                    icon: const Icon(Icons.timer), labelText: 'Start time'),
                 onTap: () async {
                   var newDate = await _selectTime(context);
                   this._startTimeTextEditingController.text =
@@ -145,8 +145,8 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
                 readOnly: true,
               ),
               TextField(
-                decoration: InputDecoration(
-                    icon: Icon(Icons.timer), labelText: 'End time'),
+                decoration: const InputDecoration(
+                    icon: const Icon(Icons.timer), labelText: 'End time'),
                 onTap: () async {
                   var newDate = await _selectTime(context);
                   this._endTimeTextEditingController.text =
@@ -160,8 +160,8 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
               ),
               TextField(
                 controller: this._detailsTextEditingController,
-                decoration: InputDecoration(
-                    icon: Icon(Icons.content_copy), labelText: 'Details'),
+                decoration: const InputDecoration(
+                    icon: const Icon(Icons.content_copy), labelText: 'Details'),
               ),
             ],
           )),

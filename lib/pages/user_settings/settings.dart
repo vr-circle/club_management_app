@@ -33,20 +33,20 @@ class SettingsPage extends HookWidget {
         body: SingleChildScrollView(
       child: Column(children: [
         const ListTile(
-          title: Text('Account'),
+          title: const Text('Account'),
         ),
         ListTile(
-          leading: Icon(Icons.account_box),
-          title: Text('Account management'),
+          leading: const Icon(Icons.account_box),
+          title: const Text('Account management'),
           onTap: () {
             handleOpenUserSettings();
           },
         ),
         ListTile(
-          leading: Icon(Icons.logout),
-          title: Text(
+          leading: const Icon(Icons.logout),
+          title: const Text(
             'SignOut',
-            style: TextStyle(color: Colors.red),
+            style: const TextStyle(color: Colors.red),
           ),
           onTap: () async {
             await signOut();
@@ -60,8 +60,8 @@ class SettingsPage extends HookWidget {
         ),
         Consumer(builder: (context, watch, child) {
           return ListTile(
-            leading: Icon(Icons.dark_mode),
-            title: Text('Dark mode'),
+            leading: const Icon(Icons.dark_mode),
+            title: const Text('Dark mode'),
             onTap: () async {
               watch(darkModeProvider.notifier).changeSwitch(!isDarkMode);
               await storeService.setUserTheme(!isDarkMode ? 'dark' : 'normal');
@@ -79,11 +79,11 @@ class SettingsPage extends HookWidget {
         Divider(
           color: isDarkMode ? Colors.white : Colors.black,
         ),
-        ListTile(title: Text('Information')),
-        ListTile(
-          leading: Icon(Icons.info),
-          title: Text('Version'),
-          subtitle: Text('beta'),
+        const ListTile(title: const Text('Information')),
+        const ListTile(
+          leading: const Icon(Icons.info),
+          title: const Text('Version'),
+          subtitle: const Text('beta'),
         ),
       ]),
     ));

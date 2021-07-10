@@ -14,17 +14,18 @@ class SearchOptionPageState extends State<SearchOptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(labelText: 'Search by name'),
+        title: const TextField(
+          decoration: const InputDecoration(labelText: 'Search by name'),
         ),
       ),
-      body: Center(child: Text('This is place to set option pannels.')),
+      body: const Center(
+          child: const Text('This is place to set option pannels.')),
       bottomNavigationBar: BottomAppBar(
         child: TextButton(
           child: Text('search'),
           onPressed: () {
             widget.appState.selectedIndex = GroupViewPath.index;
-            widget.appState.searchingParams = ['sample'];
+            widget.appState.searchingParams = 'sample';
           },
         ),
       ),

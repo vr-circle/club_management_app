@@ -46,7 +46,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
           title: Text(_format.format(widget.targetDate)),
         ),
         body: widget.schedules == null || widget.schedules.isEmpty
-            ? Center(child: Text('There are no plans'))
+            ? const Center(child: Text('There are no plans'))
             : ListView(
                 children: [
                   ...widget.schedules
@@ -61,7 +61,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
                 ],
               ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
               return ScheduleAddPage(

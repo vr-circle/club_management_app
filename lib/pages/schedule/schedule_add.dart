@@ -77,7 +77,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('target'),
+                    const Text('target'),
                     DropdownButton(
                       value: _selectedTargetUsers,
                       items: this

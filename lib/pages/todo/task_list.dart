@@ -37,9 +37,9 @@ class TaskListTile extends StatelessWidget {
     @required this.toggleDone,
   }) : super(key: key);
   final Task task;
-  final void Function() deleteTask;
-  final void Function() addTask;
-  final void Function() toggleDone;
+  final Future<void> Function() deleteTask;
+  final Future<void> Function() addTask;
+  final Future<void> Function() toggleDone;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -49,7 +49,7 @@ class TaskListTile extends StatelessWidget {
       },
       onLongPress: () {},
       trailing: IconButton(
-        icon: Icon(Icons.delete),
+        icon: const Icon(Icons.delete),
         onPressed: () async {
           await deleteTask();
         },

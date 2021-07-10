@@ -116,19 +116,18 @@ class TaskListTabState extends State<TaskListTab> {
 
   @override
   Widget build(BuildContext context) {
-    print('rebuild');
     return FutureBuilder(
         future: todoCollection.initTasks(widget.targetId),
         builder: (BuildContext context,
             AsyncSnapshot<Map<String, List<Task>>> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return Center(
-              child: CircularProgressIndicator(),
+            return const Center(
+              child: const CircularProgressIndicator(),
             );
           }
           return Scaffold(
             floatingActionButton: FloatingActionButton(
-              child: Icon(Icons.add_to_photos_outlined),
+              child: const Icon(Icons.add_to_photos_outlined),
               onPressed: () async {
                 TextEditingController controller = TextEditingController();
                 await showDialog(
@@ -138,11 +137,11 @@ class TaskListTabState extends State<TaskListTab> {
                         title: Text('Add Group'),
                         children: [
                           Padding(
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               child: TextField(
                                 controller: controller,
-                                decoration:
-                                    InputDecoration(labelText: 'New Group'),
+                                decoration: const InputDecoration(
+                                    labelText: 'New Group'),
                               )),
                           TextButton(
                               onPressed: () async {
@@ -150,12 +149,12 @@ class TaskListTabState extends State<TaskListTab> {
                                 setState(() {});
                                 Navigator.pop(context);
                               },
-                              child: Text('Add')),
+                              child: const Text('Add')),
                           TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: Text('Cancel')),
+                              child: const Text('Cancel')),
                         ],
                       );
                     });
@@ -199,19 +198,19 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
     super.initState();
   }
 
-  void addTask(Task task) {
+  Future<void> addTask(Task task) async {
     setState(() {
       widget.taskList.addTask(task);
     });
   }
 
-  void deleteTask(Task task) {
+  Future<void> deleteTask(Task task) async {
     setState(() {
       widget.taskList.deleteTask(task);
     });
   }
 
-  void toggleDone(Task task) {
+  Future<void> toggleDone(Task task) async {
     setState(() {
       widget.taskList.toggleDone(task);
     });
@@ -234,16 +233,15 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
                   children: [
                     TextButton(
                         onPressed: () async {
-                          print('Delete');
                           await widget.deleteGroup(widget.groupName);
                           Navigator.pop(context);
                         },
-                        child: Text('Delete')),
+                        child: const Text('Delete')),
                     TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text('Cancel')),
+                        child: const Text('Cancel')),
                   ],
                 );
               });
@@ -257,13 +255,13 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
                     context: context,
                     builder: (BuildContext context) {
                       return SimpleDialog(
-                        title: Text(''),
+                        title: const Text(''),
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(8),
                             child: TextField(
                               controller: controller,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Enter new task title',
                               ),
                             ),
@@ -273,12 +271,12 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
                                 addTask(Task(title: controller.text));
                                 Navigator.pop(context);
                               },
-                              child: Text('add')),
+                              child: const Text('Add')),
                           TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: Text('cancel')),
+                              child: const Text('Cancel')),
                         ],
                       );
                     });
@@ -296,10 +294,10 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
             children: widget.taskList.taskList.map((Task task) {
               return TaskListTile(
                   task: task,
-                  deleteTask: () {
+                  deleteTask: () async {
                     deleteTask(task);
                   },
-                  addTask: () {
+                  addTask: () async {
                     addTask(task);
                   },
                   toggleDone: () {

@@ -79,8 +79,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 AsyncSnapshot<LinkedHashMap<DateTime, List<Schedule>>>
                     snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return Center(
-                  child: CircularProgressIndicator(),
+                return const Center(
+                  child: const CircularProgressIndicator(),
                 );
               }
               return Column(children: [

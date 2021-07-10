@@ -22,19 +22,19 @@ class ScheduleDetails extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: Text('Start time'),
+                  leading: const Text('Start time'),
                   title: Text(_format.format(schedule.start)),
                 ),
                 ListTile(
-                  leading: Text('End time'),
+                  leading: const Text('End time'),
                   title: Text(_format.format(schedule.end)),
                 ),
                 ListTile(
-                  leading: Text('Place'),
+                  leading: const Text('Place'),
                   title: Text(schedule.place),
                 ),
                 ListTile(
-                  leading: Text('Details'),
+                  leading: const Text('Details'),
                   title: Text(schedule.details),
                 ),
               ],
@@ -54,7 +54,7 @@ class ScheduleDetails extends StatelessWidget {
                 }));
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
             FloatingActionButton(
@@ -62,7 +62,7 @@ class ScheduleDetails extends StatelessWidget {
                 await deleteSchedule(schedule);
                 Navigator.pop(context);
               },
-              child: Icon(Icons.delete),
+              child: const Icon(Icons.delete),
               backgroundColor: Colors.red,
             )
           ],

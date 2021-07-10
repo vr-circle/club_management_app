@@ -13,14 +13,13 @@ class HomePage extends StatelessWidget {
   static const String route = '/homepage';
   @override
   Widget build(BuildContext context) {
-    print('build home page');
     return Scaffold(
         body: Column(
       children: [
         TodoPartsListView(
           appState: appState,
         ),
-        Divider(
+        const Divider(
           color: Colors.white,
         ),
         SchedulePartsListView(
@@ -74,7 +73,7 @@ class SchedulePartsListView extends StatelessWidget {
             builder:
                 (BuildContext context, AsyncSnapshot<List<Schedule>> snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return Center(
+                return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
@@ -226,7 +225,8 @@ class ClubPartsListView extends StatelessWidget {
                                     appState.selectedSearchingClubId =
                                         snapshot.data[index].id.toString();
                                   },
-                                  child: Card(child: Text('hogehoge')),
+                                  child: Card(
+                                      child: Text(snapshot.data[index].name)),
                                 ));
                           }),
                     ),

@@ -105,12 +105,17 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         }
         return TodoPath(0);
       }
-      if (uri.pathSegments.first == 'groupview') {
-        return GroupViewPath();
-      }
       if (uri.pathSegments.first == 'search') {
-        print(uri.queryParameters['keywords']);
-        return SearchPath([]);
+        if (uri.pathSegments.length == 2) {
+          final String tmp = uri.queryParameters['param'];
+          return GroupViewPath(tmp);
+        }
+        return GroupViewPath('');
+      } else if (uri.pathSegments.first == 'clubs') {
+        if (uri.pathSegments.length == 2) {
+          return ClubDetailViewPath(uri.pathSegments[1]);
+        }
+        return GroupViewPath('');
       }
       if (uri.pathSegments.first == 'settings') {
         if (uri.pathSegments.length >= 2) {
@@ -160,9 +165,15 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       return RouteInformation(location: '/todo/${path.targetTabIndex}/add');
     }
 
-    // search
-    if (path is SearchPath) {
-      return RouteInformation(location: '/search');
+    if (path is GroupViewPath) {
+      if (path.searchParam.isEmpty) {
+        return RouteInformation(location: '/search');
+      }
+      return RouteInformation(location: '/search/?param=${path.searchParam}');
+    }
+
+    if (path is ClubDetailViewPath) {
+      return RouteInformation(location: '/clubs/${path.id}');
     }
 
     // settings
@@ -250,12 +261,13 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
     if (path is GroupViewPath) {
       appState.selectedIndex = GroupViewPath.index;
+      appState.selectedSearchingClubId = '';
     }
 
-    if (path is SearchPath) {
-      // appState.searchingParam = null;
-      return;
+    if (path is ClubDetailViewPath) {
+      appState.selectedSearchingClubId = path.id;
     }
+
     if (path is SettingsPath) {
       appState.selectedIndex = SettingsPath.index;
       appState.isSelectedUserSettings = false;
@@ -327,16 +339,6 @@ class _AppShellState extends State<AppShell> {
                     ),
                   ))),
           actions: [
-            Container(
-                width: MediaQuery.of(context).size.width / 3,
-                child: TextField(
-                  onSubmitted: (value) {
-                    // navigate for search page (param = value)
-                  },
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.search),
-                      labelText: 'Search clubs by name or categories'),
-                )),
             SizedBox(
               width: MediaQuery.of(context).size.width / 4,
             ),
