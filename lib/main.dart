@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_application_1/pages/user_settings/settings.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -43,9 +44,13 @@ class MyApp extends HookWidget {
     final myRouteAppState = useProvider(myAppStateProvider);
     return MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        theme: useProvider(darkModeProvider)
+        theme: SchedulerBinding.instance.window.platformBrightness ==
+                Brightness.dark
             ? ThemeData.dark()
             : ThemeData.light(),
+        //  useProvider(darkModeProvider)
+        //     ? ThemeData.dark()
+        //     : ThemeData.light(),
         routeInformationParser: myRouteAppState.routeInformationParser,
         routerDelegate: myRouteAppState.routerDelegate);
   }
