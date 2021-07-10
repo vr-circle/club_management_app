@@ -7,72 +7,54 @@ import 'package:flutter_application_1/pages/todo/task.dart';
 
 class TaskList {
   List<Task> taskList;
-  TaskList(List<Task> initTaskList) {
+  TaskList([List<Task> initTaskList]) {
     taskList = initTaskList;
   }
 
-  List<Widget> buildTaskListTile(void Function() setState) {
-    return taskList.map((e) {
-      return TaskListTile(
-        key: ValueKey(e.id),
-        task: e,
-        handleDelete: () {
-          this.deleteTask(e);
-          setState();
-        },
-      );
-    }).toList();
-  }
-
-  void addTask(Task task) {
+  Future<void> addTask(Task task) async {
     taskList.add(task);
+    await Future.delayed(Duration(seconds: 1));
   }
 
-  void deleteTask(Task task) {
-    taskList = taskList.where((element) => element.id != task.id);
+  Future<void> deleteTask(Task target) async {
+    taskList =
+        this.taskList.where((element) => element.id != target.id).toList();
+    await Future.delayed(Duration(seconds: 1));
   }
 
-  void toggleTask(Task task) {
-    task.toggleDone();
+  Future<void> toggleDone(Task target) async {
+    target.toggleDone();
+    await Future.delayed(Duration(seconds: 1));
   }
 }
 
 class TaskListTile extends StatelessWidget {
-  TaskListTile({Key key, @required this.task, @required this.handleDelete})
-      : super(key: key);
+  TaskListTile({
+    Key key,
+    @required this.task,
+    @required this.deleteTask,
+    @required this.addTask,
+    @required this.toggleDone,
+  }) : super(key: key);
   final Task task;
-  void Function() handleDelete;
+  final void Function() deleteTask;
+  final void Function() addTask;
+  final void Function() toggleDone;
   @override
   Widget build(BuildContext context) {
     return Card(
         child: ListTile(
-      onTap: () {},
-      onLongPress: () async {
-        var res = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(task.title),
-                // content: Text(''),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        handleDelete();
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('delete')),
-                  TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('cancel')),
-                ],
-              );
-            });
+      onTap: () {
+        toggleDone();
       },
+      onLongPress: () {},
       trailing: IconButton(
         icon: Icon(Icons.delete),
-        onPressed: () {},
+        onPressed: () async {
+          await deleteTask();
+        },
       ),
-      title: Text(task.title),
+      title: Text(this.task.title),
     ));
   }
 }

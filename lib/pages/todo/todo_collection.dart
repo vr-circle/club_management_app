@@ -9,7 +9,8 @@ class TodoCollection {
 
   get length => taskMap.length;
 
-  Future<Map<String, List<Task>>> initTasks() async {
+  Future<Map<String, List<Task>>> initTasks(String id) async {
+    // get todo list by id
     await Future.delayed(Duration(seconds: 1));
     taskMap = {
       'all0': [
@@ -46,6 +47,14 @@ class TodoCollection {
     return taskMap;
   }
 
+  Future<void> addGroup(String title) async {
+    if (this.taskMap.containsKey(title)) {
+      return;
+    }
+    await Future.delayed(Duration(seconds: 1));
+    this.taskMap[title] = [];
+  }
+
   Future<void> addTask(Task newTask, String targetGroupId) async {
     await storeService.addTask(newTask, targetGroupId);
     this.taskMap[targetGroupId] = [...this.taskMap[targetGroupId], newTask];
@@ -58,7 +67,7 @@ class TodoCollection {
         .toList();
   }
 
-  void toggleDone(Task task, String target) {
+  Future<void> toggleDone(Task task, String target) async {
     task.toggleDone();
   }
 }

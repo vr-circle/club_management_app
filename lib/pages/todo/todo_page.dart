@@ -11,14 +11,12 @@ class TodoPage extends StatefulWidget {
 }
 
 class TodoPageState extends State<TodoPage> {
-  Future<Map<String, TodoCollection>> futureTabs;
-  Map<String, TodoCollection> tabs;
+  Future<Map<String, String>> futureTabs;
+  Map<String, String> tabs;
 
-  Future<Map<String, TodoCollection>> getTabs() async {
+  Future<Map<String, String>> getTabs() async {
     await Future.delayed(Duration(seconds: 1));
-    final tmp = TodoCollection();
-    final tmpa = TodoCollection();
-    tabs = {'Private': tmp, 'ClubA': tmpa};
+    tabs = {'privateID': 'private', 'clubAID': 'clubA', 'clubBID': 'ClubB'};
     return tabs;
   }
 
@@ -33,7 +31,7 @@ class TodoPageState extends State<TodoPage> {
     return FutureBuilder(
         future: futureTabs,
         builder: (BuildContext context,
-            AsyncSnapshot<Map<String, TodoCollection>> snapshot) {
+            AsyncSnapshot<Map<String, String>> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return Center(child: CircularProgressIndicator());
           }
@@ -46,7 +44,7 @@ class TodoTabController extends StatefulWidget {
   TodoTabController({Key key, @required this.tabs, @required this.appState})
       : super(key: key);
   final MyAppState appState;
-  final Map<String, TodoCollection> tabs;
+  final Map<String, String> tabs;
   @override
   TodoTabControllerState createState() => TodoTabControllerState();
 }
@@ -89,7 +87,7 @@ class TodoTabControllerState extends State<TodoTabController>
                   controller: _tabController,
                   tabs: widget.tabs.entries
                       .map((e) => Tab(
-                            text: e.key,
+                            text: e.value, // name
                           ))
                       .toList())
             ],
@@ -97,24 +95,30 @@ class TodoTabControllerState extends State<TodoTabController>
         ),
         body: TabBarView(
             controller: _tabController,
-            children: widget.tabs.entries
-                .map((e) => TaskListTab(e.key, e.value))
-                .toList()));
+            children:
+                widget.tabs.entries.map((e) => TaskListTab(e.key)).toList()));
   }
 }
 
 class TaskListTab extends StatefulWidget {
-  TaskListTab(this.targetClubId, this.todoCollection);
-  final String targetClubId;
-  final TodoCollection todoCollection;
+  TaskListTab(this.targetId);
+  final String targetId;
   TaskListTabState createState() => TaskListTabState();
 }
 
 class TaskListTabState extends State<TaskListTab> {
+  final TodoCollection todoCollection = TodoCollection();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('rebuild');
     return FutureBuilder(
-        future: widget.todoCollection.initTasks(),
+        future: todoCollection.initTasks(widget.targetId),
         builder: (BuildContext context,
             AsyncSnapshot<Map<String, List<Task>>> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -124,16 +128,44 @@ class TaskListTabState extends State<TaskListTab> {
           }
           return Scaffold(
             floatingActionButton: FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () {
-                print('add!');
+              child: Icon(Icons.add_to_photos_outlined),
+              onPressed: () async {
+                TextEditingController controller = TextEditingController();
+                await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SimpleDialog(
+                        title: Text('Add Group'),
+                        children: [
+                          Padding(
+                              padding: EdgeInsets.all(8),
+                              child: TextField(
+                                controller: controller,
+                                decoration:
+                                    InputDecoration(labelText: 'New Group'),
+                              )),
+                          TextButton(
+                              onPressed: () async {
+                                await todoCollection.addGroup(controller.text);
+                                setState(() {});
+                                Navigator.pop(context);
+                              },
+                              child: Text('Add')),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('Cancel')),
+                        ],
+                      );
+                    });
               },
             ),
             body: ListView(
-              children: widget.todoCollection.taskMap.entries.map((e) {
+              children: todoCollection.taskMap.entries.map((e) {
                 return TaskExpansionTile(
                   groupName: e.key,
-                  taskList: e.value,
+                  taskList: TaskList(e.value),
                 );
               }).toList(),
             ),
@@ -145,29 +177,99 @@ class TaskListTabState extends State<TaskListTab> {
 class TaskExpansionTile extends StatefulWidget {
   TaskExpansionTile({Key key, this.groupName, this.taskList}) : super(key: key);
   final String groupName;
-  final List<Task> taskList;
+  final TaskList taskList;
   TaskExpansionTileState createState() => TaskExpansionTileState();
 }
 
 class TaskExpansionTileState extends State<TaskExpansionTile> {
-  TaskList taskList;
+  bool isOpenExpansion;
   @override
   void initState() {
-    // this.taskList = TaskList(widget.taskList);
+    isOpenExpansion = false;
     super.initState();
+  }
+
+  void addTask(Task task) {
+    setState(() {
+      widget.taskList.addTask(task);
+    });
+  }
+
+  void deleteTask(Task task) {
+    setState(() {
+      widget.taskList.deleteTask(task);
+    });
+  }
+
+  void toggleDone(Task task) {
+    setState(() {
+      widget.taskList.toggleDone(task);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this.taskList = TaskList(widget.taskList);
     return ExpansionTile(
-        leading: Icon(Icons.menu_book),
+        trailing: IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () async {
+            TextEditingController controller = TextEditingController();
+            await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SimpleDialog(
+                    title: Text(''),
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                        child: TextField(
+                          controller: controller,
+                          decoration: InputDecoration(
+                            labelText: 'Enter new task title',
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            addTask(Task(title: controller.text));
+                            Navigator.pop(context);
+                          },
+                          child: Text('add')),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('cancel')),
+                    ],
+                  );
+                });
+          },
+        ),
+        initiallyExpanded: isOpenExpansion,
+        leading: isOpenExpansion ? Icon(Icons.folder_open) : Icon(Icons.folder),
         onExpansionChanged: (value) {
-          // scroll?
+          setState(() {
+            isOpenExpansion = value;
+          });
         },
         title: Text(widget.groupName),
-        children: this.taskList.buildTaskListTile(() {
-          setState(() {});
-        }));
+        children: widget.taskList.taskList.map((Task task) {
+          return TaskListTile(
+              task: task,
+              deleteTask: () {
+                deleteTask(task);
+              },
+              addTask: () {
+                addTask(task);
+              },
+              toggleDone: () {
+                toggleDone(task);
+              });
+        }).toList());
   }
 }
