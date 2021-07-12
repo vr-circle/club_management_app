@@ -1,16 +1,16 @@
 import 'package:flutter_application_1/app_state.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/home/home.dart';
-import 'package:flutter_application_1/pages/schedule/schedule.dart';
-import 'package:flutter_application_1/pages/schedule/schedule_details.dart';
-import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
-import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
-import 'package:flutter_application_1/pages/search/club_details.dart';
-import 'package:flutter_application_1/pages/search/search_page.dart';
-import 'package:flutter_application_1/pages/todo/todo_page.dart';
-import 'package:flutter_application_1/pages/user_settings/settings.dart';
-import 'package:flutter_application_1/pages/user_settings/user_account_view.dart';
+import 'package:flutter_application_1/shell_pages/home/home.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_details.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_list_on_day.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
+import 'package:flutter_application_1/shell_pages/search/club_details.dart';
+import 'package:flutter_application_1/shell_pages/search/search_page.dart';
+import 'package:flutter_application_1/shell_pages/todo/todo_page.dart';
+import 'package:flutter_application_1/shell_pages/user_settings/settings.dart';
+import 'package:flutter_application_1/shell_pages/user_settings/user_account_view.dart';
 import 'animation_pages/fade_animation_page.dart';
 
 class NavigationState {

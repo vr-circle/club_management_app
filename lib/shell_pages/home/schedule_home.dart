@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
-class SchedulePartsListView extends StatelessWidget {
-  SchedulePartsListView({Key key, @required this.handleChangeSelectedIndex})
+class ScheduleHomeView extends StatelessWidget {
+  ScheduleHomeView({Key key, @required this.handleChangeSelectedIndex})
       : super(key: key);
   final void Function(int index) handleChangeSelectedIndex;
   Future<List<Schedule>> getScheduleList() async {

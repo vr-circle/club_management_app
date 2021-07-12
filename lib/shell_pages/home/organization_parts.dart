@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/pages/search/organization_info.dart';
 import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 
 class OrganizationPartsListView extends StatelessWidget {
   OrganizationPartsListView({Key key, @required this.appState})

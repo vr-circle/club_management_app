@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
 
 class TaskTile extends StatelessWidget {
   const TaskTile({this.task, this.checkboxCallback, this.longPressCallback});

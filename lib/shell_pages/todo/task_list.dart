@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_application_1/pages/todo/task.dart';
-import 'package:flutter_application_1/pages/todo/task_list_tile.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_list_tile.dart';
 
 class TaskList {
   List<Task> _taskList;

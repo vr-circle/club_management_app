@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:flutter_application_1/pages/schedule/schedule.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 

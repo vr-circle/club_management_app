@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/pages/todo/task.dart';
-import 'package:flutter_application_1/pages/todo/task_list.dart';
-import 'package:flutter_application_1/pages/todo/todo_collection.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
+import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class TabInfo {

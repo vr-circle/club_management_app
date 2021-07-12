@@ -1,4 +1,4 @@
-import 'package:flutter_application_1/pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class TodoCollection {

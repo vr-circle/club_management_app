@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
-import 'package:flutter_application_1/pages/schedule/schedule.dart';
-import 'package:flutter_application_1/pages/search/organization_info.dart';
 import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class MyAppState extends ChangeNotifier {

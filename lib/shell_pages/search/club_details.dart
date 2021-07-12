@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/search/organization_info.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 
 class OrganizationDetailPage extends StatelessWidget {
   OrganizationDetailPage({Key key, @required String clubId}) : super(key: key);
