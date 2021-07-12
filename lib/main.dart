@@ -123,10 +123,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
-    switch (path) {
-      case LoginPath:
-    }
-
     // login
     if (path is LoginPath) {
       return RouteInformation(location: '/${LoginPath.location}');
@@ -140,13 +136,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     // schedule
     if (path is SchedulePath) {
       return RouteInformation(location: '/${SchedulePath.location}');
-    }
-    if (path is ScheduleDetailPath) {
+    } else if (path is ScheduleDetailPath) {
       return RouteInformation(
           location:
               '/${SchedulePath.location}/${DateFormat("yyyy-MM-dd").format(path.day)}/${path.id}');
-    }
-    if (path is ScheduleListViewPath) {
+    } else if (path is ScheduleListViewPath) {
       var p = DateFormat('yyyy-MM-dd').format(path.day);
       return RouteInformation(location: '/${SchedulePath.location}/$p');
     }
@@ -156,12 +150,12 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       // get target tab name from tab index.
       return RouteInformation(
           location: '/${TodoPath.location}/${path.targetTabIndex}');
-    }
-    if (path is TodoAddPath) {
+    } else if (path is TodoAddPath) {
       return RouteInformation(
           location: '/${TodoPath.location}/${path.targetTabIndex}/add');
     }
 
+    // search
     if (path is SearchViewPath) {
       if (path.searchParam.isEmpty) {
         return RouteInformation(location: '/${SearchViewPath.location}');
@@ -170,6 +164,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           location: '/${SearchViewPath.location}/?param=${path.searchParam}');
     }
 
+    // club
     if (path is ClubDetailViewPath) {
       return RouteInformation(
           location: '/${ClubDetailViewPath.location}/${path.id}');
@@ -178,11 +173,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     // settings
     if (path is SettingsPath) {
       return RouteInformation(location: '/${SettingsPath.location}');
-    }
-    if (path is UserSettingsPath) {
+    } else if (path is UserSettingsPath) {
       return RouteInformation(location: '/${SettingsPath.location}/user');
     }
-    return null;
+
+    return RouteInformation(location: '/');
   }
 }
 
@@ -294,7 +289,6 @@ class _AppShellState extends State<AppShell> {
   ChildBackButtonDispatcher _backButtonDispatcher;
 
   void initState() {
-    // storeService = FireStoreService(userId: widget.appState.getCurrentUser().uid);
     dbService = FireStoreService(userId: widget.appState.getCurrentUser().uid);
     _routerDelegate = InnerRouterDelegate(widget.appState);
     super.initState();
@@ -322,7 +316,7 @@ class _AppShellState extends State<AppShell> {
 
     _backButtonDispatcher.takePriority();
 
-    if (size.width > 600) {
+    if (size.width > 550) {
       return Scaffold(
         appBar: AppBar(
           title: SizedBox(
@@ -398,16 +392,8 @@ class _AppShellState extends State<AppShell> {
                   ),
                 ))),
         actions: [
-          // Padding(
-          //   padding: EdgeInsets.all(8),
-          //   child: IconButton(
-          //       onPressed: () {
-          //         appState.isSearchingMode = true;
-          //       },
-          //       icon: Icon(Icons.search)),
-          // ),
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             child: IconButton(
               icon: Icon(Icons.person),
               onPressed: () {

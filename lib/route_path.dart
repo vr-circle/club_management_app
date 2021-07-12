@@ -43,7 +43,9 @@ final List<NavigationState> navigationList = [
         return [
           FadeAnimationPage(
               child: HomePage(
-            appState: appState,
+                handleChangeSelectedIndex: (int index){
+                  appState.selectedIndex = index;
+                },
           ))
         ];
       }),

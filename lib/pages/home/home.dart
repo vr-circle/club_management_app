@@ -8,22 +8,22 @@ import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/route_path.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key key, @required this.appState}) : super(key: key);
-  final MyAppState appState;
-  static const String route = '/homepage';
+  HomePage({Key key, @required this.handleChangeSelectedIndex})
+      : super(key: key);
+  final void Function(int index) handleChangeSelectedIndex;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
       children: [
         TodoPartsListView(
-          appState: appState,
+          handleChangeSelectedIndex: handleChangeSelectedIndex,
         ),
         const Divider(
           color: Colors.white,
         ),
         SchedulePartsListView(
-          appState: appState,
+          handleChangeSelectedIndex: handleChangeSelectedIndex,
         ),
         // Divider(
         //   color: Colors.white,
@@ -37,8 +37,9 @@ class HomePage extends StatelessWidget {
 }
 
 class SchedulePartsListView extends StatelessWidget {
-  SchedulePartsListView({Key key, @required this.appState}) : super(key: key);
-  final MyAppState appState;
+  SchedulePartsListView({Key key, @required this.handleChangeSelectedIndex})
+      : super(key: key);
+  final void Function(int index) handleChangeSelectedIndex;
   Future<List<Schedule>> getScheduleList() async {
     await Future.delayed(Duration(seconds: 1));
     return [
@@ -89,7 +90,7 @@ class SchedulePartsListView extends StatelessWidget {
             }),
         TextButton(
             onPressed: () {
-              appState.selectedIndex = SchedulePath.index;
+              handleChangeSelectedIndex(SchedulePath.index);
             },
             child: Text('More')),
       ],
@@ -98,8 +99,10 @@ class SchedulePartsListView extends StatelessWidget {
 }
 
 class TodoPartsListView extends StatelessWidget {
-  TodoPartsListView({Key key, @required this.appState}) : super(key: key);
-  final MyAppState appState;
+  TodoPartsListView({Key key, @required this.handleChangeSelectedIndex})
+      : super(key: key);
+  // final MyAppState appState;
+  final void Function(int index) handleChangeSelectedIndex;
   Future<List<Task>> getTaskList() async {
     await Future.delayed(Duration(seconds: 1));
     return [
@@ -145,7 +148,7 @@ class TodoPartsListView extends StatelessWidget {
             }),
         TextButton(
             onPressed: () {
-              appState.selectedIndex = TodoPath.index;
+              handleChangeSelectedIndex(TodoPath.index);
             },
             child: Text('More')),
       ],
