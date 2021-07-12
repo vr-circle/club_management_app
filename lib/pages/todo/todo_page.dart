@@ -3,6 +3,8 @@ import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/pages/todo/task_list.dart';
 import 'package:flutter_application_1/pages/todo/todo_collection.dart';
+import 'package:flutter_application_1/store/store_service.dart';
+import 'package:tuple/tuple.dart';
 
 class TodoPage extends StatefulWidget {
   TodoPage({Key key, @required this.appState}) : super(key: key);
@@ -11,17 +13,21 @@ class TodoPage extends StatefulWidget {
 }
 
 class TodoPageState extends State<TodoPage> {
-  Future<Map<String, String>> futureTabs;
-  Map<String, String> tabs;
+  Future<List<Tuple2<String, String>>> futureTabs;
+  List<Tuple2<String, String>> tabs = [];
 
-  Future<Map<String, String>> getTabs() async {
-    await Future.delayed(Duration(seconds: 1));
-    tabs = {'privateID': 'private', 'clubAID': 'clubA', 'clubBID': 'ClubB'};
+  Future<List<Tuple2<String, String>>> getTabs() async {
+    tabs.add(Tuple2<String, String>('private', 'private'));
+    final clubIdList = await dbService.getParticipatingClubIdList();
+    clubIdList.forEach((id) async {
+      tabs.add(Tuple2(id, (await dbService.getClubInfo(id)).name));
+    });
     return tabs;
   }
 
   @override
   void initState() {
+    tabs = [];
     futureTabs = getTabs();
     super.initState();
   }
@@ -31,10 +37,11 @@ class TodoPageState extends State<TodoPage> {
     return FutureBuilder(
         future: futureTabs,
         builder: (BuildContext context,
-            AsyncSnapshot<Map<String, String>> snapshot) {
+            AsyncSnapshot<List<Tuple2<String, String>>> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: const CircularProgressIndicator());
           }
+          print('start todo tab build');
           return TodoTabController(tabs: tabs, appState: widget.appState);
         });
   }
@@ -44,7 +51,7 @@ class TodoTabController extends StatefulWidget {
   TodoTabController({Key key, @required this.tabs, @required this.appState})
       : super(key: key);
   final MyAppState appState;
-  final Map<String, String> tabs;
+  final List<Tuple2<String, String>> tabs;
   @override
   TodoTabControllerState createState() => TodoTabControllerState();
 }
@@ -85,9 +92,9 @@ class TodoTabControllerState extends State<TodoTabController>
             children: [
               TabBar(
                   controller: _tabController,
-                  tabs: widget.tabs.entries
+                  tabs: widget.tabs
                       .map((e) => Tab(
-                            text: e.value, // name
+                            text: e.item2, // name
                           ))
                       .toList())
             ],
@@ -95,8 +102,7 @@ class TodoTabControllerState extends State<TodoTabController>
         ),
         body: TabBarView(
             controller: _tabController,
-            children:
-                widget.tabs.entries.map((e) => TaskListTab(e.key)).toList()));
+            children: widget.tabs.map((e) => TaskListTab(e.item1)).toList()));
   }
 }
 

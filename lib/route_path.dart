@@ -41,11 +41,10 @@ final List<NavigationState> navigationList = [
       onPopPage: (appState) {},
       getPages: (appState) {
         return [
-          FadeAnimationPage(
-              child: HomePage(
-                handleChangeSelectedIndex: (int index){
-                  appState.selectedIndex = index;
-                },
+          FadeAnimationPage(child: HomePage(
+            handleChangeSelectedIndex: (int index) {
+              appState.selectedIndex = index;
+            },
           ))
         ];
       }),
@@ -117,7 +116,7 @@ final List<NavigationState> navigationList = [
                 key: ValueKey('ScheduleDetails'),
                 child: ScheduleDetails(
                   schedule: appState.selectedSchedule,
-                  deleteSchedule: ,
+                  // deleteSchedule: ,
                   handleCloseDetailsPage: () {
                     appState.selectedSchedule = null;
                   },
@@ -157,11 +156,9 @@ final List<NavigationState> navigationList = [
         return SearchViewPath(appState.searchingParams);
       },
       initAppState: (appState) {
-        appState.isSearchingMode = false;
         appState.selectedSearchingClubId = '';
       },
       onPopPage: (appState) {
-        appState.isSearchingMode = false;
         appState.selectedSearchingClubId = '';
       },
       getPages: (appState) {

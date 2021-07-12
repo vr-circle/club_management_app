@@ -7,7 +7,7 @@ class ClubInfo {
     this.otherInfo,
     this.categoryList,
   });
-  int id;
+  String id;
   String name;
   int memberNum;
   String introduction;

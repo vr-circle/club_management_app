@@ -17,6 +17,8 @@ abstract class PermissionManager {
 abstract class DatabaseService {
   // club
   Future<List<ClubInfo>> getClubList();
+  Future<List<String>> getParticipatingClubIdList();
+  Future<ClubInfo> getClubInfo(String id);
   Future<void> createClub(ClubInfo newClub);
   Future<void> joinClub(ClubInfo targetClub);
   Future<void> leaveClub(ClubInfo targetClub);
@@ -30,14 +32,13 @@ abstract class DatabaseService {
   Future<void> deleteSchedule(Schedule schedule, String targetId);
 
   // todo
-  Future<Map<String, List<Task>>> getTaskList();
+  Future<Map<String, List<Task>>> getTaskList(String id);
   Future<void> setList(String listName, String targetGroupId);
   Future<void> deleteList(String listName, String targetGroupId);
   Future<void> setTask(Task task, String targetId);
   Future<void> deleteTask(Task task, String targetId);
 
   // settings
-  Future<List<String>> getParticipatingClubIdList();
   Future<void> setUserTheme();
 }
 
@@ -51,9 +52,25 @@ class FireStoreService extends DatabaseService {
   final String userId;
   // --------------------------- club ------------------------------------------
   @override
+  Future<List<String>> getParticipatingClubIdList() async {
+    print('getParticipatingClubIdList');
+    await dummyDelay();
+    // _store.collection('clubs').where();
+    return ['0', '1'];
+  }
+
+  @override
+  Future<ClubInfo> getClubInfo(String id) async {
+    await dummyDelay();
+    return (await getClubList())
+        .where((element) => element.id == id)
+        .toList()
+        .first;
+  }
+
+  @override
   Future<List<ClubInfo>> getClubList() async {
     await dummyDelay();
-    int i = 0;
     return dummyClubInfoList;
   }
 
@@ -118,12 +135,15 @@ class FireStoreService extends DatabaseService {
     // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
   }
 
-  // --------------------------- task ------------------------------------------
+  // --------------------------- todo ------------------------------------------
   @override
-  Future<Map<String, List<Task>>> getTaskList() async {
+  Future<Map<String, List<Task>>> getTaskList(String id) async {
     print('getTaskList');
     await dummyDelay();
-    final List<String> clubList = await this.getParticipatingClubIdList();
+    // get task map form id
+    if (id == 'private') {
+      // private
+    }
     // _store.collection().doc().get()
     return dummyTaskList;
   }
@@ -157,13 +177,6 @@ class FireStoreService extends DatabaseService {
   }
 
   // --------------------------- settings --------------------------------------
-  @override
-  Future<List<String>> getParticipatingClubIdList() async {
-    print('getParticipatingClubIdList');
-    await dummyDelay();
-    // _store.collection('clubs').where();
-    return ['0', '1'];
-  }
 
   @override
   Future<void> setUserTheme() async {
@@ -175,7 +188,7 @@ class FireStoreService extends DatabaseService {
 int _i = 0;
 final dummyClubInfoList = <ClubInfo>[
   ClubInfo(
-      id: _i++,
+      id: (_i++).toString(),
       name: 'Hitech',
       introduction: 'hogehog',
       memberNum: 10,
@@ -183,23 +196,23 @@ final dummyClubInfoList = <ClubInfo>[
         {'hogehoge': 'fugafuga'}
       ],
       categoryList: [
-        '文化',
+        'cultual',
         'circle'
       ]),
   ClubInfo(
-      id: _i++,
+      id: (_i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
   ClubInfo(
-      id: _i++,
+      id: (_i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
   ClubInfo(
-      id: _i++,
+      id: (_i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,

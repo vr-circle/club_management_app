@@ -11,8 +11,7 @@ class TodoCollection {
 
   Future<Map<String, List<Task>>> initTasks(String id) async {
     // get todo list by id
-    await Future.delayed(Duration(seconds: 1));
-    taskMap = {};
+    taskMap = await dbService.getTaskList(id);
     return taskMap;
   }
 

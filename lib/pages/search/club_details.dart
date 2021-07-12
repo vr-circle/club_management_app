@@ -7,7 +7,7 @@ class ClubDetailPage extends StatelessWidget {
   Future<ClubInfo> getClubInfo() async {
     await Future.delayed(Duration(seconds: 1));
     return ClubInfo(
-      id: 0,
+      id: 0.toString(),
       memberNum: 10,
       name: 'hogehoge',
       categoryList: ['circle'],

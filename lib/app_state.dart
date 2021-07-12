@@ -2,10 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
-import 'package:flutter_application_1/pages/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/pages/search/club.dart';
-import 'package:flutter_application_1/pages/todo/task.dart';
-import 'package:flutter_application_1/pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class MyAppState extends ChangeNotifier {
@@ -24,7 +21,7 @@ class MyAppState extends ChangeNotifier {
 
   // schedule
   DateTime _selectedDay;
-  // DateTime _selectedCalendarPage;
+  DateTime _selectedCalendarPage;
   Schedule _selectedSchedule;
   bool isOpeningAddSchedulePage;
 
@@ -36,7 +33,6 @@ class MyAppState extends ChangeNotifier {
   String _searchingParams;
   bool _isSelectedSearching;
   String _selectedSearchingClubId;
-  // bool _isSearchMode;
 
   // settings
   bool _isSelectedUserSettings;

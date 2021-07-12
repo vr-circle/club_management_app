@@ -160,7 +160,7 @@ class ClubListView extends StatelessWidget {
 int i = 0;
 final dummyClubInfoList = <ClubInfo>[
   ClubInfo(
-      id: i++,
+      id: (i++).toString(),
       name: 'Hitech',
       introduction: 'hogehog',
       memberNum: 10,
@@ -168,23 +168,23 @@ final dummyClubInfoList = <ClubInfo>[
         {'hogehoge': 'fugafuga'}
       ],
       categoryList: [
-        '文化',
+        'cultual',
         'circle'
       ]),
   ClubInfo(
-      id: i++,
+      id: (i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
   ClubInfo(
-      id: i++,
+      id: (i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
   ClubInfo(
-      id: i++,
+      id: (i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
