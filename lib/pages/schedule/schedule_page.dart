@@ -28,8 +28,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
 
   Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
-    final Map<DateTime, List<Schedule>> res =
-        await dbService.getSchedules(['']);
+    final Map<DateTime, List<Schedule>> res = await dbService.getSchedules('');
     scheduleCollection.initScheduleCollection(res);
     return scheduleCollection.schedules;
   }

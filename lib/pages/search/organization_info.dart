@@ -1,5 +1,5 @@
-class ClubInfo {
-  ClubInfo({
+class OrganizationInfo {
+  OrganizationInfo({
     this.id,
     this.name,
     this.introduction,

@@ -2,45 +2,43 @@ import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class TodoCollection {
-  Map<String, List<Task>> taskMap; // {target group id, List<Task>}
+  Map<String, List<Task>> taskMap; // {target group name, List<Task>}
   TodoCollection() {
     this.taskMap = Map<String, List<Task>>();
   }
 
-  get length => taskMap.length;
+  get groupLength => taskMap.length;
 
   Future<Map<String, List<Task>>> initTasks(String id) async {
-    // get todo list by id
     taskMap = await dbService.getTaskList(id);
     return taskMap;
   }
 
-  Future<void> addGroup(String title) async {
-    if (this.taskMap.containsKey(title)) {
+  Future<void> addGroup(String name, String id) async {
+    if (this.taskMap.containsKey(name)) {
       return;
     }
-    await Future.delayed(Duration(seconds: 1));
-    this.taskMap[title] = [];
+    await dbService.addTaskGroup(name, id);
+    this.taskMap[name] = [];
   }
 
-  Future<void> addTask(Task newTask, String targetGroupId) async {
-    await dbService.setTask(newTask, targetGroupId);
-    this.taskMap[targetGroupId] = [...this.taskMap[targetGroupId], newTask];
-  }
-
-  Future<void> deleteTask(Task targetTask, String targetGroupId) async {
-    await dbService.deleteTask(targetTask, targetGroupId);
-    this.taskMap[targetGroupId] = taskMap[targetGroupId]
-        .where((task) => task.id != targetTask.id)
-        .toList();
-  }
-
-  Future<void> deleteGroup(String groupName) async {
-    await Future.delayed(Duration(seconds: 1));
+  Future<void> deleteGroup(String groupName, String organizationId) async {
+    await dbService.deleteTaskGroup(groupName, organizationId);
     this.taskMap.remove(groupName);
   }
 
-  Future<void> toggleDone(Task task, String target) async {
-    task.toggleDone();
+  Future<void> addTask(
+      Task newTask, String targetGroupName, String targetOrganizationId) async {
+    await dbService.addTask(newTask, targetGroupName, targetOrganizationId);
+    this.taskMap[targetGroupName] = [...this.taskMap[targetGroupName], newTask];
+  }
+
+  Future<void> deleteTask(Task targetTask, String targetGroupName,
+      String targetOrganizationId) async {
+    await dbService.deleteTask(
+        targetTask, targetGroupName, targetOrganizationId);
+    this.taskMap[targetGroupName] = taskMap[targetGroupName]
+        .where((task) => task.id != targetTask.id)
+        .toList();
   }
 }

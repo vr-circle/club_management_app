@@ -1,14 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
-import 'package:flutter_application_1/pages/search/club.dart';
+import 'package:flutter_application_1/pages/search/organization_info.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
+import 'package:intl/intl.dart';
 
 DatabaseService dbService;
-
-enum Permission {
-  admin,
-  none,
-}
 
 abstract class PermissionManager {
   Future<bool> getPermission();
@@ -16,27 +12,28 @@ abstract class PermissionManager {
 
 abstract class DatabaseService {
   // club
-  Future<List<ClubInfo>> getClubList();
-  Future<List<String>> getParticipatingClubIdList();
-  Future<ClubInfo> getClubInfo(String id);
-  Future<void> createClub(ClubInfo newClub);
-  Future<void> joinClub(ClubInfo targetClub);
-  Future<void> leaveClub(ClubInfo targetClub);
+  Future<List<OrganizationInfo>> getOrganizationList();
+  Future<List<String>> getParticipatingOrganizationIdList();
+  Future<OrganizationInfo> getOrganizationInfo(String id);
+  Future<void> createOrganization(OrganizationInfo newOrganization);
+  Future<void> joinOrganization(OrganizationInfo targetOrganization);
+  Future<void> leaveOrganization(OrganizationInfo targetOrganization);
 
   // schedule
-  Future<Map<DateTime, List<Schedule>>> getSchedules(List<String> targetId);
+  Future<Map<DateTime, List<Schedule>>> getSchedules(String targetId);
   Future<List<Schedule>> getSchedulesOnDay(
       DateTime day, List<String> targetIdList);
-  Future<Schedule> getSchedule(String id);
-  Future<void> setSchedule(Schedule newSchedule, String targetId);
+  Future<void> addSchedule(Schedule newSchedule, String targetId);
   Future<void> deleteSchedule(Schedule schedule, String targetId);
 
   // todo
   Future<Map<String, List<Task>>> getTaskList(String id);
-  Future<void> setList(String listName, String targetGroupId);
-  Future<void> deleteList(String listName, String targetGroupId);
-  Future<void> setTask(Task task, String targetId);
-  Future<void> deleteTask(Task task, String targetId);
+  Future<void> addTaskGroup(String groupName, String targetOrganizationId);
+  Future<void> deleteTaskGroup(String groupName, String targetOrganizationId);
+  Future<void> addTask(
+      Task task, String targetGroupName, String targetOrganizationId);
+  Future<void> deleteTask(
+      Task task, String targetGroupName, String targetOrganizationId);
 
   // settings
   Future<void> setUserTheme();
@@ -48,60 +45,163 @@ Future<void> dummyDelay() async {
 
 class FireStoreService extends DatabaseService {
   FireStoreService({this.userId});
-  final _store = FirebaseFirestore.instance;
   final String userId;
+  final _store = FirebaseFirestore.instance;
+  final organizationCollectionName = 'organizations';
+  final usersCollectionName = 'users';
+  final todoCollectionName = 'todo';
+  final scheduleCollectionName = 'schedule';
+  final settingsCollectionName = 'settings';
+  final settingsOrganizationName = 'organizations';
+  final taskGroupDocName = 'group';
+
   // --------------------------- club ------------------------------------------
   @override
-  Future<List<String>> getParticipatingClubIdList() async {
-    print('getParticipatingClubIdList');
-    await dummyDelay();
-    // _store.collection('clubs').where();
-    return ['0', '1'];
+  Future<List<String>> getParticipatingOrganizationIdList() async {
+    print('getParticipatingOrganizationIdList');
+    final data = await _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .collection(settingsCollectionName)
+        .doc(settingsOrganizationName)
+        .get() as Map<String, dynamic>;
+    final res = [];
+    data.forEach((key, value) {
+      res.add(key);
+    });
+    return res;
   }
 
   @override
-  Future<ClubInfo> getClubInfo(String id) async {
-    await dummyDelay();
-    return (await getClubList())
-        .where((element) => element.id == id)
-        .toList()
-        .first;
+  Future<OrganizationInfo> getOrganizationInfo(String id) async {
+    print('getOrganizationInfo');
+    final list = await _store
+        .collection(organizationCollectionName)
+        .doc(id)
+        .get() as Map<String, dynamic>;
+    final res = OrganizationInfo(
+        id: id,
+        name: list['name'],
+        memberNum: list['memberNum'],
+        introduction: list['introduction'],
+        categoryList: list['categoryList'],
+        otherInfo: list['others']);
+    return res;
   }
 
   @override
-  Future<List<ClubInfo>> getClubList() async {
-    await dummyDelay();
-    return dummyClubInfoList;
+  Future<List<OrganizationInfo>> getOrganizationList() async {
+    print('getOrganizationList');
+    final data = await _store.collection(organizationCollectionName).get()
+        as Map<String, dynamic>;
+    final res = data.entries
+        .map((e) => OrganizationInfo(
+            id: e.key,
+            name: e.value['name'],
+            introduction: e.value['introduction'],
+            categoryList: e.value['categoryList'],
+            memberNum: e.value['memberNum'],
+            otherInfo: e.value['otherInfo']))
+        .toList();
+    return res;
   }
 
   @override
-  Future<void> createClub(ClubInfo newClub) async {
-    await dummyDelay();
-    print('create club ${newClub.name}');
+  Future<void> createOrganization(OrganizationInfo newOrganization) async {
+    print('create club ${newOrganization.name}');
+    await _store.collection(organizationCollectionName).doc().set({
+      'name': newOrganization.name,
+      'introduction': newOrganization.introduction,
+      'categoryList': newOrganization.categoryList,
+      'otherInfo': newOrganization.otherInfo,
+      'memberNum': newOrganization.memberNum
+    });
   }
 
   @override
-  Future<void> joinClub(ClubInfo targetClub) async {
-    await dummyDelay();
-    // _store.collection('').doc().set();
-    print('join club ${targetClub.name}');
+  Future<void> joinOrganization(OrganizationInfo targetOrganization) async {
+    print('join club ${targetOrganization.name}');
+    await _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .collection(settingsCollectionName)
+        .doc(settingsOrganizationName)
+        .set({
+      'ids': FieldValue.arrayUnion([targetOrganization.id])
+    });
   }
 
   @override
-  Future<void> leaveClub(ClubInfo targetClub) async {
-    print('leaveClub');
-    await dummyDelay();
-    // _store.collection('users').doc(userId).set({'clubs' : });
+  Future<void> leaveOrganization(OrganizationInfo targetOrganization) async {
+    print('leaveOrganization');
+    await _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .collection(settingsCollectionName)
+        .doc(settingsOrganizationName)
+        .set({
+      'ids': FieldValue.arrayRemove([targetOrganization.id])
+    });
   }
 
   // --------------------------- schedule --------------------------------------
   @override
-  Future<Map<DateTime, List<Schedule>>> getSchedules(
-      List<String> targetId) async {
+  Future<Map<DateTime, List<Schedule>>> getSchedules(String targetId) async {
     print('getSchedules');
-    await dummyDelay();
-    // final data = await (_store.collection().doc().get()).data();
-    return dummySchedules;
+    Map<DateTime, List<Schedule>> res = {};
+    if (targetId.isEmpty) {
+      final data = await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(scheduleCollectionName)
+          .doc()
+          .get() as Map<String, List<dynamic>>;
+      data.forEach((key, value) {
+        try {
+          final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
+          final tmpList = <Schedule>[];
+          value.forEach((e) {
+            tmpList.add(Schedule(
+              title: e['title'],
+              place: e['place'],
+              details: e['details'],
+              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+            ));
+          });
+          res.addAll({tmpDate: tmpList});
+        } catch (e) {
+          print(e);
+        }
+      });
+      return res;
+    }
+    final data = await _store
+        .collection(organizationCollectionName)
+        .doc(targetId)
+        .collection(scheduleCollectionName)
+        .doc()
+        .get() as Map<String, List<dynamic>>;
+    data.forEach((key, value) {
+      try {
+        final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
+        final tmpList = <Schedule>[];
+        value.forEach((e) {
+          tmpList.add(Schedule(
+            title: e['title'],
+            place: e['place'],
+            details: e['details'],
+            start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+            end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+          ));
+        });
+        res.addAll({tmpDate: tmpList});
+      } catch (e) {
+        print(e);
+      }
+    });
+
+    return res;
   }
 
   @override
@@ -109,75 +209,225 @@ class FireStoreService extends DatabaseService {
       DateTime day, List<String> targetIdList) async {
     print('getScheduleOnDay');
     await dummyDelay();
-    // final data = await _store.collection().doc().set()
     return dummyScheduleListOnDay;
   }
 
   @override
-  Future<Schedule> getSchedule(String id) async {
-    print('getSchedule');
-    await dummyDelay();
-    // _store.collection(collectionPath)
-    return dummyScheduleListOnDay[0];
+  Future<void> addSchedule(
+      Schedule newSchedule, String targetOrganizationId) async {
+    print('addSchedule');
+    final key = DateFormat('yyyy-MM-dd').format(newSchedule.start);
+    final _start = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.start);
+    final _end = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.end);
+    if (targetOrganizationId.isEmpty) {
+      await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(scheduleCollectionName)
+          .doc()
+          .set({
+        key: FieldValue.arrayUnion([
+          {
+            'title': newSchedule.title,
+            'start': _start,
+            'end': _end,
+            'place': newSchedule.place,
+            'details': newSchedule.details
+          }
+        ])
+      });
+      return;
+    }
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .collection(scheduleCollectionName)
+        .doc() // private or public
+        .set({
+      key: FieldValue.arrayUnion([
+        {
+          'title': newSchedule.title,
+          'start': _start,
+          'end': _end,
+          'place': newSchedule.place,
+          'details': newSchedule.details
+        }
+      ])
+    });
   }
 
   @override
-  Future<void> setSchedule(Schedule newSchedule, String targetId) async {
-    print('setSchedule');
-    await dummyDelay();
-    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
-  }
-
-  @override
-  Future<void> deleteSchedule(Schedule schedule, String targetId) async {
+  Future<void> deleteSchedule(
+      Schedule targetSchedule, String targetOrganizationId) async {
     print('deleteSchedule');
-    await dummyDelay();
-    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
+    final key = DateFormat('yyyy-MM-dd').format(targetSchedule.start);
+    final _start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
+    final _end = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.end);
+    if (targetOrganizationId.isEmpty) {
+      await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(scheduleCollectionName)
+          .doc()
+          .set({
+        key: FieldValue.arrayRemove([
+          {
+            'title': targetSchedule.title,
+            'start': _start,
+            'end': _end,
+            'place': targetSchedule.place,
+            'details': targetSchedule.details
+          }
+        ])
+      });
+      return;
+    }
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .collection(scheduleCollectionName)
+        .doc() // private or public
+        .set({
+      key: FieldValue.arrayRemove([
+        {
+          'title': targetSchedule.title,
+          'start': _start,
+          'end': _end,
+          'place': targetSchedule.place,
+          'details': targetSchedule.details
+        }
+      ])
+    });
   }
 
   // --------------------------- todo ------------------------------------------
   @override
   Future<Map<String, List<Task>>> getTaskList(String id) async {
     print('getTaskList');
-    await dummyDelay();
-    // get task map form id
-    if (id == 'private') {
+    Map<String, List<Task>> res = {};
+    if (id.isEmpty) {
       // private
+      final _data = await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(todoCollectionName)
+          .doc(taskGroupDocName)
+          .get() as Map<String, List<String>>;
+      _data.forEach((key, value) {
+        res.addAll({key: value.map((e) => Task(title: e))});
+      });
+      return res;
     }
-    // _store.collection().doc().get()
-    return dummyTaskList;
+    final _data = await _store
+        .collection(organizationCollectionName)
+        .doc(id)
+        .collection(todoCollectionName)
+        .doc(taskGroupDocName)
+        .get() as Map<String, List<String>>;
+    _data.forEach((key, value) {
+      res.addAll({key: value.map((e) => Task(title: e))});
+    });
+    return res;
   }
 
   @override
-  Future<void> setList(String listName, String targetGroupId) async {
-    print('setList');
-    await dummyDelay();
-    // _store.collection(targetGroupId.isEmpty ? userId : targetGroupId).doc('group').set({});
+  Future<void> addTaskGroup(
+      String listName, String targetOrganizationId) async {
+    print('addTaskGroup');
+    if (targetOrganizationId.isEmpty) {
+      await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(todoCollectionName)
+          .doc(taskGroupDocName)
+          .set({
+        listName: ['']
+      });
+      return;
+    }
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .collection(todoCollectionName)
+        .doc(taskGroupDocName)
+        .set({
+      listName: ['']
+    });
   }
 
   @override
-  Future<void> deleteList(String listName, String targetGroupId) async {
+  Future<void> deleteTaskGroup(
+      String listName, String targetOrganizationId) async {
     print('deleteList');
-    await dummyDelay();
-    // _store.collection(targetGroupId.isEmpty ? userId : targetGroupId).doc('group').set({});
+    if (targetOrganizationId.isEmpty) {
+      await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(todoCollectionName)
+          .doc(taskGroupDocName)
+          .update({listName: FieldValue.delete()});
+      return;
+    }
+    await _store
+        .collection(usersCollectionName)
+        .doc(targetOrganizationId)
+        .collection(todoCollectionName)
+        .doc(taskGroupDocName)
+        .update({listName: FieldValue.delete()});
   }
 
   @override
-  Future<void> setTask(Task task, String targetId) async {
-    print('setTask');
-    await dummyDelay();
-    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
+  Future<void> addTask(
+      Task task, String targetListName, String targetOrganizationId) async {
+    print('addTask');
+    if (targetOrganizationId.isEmpty) {
+      await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(todoCollectionName)
+          .doc(taskGroupDocName)
+          .update({
+        targetListName: FieldValue.arrayUnion([task.title])
+      });
+      return;
+    }
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .collection(todoCollectionName)
+        .doc(taskGroupDocName)
+        .update({
+      targetListName: FieldValue.arrayUnion([task.title])
+    });
   }
 
   @override
-  Future<void> deleteTask(Task task, String targetId) async {
+  Future<void> deleteTask(
+      Task task, String targetListName, String targetOrganizationId) async {
     print('deleteTask');
-    await dummyDelay();
-    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
+    if (targetOrganizationId.isEmpty) {
+      // private
+      await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(todoCollectionName)
+          .doc(taskGroupDocName)
+          .update({
+        targetListName: FieldValue.arrayRemove([task.title])
+      });
+      return;
+    }
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .collection(todoCollectionName)
+        .doc(taskGroupDocName)
+        .update({
+      targetListName: FieldValue.arrayRemove([task.title])
+    });
   }
 
   // --------------------------- settings --------------------------------------
-
   @override
   Future<void> setUserTheme() async {
     print('setUserTheme');
@@ -186,8 +436,8 @@ class FireStoreService extends DatabaseService {
 }
 
 int _i = 0;
-final dummyClubInfoList = <ClubInfo>[
-  ClubInfo(
+final dummyOrganizationInfoList = <OrganizationInfo>[
+  OrganizationInfo(
       id: (_i++).toString(),
       name: 'Hitech',
       introduction: 'hogehog',
@@ -199,19 +449,19 @@ final dummyClubInfoList = <ClubInfo>[
         'cultual',
         'circle'
       ]),
-  ClubInfo(
+  OrganizationInfo(
       id: (_i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
-  ClubInfo(
+  OrganizationInfo(
       id: (_i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
-  ClubInfo(
+  OrganizationInfo(
       id: (_i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',

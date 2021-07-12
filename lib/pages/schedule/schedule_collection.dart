@@ -29,7 +29,7 @@ class ScheduleCollection {
       _schedules[schedule.start] = [];
     }
     _schedules[schedule.start].add(schedule);
-    await dbService.setSchedule(schedule, target);
+    await dbService.addSchedule(schedule, target);
   }
 
   void deleteSchedule(Schedule targetSchedule) {

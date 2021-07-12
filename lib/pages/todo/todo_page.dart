@@ -4,7 +4,12 @@ import 'package:flutter_application_1/pages/todo/task.dart';
 import 'package:flutter_application_1/pages/todo/task_list.dart';
 import 'package:flutter_application_1/pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
-import 'package:tuple/tuple.dart';
+
+class TabInfo {
+  String name;
+  String id;
+  TabInfo({@required this.id, @required this.name});
+}
 
 class TodoPage extends StatefulWidget {
   TodoPage({Key key, @required this.appState}) : super(key: key);
@@ -13,14 +18,17 @@ class TodoPage extends StatefulWidget {
 }
 
 class TodoPageState extends State<TodoPage> {
-  Future<List<Tuple2<String, String>>> futureTabs;
-  List<Tuple2<String, String>> tabs = [];
+  Future<List<TabInfo>> futureTabs;
+  List<TabInfo> tabs = [];
 
-  Future<List<Tuple2<String, String>>> getTabs() async {
-    tabs.add(Tuple2<String, String>('private', 'private'));
-    final clubIdList = await dbService.getParticipatingClubIdList();
-    clubIdList.forEach((id) async {
-      tabs.add(Tuple2(id, (await dbService.getClubInfo(id)).name));
+  Future<List<TabInfo>> getTabs() async {
+    tabs.add(TabInfo(id: 'private', name: 'private'));
+    final clubIdList = await dbService.getParticipatingOrganizationIdList();
+    await Future.forEach(clubIdList, (id) async {
+      final _clubInfo = await dbService.getOrganizationInfo(id);
+      if (_clubInfo != null) {
+        tabs.add(TabInfo(id: id, name: _clubInfo.name));
+      }
     });
     return tabs;
   }
@@ -36,12 +44,10 @@ class TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: futureTabs,
-        builder: (BuildContext context,
-            AsyncSnapshot<List<Tuple2<String, String>>> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List<TabInfo>> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: const CircularProgressIndicator());
           }
-          print('start todo tab build');
           return TodoTabController(tabs: tabs, appState: widget.appState);
         });
   }
@@ -51,7 +57,7 @@ class TodoTabController extends StatefulWidget {
   TodoTabController({Key key, @required this.tabs, @required this.appState})
       : super(key: key);
   final MyAppState appState;
-  final List<Tuple2<String, String>> tabs;
+  final List<TabInfo> tabs;
   @override
   TodoTabControllerState createState() => TodoTabControllerState();
 }
@@ -94,7 +100,7 @@ class TodoTabControllerState extends State<TodoTabController>
                   controller: _tabController,
                   tabs: widget.tabs
                       .map((e) => Tab(
-                            text: e.item2, // name
+                            text: e.name,
                           ))
                       .toList())
             ],
@@ -102,13 +108,13 @@ class TodoTabControllerState extends State<TodoTabController>
         ),
         body: TabBarView(
             controller: _tabController,
-            children: widget.tabs.map((e) => TaskListTab(e.item1)).toList()));
+            children: widget.tabs.map((e) => TaskListTab(e.id)).toList()));
   }
 }
 
 class TaskListTab extends StatefulWidget {
-  TaskListTab(this.targetId);
-  final String targetId;
+  TaskListTab(this.organizationId);
+  final String organizationId;
   TaskListTabState createState() => TaskListTabState();
 }
 
@@ -120,10 +126,20 @@ class TaskListTabState extends State<TaskListTab> {
     super.initState();
   }
 
+  Future<void> addGroup(String name) async {
+    await todoCollection.addGroup(name, widget.organizationId);
+    setState(() {});
+  }
+
+  Future<void> deleteGroup(String groupName) async {
+    await todoCollection.deleteGroup(groupName, widget.organizationId);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: todoCollection.initTasks(widget.targetId),
+        future: todoCollection.initTasks(widget.organizationId),
         builder: (BuildContext context,
             AsyncSnapshot<Map<String, List<Task>>> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -151,7 +167,8 @@ class TaskListTabState extends State<TaskListTab> {
                         actions: [
                           TextButton(
                               onPressed: () async {
-                                await todoCollection.addGroup(controller.text);
+                                await todoCollection.addGroup(
+                                    controller.text, widget.organizationId);
                                 setState(() {});
                                 Navigator.pop(context);
                               },
@@ -169,11 +186,11 @@ class TaskListTabState extends State<TaskListTab> {
             body: ListView(
               children: todoCollection.taskMap.entries.map((e) {
                 return TaskExpansionTile(
+                  organizationId: widget.organizationId,
                   groupName: e.key,
-                  taskList: TaskList(e.value),
-                  deleteGroup: (String groupName) async {
-                    await todoCollection.deleteGroup(groupName);
-                    setState(() {});
+                  taskList: e.value,
+                  deleteGroup: () async {
+                    await deleteGroup(e.key);
                   },
                 );
               }).toList(),
@@ -184,37 +201,42 @@ class TaskListTabState extends State<TaskListTab> {
 }
 
 class TaskExpansionTile extends StatefulWidget {
-  TaskExpansionTile(
-      {Key key,
-      @required this.groupName,
-      @required this.taskList,
-      @required this.deleteGroup})
-      : super(key: key);
+  TaskExpansionTile({
+    Key key,
+    @required this.organizationId,
+    @required this.groupName,
+    @required this.taskList,
+    @required this.deleteGroup,
+  }) : super(key: key);
+  final String organizationId;
   final String groupName;
-  final TaskList taskList;
-  final Future<void> Function(String groupName) deleteGroup;
+  final List<Task> taskList;
+  final Future<void> Function() deleteGroup;
   TaskExpansionTileState createState() => TaskExpansionTileState();
 }
 
 class TaskExpansionTileState extends State<TaskExpansionTile> {
   bool isOpenExpansion;
+  TaskList taskList;
   @override
   void initState() {
     isOpenExpansion = false;
+    taskList = TaskList(widget.taskList);
     super.initState();
   }
 
   Future<void> addTask(Task task) async {
-    Future.delayed(Duration(seconds: 1));
+    await dbService.addTask(task, widget.groupName, widget.organizationId);
     setState(() {
-      widget.taskList.addTask(task);
+      taskList.addTask(task);
     });
   }
 
   Future<void> deleteTask(Task targetTask) async {
-    Future.delayed(Duration(seconds: 1));
+    await dbService.deleteTask(
+        targetTask, widget.groupName, widget.organizationId);
     setState(() {
-      widget.taskList.deleteTask(targetTask);
+      taskList.deleteTask(targetTask);
     });
   }
 
@@ -232,11 +254,11 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text(widget.groupName),
-                  content: const Text('Do you want to remove?'),
+                  content: Text('Do you want to remove ${widget.groupName}?'),
                   actions: <Widget>[
                     TextButton(
                         onPressed: () async {
-                          await widget.deleteGroup(widget.groupName);
+                          await widget.deleteGroup();
                           Navigator.pop(context);
                         },
                         child: const Text('Delete')),
@@ -257,19 +279,23 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
                 await showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return SimpleDialog(
+                      return AlertDialog(
                         title: Text('Add task in ${widget.groupName}'),
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: TextField(
-                              controller: controller,
-                              decoration: const InputDecoration(
-                                labelText: 'Enter new task title',
-                                icon: const Icon(Icons.task),
-                              ),
+                        content: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: TextField(
+                            controller: controller,
+                            decoration: const InputDecoration(
+                              labelText: 'Enter new task title',
+                              icon: const Icon(Icons.task),
                             ),
+                            onSubmitted: (value) async {
+                              await addTask(Task(title: value));
+                              Navigator.pop(context);
+                            },
                           ),
+                        ),
+                        actions: [
                           TextButton(
                               onPressed: () async {
                                 await addTask(Task(title: controller.text));
@@ -295,6 +321,6 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
               });
             },
             title: Text(widget.groupName),
-            children: widget.taskList.getListTiles(this.deleteTask)));
+            children: taskList.getListTiles(this.deleteTask)));
   }
 }

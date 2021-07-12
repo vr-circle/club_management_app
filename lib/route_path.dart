@@ -150,16 +150,17 @@ final List<NavigationState> navigationList = [
       name: 'Search',
       icon: Icon(Icons.search),
       getRoutePath: (appState) {
-        if (appState.selectedSearchingClubId.isNotEmpty) {
-          return ClubDetailViewPath(appState.selectedSearchingClubId);
+        if (appState.selectedSearchingOrganizationId.isNotEmpty) {
+          return OrganizationDetailViewPath(
+              appState.selectedSearchingOrganizationId);
         }
         return SearchViewPath(appState.searchingParams);
       },
       initAppState: (appState) {
-        appState.selectedSearchingClubId = '';
+        appState.selectedSearchingOrganizationId = '';
       },
       onPopPage: (appState) {
-        appState.selectedSearchingClubId = '';
+        appState.selectedSearchingOrganizationId = '';
       },
       getPages: (appState) {
         return [
@@ -169,11 +170,11 @@ final List<NavigationState> navigationList = [
               appState: appState,
             ),
           ),
-          if (appState.selectedSearchingClubId.isNotEmpty)
+          if (appState.selectedSearchingOrganizationId.isNotEmpty)
             MaterialPage(
-                key: ValueKey('ClubDetail'),
-                child: ClubDetailPage(
-                  clubId: appState.selectedSearchingClubId,
+                key: ValueKey('OrganizationDetail'),
+                child: OrganizationDetailPage(
+                  clubId: appState.selectedSearchingOrganizationId,
                 )),
         ];
       }),
@@ -260,9 +261,9 @@ class SearchViewPath extends RoutePath {
   SearchViewPath(this.searchParam);
 }
 
-class ClubDetailViewPath extends RoutePath {
+class OrganizationDetailViewPath extends RoutePath {
   final String id;
-  ClubDetailViewPath(this.id);
+  OrganizationDetailViewPath(this.id);
   static const String location = 'club';
 }
 

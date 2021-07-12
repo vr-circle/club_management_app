@@ -106,9 +106,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           }
         }
         return TodoPath(0);
-      case ClubDetailViewPath.location:
+      case OrganizationDetailViewPath.location:
         if (pathSegments.length == 2) {
-          return ClubDetailViewPath(pathSegments[1]);
+          return OrganizationDetailViewPath(pathSegments[1]);
         }
         return SearchViewPath('');
       case SettingsPath.location:
@@ -165,9 +165,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     }
 
     // club
-    if (path is ClubDetailViewPath) {
+    if (path is OrganizationDetailViewPath) {
       return RouteInformation(
-          location: '/${ClubDetailViewPath.location}/${path.id}');
+          location: '/${OrganizationDetailViewPath.location}/${path.id}');
     }
 
     // settings
@@ -255,11 +255,11 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
     if (path is SearchViewPath) {
       appState.selectedIndex = SearchViewPath.index;
-      appState.selectedSearchingClubId = '';
+      appState.selectedSearchingOrganizationId = '';
     }
 
-    if (path is ClubDetailViewPath) {
-      appState.selectedSearchingClubId = path.id;
+    if (path is OrganizationDetailViewPath) {
+      appState.selectedSearchingOrganizationId = path.id;
     }
 
     if (path is SettingsPath) {

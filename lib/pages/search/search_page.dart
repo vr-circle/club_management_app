@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/pages/search/club.dart';
+import 'package:flutter_application_1/pages/search/organization_info.dart';
 
 class SearchPage extends StatefulWidget {
   SearchPage({Key key, @required this.appState}) : super(key: key);
@@ -10,17 +10,17 @@ class SearchPage extends StatefulWidget {
 }
 
 class SearchPageState extends State<SearchPage> {
-  List<ClubInfo> searchResultList;
-  Future<List<ClubInfo>> futureClubList;
-  List<ClubInfo> allClubList;
+  List<OrganizationInfo> searchResultList;
+  Future<List<OrganizationInfo>> futureOrganizationList;
+  List<OrganizationInfo> allOrganizationList;
   TextEditingController _controller;
 
-  Future<List<ClubInfo>> _getClubList() async {
+  Future<List<OrganizationInfo>> _getOrganizationList() async {
     await Future.delayed(Duration(seconds: 1));
     // get all club data
-    allClubList = dummyClubInfoList;
-    this.searchResultList = dummyClubInfoList;
-    return allClubList;
+    allOrganizationList = dummyOrganizationInfoList;
+    this.searchResultList = dummyOrganizationInfoList;
+    return allOrganizationList;
   }
 
   @override
@@ -30,14 +30,14 @@ class SearchPageState extends State<SearchPage> {
     super.initState();
   }
 
-  List<ClubInfo> _search() {
+  List<OrganizationInfo> _search() {
     final String _param = widget.appState.searchingParams;
     if (_param.isEmpty) {
-      return allClubList;
+      return allOrganizationList;
     }
     List<String> keywordList = _param.split(' ');
-    List<ClubInfo> res = [];
-    allClubList.forEach((ClubInfo element) {
+    List<OrganizationInfo> res = [];
+    allOrganizationList.forEach((OrganizationInfo element) {
       for (final keyword in keywordList) {
         if (element.categoryList.contains(keyword) ||
             element.name.contains(keyword)) {
@@ -68,23 +68,23 @@ class SearchPageState extends State<SearchPage> {
                 });
               },
             )),
-        const ListTile(title: Text('Club list')),
+        const ListTile(title: Text('Organization list')),
         Expanded(
             // searching result list
             child: FutureBuilder(
-          future: this._getClubList(),
-          builder:
-              (BuildContext context, AsyncSnapshot<List<ClubInfo>> snapshot) {
+          future: this._getOrganizationList(),
+          builder: (BuildContext context,
+              AsyncSnapshot<List<OrganizationInfo>> snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(
                 child: const CircularProgressIndicator(),
               );
             }
             this.searchResultList = this._search();
-            return ClubListView(
+            return OrganizationListView(
               clubList: this.searchResultList,
-              handleChangeClubId: (String targetId) {
-                widget.appState.selectedSearchingClubId = targetId;
+              handleChangeOrganizationId: (String targetId) {
+                widget.appState.selectedSearchingOrganizationId = targetId;
               },
             );
           },
@@ -94,11 +94,12 @@ class SearchPageState extends State<SearchPage> {
   }
 }
 
-class ClubListView extends StatelessWidget {
-  ClubListView({Key key, this.clubList, this.handleChangeClubId})
+class OrganizationListView extends StatelessWidget {
+  OrganizationListView(
+      {Key key, this.clubList, this.handleChangeOrganizationId})
       : super(key: key);
-  final List<ClubInfo> clubList;
-  final void Function(String targetId) handleChangeClubId;
+  final List<OrganizationInfo> clubList;
+  final void Function(String targetId) handleChangeOrganizationId;
   @override
   Widget build(BuildContext context) {
     return clubList == null || clubList.length == 0
@@ -114,7 +115,8 @@ class ClubListView extends StatelessWidget {
                   child: Card(
                       child: InkWell(
                           onTap: () {
-                            handleChangeClubId(clubList[index].id.toString());
+                            handleChangeOrganizationId(
+                                clubList[index].id.toString());
                           },
                           child: Padding(
                               padding: const EdgeInsets.all(16),
@@ -148,7 +150,7 @@ class ClubListView extends StatelessWidget {
                                         const SizedBox(
                                           height: 16,
                                         ),
-                                        Text(dummyClubInfoList[index]
+                                        Text(dummyOrganizationInfoList[index]
                                             .introduction),
                                       ]))
                                 ],
@@ -158,8 +160,8 @@ class ClubListView extends StatelessWidget {
 }
 
 int i = 0;
-final dummyClubInfoList = <ClubInfo>[
-  ClubInfo(
+final dummyOrganizationInfoList = <OrganizationInfo>[
+  OrganizationInfo(
       id: (i++).toString(),
       name: 'Hitech',
       introduction: 'hogehog',
@@ -171,19 +173,19 @@ final dummyClubInfoList = <ClubInfo>[
         'cultual',
         'circle'
       ]),
-  ClubInfo(
+  OrganizationInfo(
       id: (i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
-  ClubInfo(
+  OrganizationInfo(
       id: (i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
-  ClubInfo(
+  OrganizationInfo(
       id: (i++).toString(),
       name: 'soccer club',
       introduction: 'hogehog',

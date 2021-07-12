@@ -2,17 +2,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
-import 'package:flutter_application_1/pages/search/club.dart';
+import 'package:flutter_application_1/pages/search/organization_info.dart';
+import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class MyAppState extends ChangeNotifier {
   MyAppState()
-      : _selectedIndex = 0,
+      : _selectedIndex = TodoPath.index,
         _selectedDay = null,
         _selectedSchedule = null,
         _selectedTabInTodo = 0,
         _isSelectedUserSettings = false,
-        _selectedSearchingClubId = '',
+        _selectedSearchingOrganizationId = '',
         _isSelectedSearching = false,
         _searchingParams = '';
 
@@ -32,13 +33,13 @@ class MyAppState extends ChangeNotifier {
   // search
   String _searchingParams;
   bool _isSelectedSearching;
-  String _selectedSearchingClubId;
+  String _selectedSearchingOrganizationId;
 
   // settings
   bool _isSelectedUserSettings;
 
-  Future<List<ClubInfo>> getClubList() async {
-    return (await dbService.getClubList());
+  Future<List<OrganizationInfo>> getOrganizationList() async {
+    return (await dbService.getOrganizationList());
   }
 
   String get searchingParams => _searchingParams;
@@ -53,9 +54,10 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String get selectedSearchingClubId => _selectedSearchingClubId;
-  set selectedSearchingClubId(String id) {
-    _selectedSearchingClubId = id;
+  String get selectedSearchingOrganizationId =>
+      _selectedSearchingOrganizationId;
+  set selectedSearchingOrganizationId(String id) {
+    _selectedSearchingOrganizationId = id;
     notifyListeners();
   }
 

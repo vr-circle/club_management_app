@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/todo/task.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 
 class TodoAddTaskPage extends StatefulWidget {
   TodoAddTaskPage(
@@ -21,14 +19,7 @@ class TodoAddTaskPageState extends State<TodoAddTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add task')),
-      body: Center(
-        child: TextField(
-          decoration: InputDecoration(labelText: 'Enter new task'),
-          onSubmitted: (value) async {
-            await dbService.setTask(Task(title: value), widget.listName);
-          },
-        ),
-      ),
+      body: Center(),
     );
   }
 }
