@@ -1,7 +1,5 @@
-// import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
