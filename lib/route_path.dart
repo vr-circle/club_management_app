@@ -152,7 +152,7 @@ final List<NavigationState> navigationList = [
         if (appState.selectedSearchingClubId.isNotEmpty) {
           return ClubDetailViewPath(appState.selectedSearchingClubId);
         }
-        return GroupViewPath(appState.searchingParams);
+        return SearchViewPath(appState.searchingParams);
       },
       initAppState: (appState) {
         appState.isSearchingMode = false;
@@ -254,16 +254,17 @@ class TodoAddPath extends RoutePath {
   TodoAddPath(this.targetTabIndex);
 }
 
-class GroupViewPath extends RoutePath {
+class SearchViewPath extends RoutePath {
   static final int index = 3;
-  static const String location = 'club';
+  static const String location = 'search';
   String searchParam;
-  GroupViewPath(this.searchParam);
+  SearchViewPath(this.searchParam);
 }
 
 class ClubDetailViewPath extends RoutePath {
   final String id;
   ClubDetailViewPath(this.id);
+  static const String location = 'club';
 }
 
 // class SearchPath extends RoutePath {

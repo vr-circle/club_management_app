@@ -1,7 +1,7 @@
 // import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_application_1/pages/user_settings/user_settings.dart';
+import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -88,10 +88,10 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           }
         }
         return SchedulePath();
-      case GroupViewPath.location:
-        return GroupViewPath(params['keywords'] ?? '');
+      case SearchViewPath.location:
+        return SearchViewPath(params['keywords'] ?? '');
         break;
-      case 'todo':
+      case TodoPath.location:
         if (pathSegments.length == 2) {
           try {
             return TodoPath(int.parse(pathSegments[1]));
@@ -106,12 +106,12 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           }
         }
         return TodoPath(0);
-      case 'club':
+      case ClubDetailViewPath.location:
         if (pathSegments.length == 2) {
           return ClubDetailViewPath(pathSegments[1]);
         }
-        return GroupViewPath('');
-      case 'settings':
+        return SearchViewPath('');
+      case SettingsPath.location:
         if (pathSegments.length == 2 && pathSegments[1] == 'user') {
           return UserSettingsPath();
         }
@@ -123,56 +123,64 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
+    switch (path) {
+      case LoginPath:
+    }
+
     // login
     if (path is LoginPath) {
-      return RouteInformation(location: '/login');
+      return RouteInformation(location: '/${LoginPath.location}');
     }
 
     // home
     if (path is HomePath) {
-      return RouteInformation(location: '/home');
+      return RouteInformation(location: '/${HomePath.index}');
     }
 
     // schedule
     if (path is SchedulePath) {
-      return RouteInformation(location: '/schedule');
+      return RouteInformation(location: '/${SchedulePath.location}');
     }
     if (path is ScheduleDetailPath) {
       return RouteInformation(
           location:
-              '/schedule/${DateFormat("yyyy-MM-dd").format(path.day)}/${path.id}');
+              '/${SchedulePath.location}/${DateFormat("yyyy-MM-dd").format(path.day)}/${path.id}');
     }
     if (path is ScheduleListViewPath) {
       var p = DateFormat('yyyy-MM-dd').format(path.day);
-      return RouteInformation(location: '/schedule/$p');
+      return RouteInformation(location: '/${SchedulePath.location}/$p');
     }
 
     // todo
     if (path is TodoPath) {
       // get target tab name from tab index.
-      return RouteInformation(location: '/todo/${path.targetTabIndex}');
+      return RouteInformation(
+          location: '/${TodoPath.location}/${path.targetTabIndex}');
     }
     if (path is TodoAddPath) {
-      return RouteInformation(location: '/todo/${path.targetTabIndex}/add');
+      return RouteInformation(
+          location: '/${TodoPath.location}/${path.targetTabIndex}/add');
     }
 
-    if (path is GroupViewPath) {
+    if (path is SearchViewPath) {
       if (path.searchParam.isEmpty) {
-        return RouteInformation(location: '/search');
+        return RouteInformation(location: '/${SearchViewPath.location}');
       }
-      return RouteInformation(location: '/search/?param=${path.searchParam}');
+      return RouteInformation(
+          location: '/${SearchViewPath.location}/?param=${path.searchParam}');
     }
 
     if (path is ClubDetailViewPath) {
-      return RouteInformation(location: '/clubs/${path.id}');
+      return RouteInformation(
+          location: '/${ClubDetailViewPath.location}/${path.id}');
     }
 
     // settings
     if (path is SettingsPath) {
-      return RouteInformation(location: '/settings');
+      return RouteInformation(location: '/${SettingsPath.location}');
     }
     if (path is UserSettingsPath) {
-      return RouteInformation(location: '/settings/user');
+      return RouteInformation(location: '/${SettingsPath.location}/user');
     }
     return null;
   }
@@ -250,8 +258,8 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedTabInTodo = path.targetTabIndex;
     }
 
-    if (path is GroupViewPath) {
-      appState.selectedIndex = GroupViewPath.index;
+    if (path is SearchViewPath) {
+      appState.selectedIndex = SearchViewPath.index;
       appState.selectedSearchingClubId = '';
     }
 

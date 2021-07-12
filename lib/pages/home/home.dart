@@ -221,7 +221,7 @@ class ClubPartsListView extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () {
                                     appState.selectedIndex =
-                                        GroupViewPath.index;
+                                        SearchViewPath.index;
                                     appState.selectedSearchingClubId =
                                         snapshot.data[index].id.toString();
                                   },
