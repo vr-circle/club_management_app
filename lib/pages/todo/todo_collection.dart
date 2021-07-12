@@ -12,38 +12,7 @@ class TodoCollection {
   Future<Map<String, List<Task>>> initTasks(String id) async {
     // get todo list by id
     await Future.delayed(Duration(seconds: 1));
-    taskMap = {
-      'all0': [
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-      ],
-      'all1': [
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-      ],
-      'all2': [
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-      ],
-      'all3': [
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-      ],
-      'seconds': [
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-        Task(title: 'hogehoge'),
-      ]
-    };
+    taskMap = {};
     return taskMap;
   }
 
@@ -56,12 +25,12 @@ class TodoCollection {
   }
 
   Future<void> addTask(Task newTask, String targetGroupId) async {
-    await storeService.addTask(newTask, targetGroupId);
+    await dbService.setTask(newTask, targetGroupId);
     this.taskMap[targetGroupId] = [...this.taskMap[targetGroupId], newTask];
   }
 
   Future<void> deleteTask(Task targetTask, String targetGroupId) async {
-    await storeService.deleteTask(targetTask, targetGroupId);
+    await dbService.deleteTask(targetTask, targetGroupId);
     this.taskMap[targetGroupId] = taskMap[targetGroupId]
         .where((task) => task.id != targetTask.id)
         .toList();

@@ -8,7 +8,6 @@ class ScheduleCollection {
   ScheduleCollection() {
     this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
   }
-  void Function() notifyListeners;
   LinkedHashMap<DateTime, List<Schedule>> _schedules;
   LinkedHashMap<DateTime, List<Schedule>> get schedules => _schedules;
   int _getHashCode(DateTime key) {
@@ -16,12 +15,13 @@ class ScheduleCollection {
   }
 
   void initScheduleCollection(Map<DateTime, List<Schedule>> collection) {
-    this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
-      ..addAll(collection);
+    // this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
+    //   ..addAll(collection);
+    this._schedules.addAll(collection);
   }
 
   List<Schedule> getScheduleList(DateTime day) {
-    return this._schedules[day];
+    return this._schedules[day] ?? [];
   }
 
   Future<void> addSchedule(Schedule schedule, target) async {
@@ -29,7 +29,7 @@ class ScheduleCollection {
       _schedules[schedule.start] = [];
     }
     _schedules[schedule.start].add(schedule);
-    await storeService.addSchedule(schedule, target);
+    await dbService.setSchedule(schedule, target);
   }
 
   void deleteSchedule(Schedule targetSchedule) {

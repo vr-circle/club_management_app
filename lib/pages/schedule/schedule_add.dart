@@ -69,7 +69,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
         title: Text(_format.format(widget.targetDate)),
       ),
       body: Padding(
-          padding: EdgeInsets.all(32),
+          padding: const EdgeInsets.all(32),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,21 +97,21 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.title), labelText: 'Title'),
+                      icon: const Icon(Icons.title), labelText: 'Title'),
                   onChanged: (value) {
                     this.newSchedule.title = value;
                   },
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.place), labelText: 'Place'),
+                      icon: const Icon(Icons.place), labelText: 'Place'),
                   onChanged: (value) {
                     this.newSchedule.place = value;
                   },
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: 'Start time'),
+                      icon: const Icon(Icons.timer), labelText: 'Start time'),
                   onTap: () async {
                     var newDate = await _selectTime(context);
                     startTextFiledController.text =
@@ -125,7 +125,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                      icon: Icon(Icons.timer), labelText: 'End time'),
+                      icon: const Icon(Icons.timer), labelText: 'End time'),
                   onTap: () async {
                     var newDate = await _selectTime(context);
                     endTextFiledController.text =
@@ -140,7 +140,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                 TextField(
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(
-                    icon: Icon(Icons.content_copy),
+                    icon: const Icon(Icons.content_copy),
                     labelText: 'Details',
                   ),
                   onChanged: (value) {

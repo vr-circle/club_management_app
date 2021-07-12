@@ -17,27 +17,32 @@ class MyAppState extends ChangeNotifier {
         _isSelectedUserSettings = false,
         _selectedSearchingClubId = '',
         _isSelectedSearching = false,
-        _searchingParams = '',
-        _isSearchMode = false;
+        _searchingParams = '';
+
+  // app shell
   int _selectedIndex;
+
+  // schedule
   DateTime _selectedDay;
-  DateTime _selectedCalendarPage;
+  // DateTime _selectedCalendarPage;
   Schedule _selectedSchedule;
+  bool isOpeningAddSchedulePage;
+
+  // todo
   int _selectedTabInTodo;
-  bool _isSelectedUserSettings;
-  String _selectedSearchingClubId;
-  bool _isSelectedSearching;
+  bool isOpeningAddTodoPage;
+
+  // search
   String _searchingParams;
-  bool _isSearchMode;
+  bool _isSelectedSearching;
+  String _selectedSearchingClubId;
+  // bool _isSearchMode;
+
+  // settings
+  bool _isSelectedUserSettings;
 
   Future<List<ClubInfo>> getClubList() async {
-    return (await storeService.getClubList());
-  }
-
-  bool get isSearchingMode => _isSearchMode;
-  set isSearchingMode(bool v) {
-    _isSearchMode = v;
-    notifyListeners();
+    return (await dbService.getClubList());
   }
 
   String get searchingParams => _searchingParams;
@@ -55,12 +60,6 @@ class MyAppState extends ChangeNotifier {
   String get selectedSearchingClubId => _selectedSearchingClubId;
   set selectedSearchingClubId(String id) {
     _selectedSearchingClubId = id;
-    notifyListeners();
-  }
-
-  DateTime get selectedCalendarPage => _selectedCalendarPage;
-  set selectedCalendarPage(DateTime day) {
-    _selectedCalendarPage = day;
     notifyListeners();
   }
 
@@ -89,64 +88,17 @@ class MyAppState extends ChangeNotifier {
   }
 
   // ---------------- todo ----------------
-  TodoCollection todoCollection;
   int get selectedTabInTodo => _selectedTabInTodo;
   set selectedTabInTodo(int target) {
     _selectedTabInTodo = target;
     notifyListeners();
   }
 
-  void addTask(Task newTask, String targetGroupID) {
-    todoCollection.addTask(newTask, targetGroupID);
-    notifyListeners();
-  }
-
-  void deleteTask(Task targetTask, String targetGroupID) {
-    todoCollection.deleteTask(targetTask, targetGroupID);
-    notifyListeners();
-  }
-
   // ---------------- schedule ----------------
-  ScheduleCollection scheduleCollection = new ScheduleCollection();
-
   void setSelectedDay(DateTime day) {
     if (day == null) return;
     selectedDay = day;
     notifyListeners();
-  }
-
-  void setSelectedScheduleById(DateTime day, String id) {
-    final List<Schedule> targetScheduleList = scheduleCollection
-        .getScheduleList(day)
-        .where((element) => element.id == id)
-        .toList();
-    if (targetScheduleList.isEmpty) {
-      return;
-    }
-    setSelectedDay(day);
-    selectedSchedule = targetScheduleList[0];
-    // notifyListeners();
-  }
-
-  Future<void> addSchedule(Schedule schedule, String target) async {
-    await storeService.addSchedule(schedule, target);
-    scheduleCollection.addSchedule(schedule, target);
-    notifyListeners();
-  }
-
-  Future<void> deleteSchedule(Schedule targetSchedule) async {
-    await storeService.deleteSchedule(targetSchedule);
-    scheduleCollection.deleteSchedule(targetSchedule);
-    notifyListeners();
-  }
-
-  Future<Map<DateTime, List<Schedule>>> getSchedule(
-      List<String> targets) async {
-    return (await storeService.getSchedule(targets));
-  }
-
-  List<Schedule> getScheduleList(DateTime day) {
-    return scheduleCollection.getScheduleList(day);
   }
 
   // ---------------- auth ----------------

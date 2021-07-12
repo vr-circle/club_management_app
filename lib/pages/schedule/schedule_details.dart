@@ -5,10 +5,15 @@ import 'schedule.dart';
 import 'schedule_edit.dart';
 
 class ScheduleDetails extends StatelessWidget {
-  ScheduleDetails({@required this.schedule, @required this.deleteSchedule});
+  ScheduleDetails({
+    @required this.schedule,
+    @required this.deleteSchedule,
+    @required this.handleCloseDetailsPage,
+  });
   final Future<void> Function(Schedule schedule) deleteSchedule;
+  final void Function() handleCloseDetailsPage;
   final Schedule schedule;
-  final _format = new DateFormat('yyyy/MM/dd(E) hh:mm');
+  final _format = new DateFormat('yyyy/MM/dd(E) HH:mm');
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +65,7 @@ class ScheduleDetails extends StatelessWidget {
             FloatingActionButton(
               onPressed: () async {
                 await deleteSchedule(schedule);
-                Navigator.pop(context);
+                // handleCloseDetailsPage();
               },
               child: const Icon(Icons.delete),
               backgroundColor: Colors.red,

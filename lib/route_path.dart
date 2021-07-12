@@ -7,7 +7,6 @@ import 'package:flutter_application_1/pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/pages/schedule/schedule_page.dart';
 import 'package:flutter_application_1/pages/search/club_details.dart';
-import 'package:flutter_application_1/pages/search/search_option_page.dart';
 import 'package:flutter_application_1/pages/search/search_page.dart';
 import 'package:flutter_application_1/pages/todo/todo_page.dart';
 import 'package:flutter_application_1/pages/user_settings/settings.dart';
@@ -34,7 +33,7 @@ class NavigationState {
 final List<NavigationState> navigationList = [
   NavigationState(
       name: 'Home',
-      icon: Icon(Icons.home),
+      icon: const Icon(Icons.home),
       getRoutePath: (appState) {
         return HomePath();
       },
@@ -50,29 +49,33 @@ final List<NavigationState> navigationList = [
       }),
   NavigationState(
       name: 'Schedule',
-      icon: Icon(Icons.calendar_today),
+      icon: const Icon(Icons.calendar_today),
       getRoutePath: (appState) {
         if (appState.selectedDay != null) {
+          if (appState.isOpeningAddSchedulePage) {
+            return ScheduleAddPage();
+          }
           if (appState.selectedSchedule != null) {
             return ScheduleDetailPath(
                 appState.selectedDay, appState.selectedSchedule.id);
-          } else {
-            return ScheduleListViewPath(appState.selectedDay);
           }
+          return ScheduleListViewPath(appState.selectedDay);
         }
         return SchedulePath();
       },
       initAppState: (appState) {
         appState.selectedDay = null;
         appState.selectedSchedule = null;
+        appState.isOpeningAddSchedulePage = false;
       },
       onPopPage: (appState) {
         if (appState.selectedDay != null) {
-          if (appState.selectedSchedule != null) {
+          if (appState.isOpeningAddSchedulePage) {
+            appState.isOpeningAddSchedulePage = false;
+          } else if (appState.selectedSchedule != null) {
             appState.selectedSchedule = null;
           } else {
             appState.selectedDay = null;
-            appState.selectedSchedule = null;
           }
         } else {
           if (appState.selectedSchedule != null) {
@@ -86,46 +89,52 @@ final List<NavigationState> navigationList = [
       getPages: (appState) {
         return [
           FadeAnimationPage(
+              key: ValueKey('SchedulePage'),
               child: SchedulePage(
-                appState: appState,
-                handleChangePage: (DateTime day) {
-                  appState.selectedCalendarPage = day;
-                },
-                handleOpenList: (DateTime day) {
+                handleOpenListPage: (DateTime day) {
                   appState.selectedDay = day;
                 },
-                scheduleCollection: appState.scheduleCollection,
-              ),
-              key: ValueKey('SchedulePage')),
+                handleSelectSchedule: (Schedule schedule) {
+                  appState.selectedSchedule = schedule;
+                },
+              )),
           if (appState.selectedDay != null)
             MaterialPage(
+                key: ValueKey('ScheduleList'),
                 child: ScheduleListOnDay(
-                    handleOpenScheduleDetails: (Schedule schedule) {
-                      appState.selectedSchedule = schedule;
-                    },
-                    targetDate: appState.selectedDay,
-                    addSchedule: appState.addSchedule,
-                    deleteSchedule: appState.deleteSchedule,
-                    schedules: appState.getScheduleList(appState.selectedDay))),
+                  handleOpenScheduleDetails: (Schedule schedule) {
+                    appState.selectedSchedule = schedule;
+                  },
+                  targetDate: appState.selectedDay,
+                  handleOpenAddPage: () {
+                    appState.isOpeningAddSchedulePage = true;
+                  },
+                )),
           if (appState.selectedSchedule != null)
             MaterialPage(
+                key: ValueKey('ScheduleDetails'),
                 child: ScheduleDetails(
-              schedule: appState.selectedSchedule,
-              deleteSchedule: appState.deleteSchedule,
-            )),
+                  schedule: appState.selectedSchedule,
+                  deleteSchedule: ,
+                  handleCloseDetailsPage: () {
+                    appState.selectedSchedule = null;
+                  },
+                )),
         ];
       }),
   NavigationState(
       name: 'Todo',
-      icon: Icon(Icons.task_outlined),
+      icon: const Icon(Icons.task_outlined),
       getRoutePath: (appState) {
         return TodoPath(appState.selectedTabInTodo);
       },
       initAppState: (appState) {
         appState.selectedTabInTodo = 0;
+        appState.isOpeningAddTodoPage = false;
       },
       onPopPage: (appState) {
         appState.selectedTabInTodo = 0;
+        appState.isOpeningAddTodoPage = false;
       },
       getPages: (appState) {
         return [
@@ -133,7 +142,7 @@ final List<NavigationState> navigationList = [
               child: TodoPage(
                 appState: appState,
               ),
-              key: ValueKey('TodoPage'))
+              key: ValueKey('TodoPage')),
         ];
       }),
   NavigationState(
@@ -206,14 +215,18 @@ final List<NavigationState> navigationList = [
 
 abstract class RoutePath {}
 
-class LoginPath extends RoutePath {}
+class LoginPath extends RoutePath {
+  static const String location = 'login';
+}
 
 class HomePath extends RoutePath {
   static final int index = 0;
+  static const String location = 'home';
 }
 
 class SchedulePath extends RoutePath {
   static final int index = 1;
+  static const String location = 'schedule';
 }
 
 class ScheduleDetailPath extends RoutePath {
@@ -227,8 +240,11 @@ class ScheduleListViewPath extends RoutePath {
   ScheduleListViewPath(this.day);
 }
 
+class ScheduleAddPage extends RoutePath {}
+
 class TodoPath extends RoutePath {
   static final int index = 2;
+  static const String location = 'todo';
   final int targetTabIndex;
   TodoPath(this.targetTabIndex);
 }
@@ -240,6 +256,7 @@ class TodoAddPath extends RoutePath {
 
 class GroupViewPath extends RoutePath {
   static final int index = 3;
+  static const String location = 'club';
   String searchParam;
   GroupViewPath(this.searchParam);
 }
@@ -256,6 +273,7 @@ class ClubDetailViewPath extends RoutePath {
 
 class SettingsPath extends RoutePath {
   static final int index = 4;
+  static const String location = 'settings';
 }
 
 class UserSettingsPath extends RoutePath {}

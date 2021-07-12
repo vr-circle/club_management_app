@@ -1,280 +1,181 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/schedule/schedule.dart';
 import 'package:flutter_application_1/pages/search/club.dart';
 import 'package:flutter_application_1/pages/todo/task.dart';
-import 'package:intl/intl.dart';
 
-StoreService storeService;
+DatabaseService dbService;
+
+enum Permission {
+  admin,
+  none,
+}
+
+abstract class PermissionManager {
+  Future<bool> getPermission();
+}
 
 abstract class DatabaseService {
   // club
-  Future<void> createClub();
   Future<List<ClubInfo>> getClubList();
+  Future<void> createClub(ClubInfo newClub);
   Future<void> joinClub(ClubInfo targetClub);
-  Future<void> withdrawClub(ClubInfo targetClub);
+  Future<void> leaveClub(ClubInfo targetClub);
 
   // schedule
-  Future<Map<DateTime, List<Schedule>>> getSchedules();
-  Future<void> setSchedule(Schedule schedule);
-  Future<void> deleteSchedule(Schedule schedule);
+  Future<Map<DateTime, List<Schedule>>> getSchedules(List<String> targetId);
+  Future<List<Schedule>> getSchedulesOnDay(
+      DateTime day, List<String> targetIdList);
+  Future<Schedule> getSchedule(String id);
+  Future<void> setSchedule(Schedule newSchedule, String targetId);
+  Future<void> deleteSchedule(Schedule schedule, String targetId);
 
   // todo
-  // Future<TaskList> getTaskList();
-  Future<void> setTask(Task task);
-  Future<void> deleteTask(Task task);
+  Future<Map<String, List<Task>>> getTaskList();
+  Future<void> setList(String listName, String targetGroupId);
+  Future<void> deleteList(String listName, String targetGroupId);
+  Future<void> setTask(Task task, String targetId);
+  Future<void> deleteTask(Task task, String targetId);
 
   // settings
-  Future<void> setTheme(ThemeData userTheme);
+  Future<List<String>> getParticipatingClubIdList();
+  Future<void> setUserTheme();
 }
 
-class StoreService {
-  StoreService({this.userId});
-  final _store = FirebaseFirestore.instance;
-  String userId;
-  Map<String, dynamic> privateJsonData;
-  Map<String, dynamic> clubJsonData;
-  List<String> taskTitleList;
+Future<void> dummyDelay() async {
+  await Future.delayed(Duration(seconds: 1));
+}
 
+class FireStoreService extends DatabaseService {
+  FireStoreService({this.userId});
+  final _store = FirebaseFirestore.instance;
+  final String userId;
+  // --------------------------- club ------------------------------------------
+  @override
   Future<List<ClubInfo>> getClubList() async {
-    await Future.delayed(Duration(seconds: 2));
+    await dummyDelay();
+    int i = 0;
     return dummyClubInfoList;
   }
 
-  Future<String> getClubName(String targetID) async {
-    final data = await this._store.collection('clubs').doc(targetID).get();
-    return data.data()['name'];
+  @override
+  Future<void> createClub(ClubInfo newClub) async {
+    await dummyDelay();
+    print('create club ${newClub.name}');
   }
 
-  Future<List<String>> getBelongingClubIDs() async {
-    final clubIds = (await FirebaseFirestore.instance
-        .collection('clubs')
-        .where('members', arrayContains: this.userId)
-        .get()) as List<String>;
-    print(clubIds);
-    return clubIds;
+  @override
+  Future<void> joinClub(ClubInfo targetClub) async {
+    await dummyDelay();
+    // _store.collection('').doc().set();
+    print('join club ${targetClub.name}');
   }
 
-  Future<String> getUserTheme() async {
-    final data = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('settings')
-        .doc('settings')
-        .get();
-    print(data['theme']);
-    return data['theme'];
+  @override
+  Future<void> leaveClub(ClubInfo targetClub) async {
+    print('leaveClub');
+    await dummyDelay();
+    // _store.collection('users').doc(userId).set({'clubs' : });
   }
 
-  Future<void> setUserTheme(String theme) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('settings')
-        .doc('settings')
-        .update({'theme': theme});
+  // --------------------------- schedule --------------------------------------
+  @override
+  Future<Map<DateTime, List<Schedule>>> getSchedules(
+      List<String> targetId) async {
+    print('getSchedules');
+    await dummyDelay();
+    // final data = await (_store.collection().doc().get()).data();
+    return dummySchedules;
   }
 
-  Future<Map<String, List<Task>>> getTaskMap() async {
-    Map<String, List<Task>> taskMap = new Map<String, List<Task>>();
-    final privateTaskList =
-        (await this._store.collection('users').doc(userId).get())
-            .data()['todo']
-            .cast<String>();
-    taskMap['private'] = privateTaskList.map((e) => Task(title: e)).toList();
-
-    final clubIds = await this
-        ._store
-        .collection('clubs')
-        .where('members', arrayContains: this.userId)
-        .get();
-    print(clubIds);
-    return taskMap;
+  @override
+  Future<List<Schedule>> getSchedulesOnDay(
+      DateTime day, List<String> targetIdList) async {
+    print('getScheduleOnDay');
+    await dummyDelay();
+    // final data = await _store.collection().doc().set()
+    return dummyScheduleListOnDay;
   }
 
-  Future<void> addTask(Task task, String targetGroup) async {
-    if (targetGroup == 'private') {
-      await _store.collection('users').doc(userId).update({
-        'todo': FieldValue.arrayUnion([task.title])
-      });
-      return;
-    }
-    await _store.collection('clubs').doc(targetGroup).update({
-      'todo': FieldValue.arrayUnion([task.title])
-    });
+  @override
+  Future<Schedule> getSchedule(String id) async {
+    print('getSchedule');
+    await dummyDelay();
+    // _store.collection(collectionPath)
+    return dummyScheduleListOnDay[0];
   }
 
-  Future<void> deleteTask(Task task, String target) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(target == 'private' ? userId : 'circle')
-        .update({
-      'todo': FieldValue.arrayRemove([task.title])
-    });
+  @override
+  Future<void> setSchedule(Schedule newSchedule, String targetId) async {
+    print('setSchedule');
+    await dummyDelay();
+    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
   }
 
-  Future<Map<DateTime, List<Schedule>>> getSchedule(
-      List<String> targets) async {
-    final _format = DateFormat("yyyy-MM-dd");
-    // private
-    final _scheduleList = (await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .collection('schedule')
-            .doc('schedule')
-            .get())
-        .data();
-    Map<DateTime, List<Schedule>> res = {};
-    _scheduleList.forEach((key, value) {
-      DateTime targetDateString;
-      try {
-        targetDateString = _format.parseStrict(key);
-        // Why couldn't use map() in 'value'.
-        List<Schedule> ttmp = [];
-        value.forEach((e) {
-          ttmp.add(Schedule(
-              title: e['title'],
-              place: e['place'],
-              details: e['details'],
-              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-              createdBy: 'private'));
-        });
-        Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
-        res.addAll(tmp);
-      } catch (e) {
-        print(e);
-      }
-    });
-    targets.forEach((target) async {
-      final _clubScheduleList = (await FirebaseFirestore.instance
-              .collection('users')
-              .doc(target)
-              .collection('schedule')
-              .doc('schedule')
-              .get())
-          .data();
-      Map<DateTime, List<Schedule>> clubRes = {};
-      _clubScheduleList.forEach((key, value) {
-        var targetDateString;
-        try {
-          targetDateString = _format.parseStrict(key);
-          List<Schedule> ttmp = [];
-          value.forEach((e) {
-            ttmp.add(Schedule(
-                title: e['title'],
-                place: e['place'],
-                details: e['details'],
-                start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-                end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-                createdBy: target));
-          });
-          Map<DateTime, List<Schedule>> tmp = {targetDateString: ttmp};
-          clubRes.addAll(tmp);
-        } catch (e) {
-          print(e);
-        }
-      });
-      res.addAll(clubRes);
-    });
-    return res;
+  @override
+  Future<void> deleteSchedule(Schedule schedule, String targetId) async {
+    print('deleteSchedule');
+    await dummyDelay();
+    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
   }
 
-  Future<void> addClubSchedule(
-      Schedule schedule, String targetClubId, bool isPublic) async {
-    await FirebaseFirestore.instance
-        .collection('clubs')
-        .doc(targetClubId)
-        .collection('schedule')
-        .doc(isPublic ? 'public' : 'private')
-        .set({
-      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayUnion([
-        {
-          'title': schedule.title,
-          'place': schedule.place,
-          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
-          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
-          'details': schedule.details,
-        }
-      ])
-    }, SetOptions(merge: true));
+  // --------------------------- task ------------------------------------------
+  @override
+  Future<Map<String, List<Task>>> getTaskList() async {
+    print('getTaskList');
+    await dummyDelay();
+    final List<String> clubList = await this.getParticipatingClubIdList();
+    // _store.collection().doc().get()
+    return dummyTaskList;
   }
 
-  Future<void> deleteClubSchedule(
-      Schedule schedule, String targetClubId, bool isPublic) async {
-    await FirebaseFirestore.instance
-        .collection('clubs')
-        .doc(targetClubId)
-        .collection('schedule')
-        .doc(isPublic ? 'public' : 'private')
-        .update({
-      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayRemove([
-        {
-          'details': schedule.details,
-          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
-          'place': schedule.place,
-          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
-          'title': schedule.title,
-        }
-      ])
-    });
+  @override
+  Future<void> setList(String listName, String targetGroupId) async {
+    print('setList');
+    await dummyDelay();
+    // _store.collection(targetGroupId.isEmpty ? userId : targetGroupId).doc('group').set({});
   }
 
-  Future<Schedule> getScheduleToday(String targetId) async {
-    // final today = DateTime.now();
-    // final data = (await _store.collection('users').doc(targetId).get());
-    return Schedule(
-        title: 'title',
-        start: DateTime.now(),
-        end: DateTime.now(),
-        details: 'hogehoge',
-        place: 'place',
-        createdBy: 'suine');
+  @override
+  Future<void> deleteList(String listName, String targetGroupId) async {
+    print('deleteList');
+    await dummyDelay();
+    // _store.collection(targetGroupId.isEmpty ? userId : targetGroupId).doc('group').set({});
   }
 
-  Future<void> addSchedule(Schedule schedule, String target) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(target == 'private' ? userId : target)
-        .collection('schedule')
-        .doc('schedule')
-        .set({
-      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayUnion([
-        {
-          'title': schedule.title,
-          'place': schedule.place,
-          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
-          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
-          'details': schedule.details,
-        }
-      ])
-    }, SetOptions(merge: true));
+  @override
+  Future<void> setTask(Task task, String targetId) async {
+    print('setTask');
+    await dummyDelay();
+    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
   }
 
-  Future<void> deleteSchedule(Schedule schedule) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(schedule.createdBy == 'private' ? userId : schedule.createdBy)
-        .collection('schedule')
-        .doc('schedule')
-        .update({
-      DateFormat('yyyy-MM-dd').format(schedule.start): FieldValue.arrayRemove([
-        {
-          'details': schedule.details,
-          'end': DateFormat('yyyy-MM-dd HH:mm').format(schedule.end),
-          'place': schedule.place,
-          'start': DateFormat('yyyy-MM-dd HH:mm').format(schedule.start),
-          'title': schedule.title,
-        }
-      ])
-    });
+  @override
+  Future<void> deleteTask(Task task, String targetId) async {
+    print('deleteTask');
+    await dummyDelay();
+    // _store.collection(targetId.isEmpty ? userId : targetId).doc().set();
+  }
+
+  // --------------------------- settings --------------------------------------
+  @override
+  Future<List<String>> getParticipatingClubIdList() async {
+    print('getParticipatingClubIdList');
+    await dummyDelay();
+    // _store.collection('clubs').where();
+    return ['0', '1'];
+  }
+
+  @override
+  Future<void> setUserTheme() async {
+    print('setUserTheme');
+    await dummyDelay();
   }
 }
 
-int i = 0;
+int _i = 0;
 final dummyClubInfoList = <ClubInfo>[
   ClubInfo(
-      id: i++,
+      id: _i++,
       name: 'Hitech',
       introduction: 'hogehog',
       memberNum: 10,
@@ -286,21 +187,173 @@ final dummyClubInfoList = <ClubInfo>[
         'circle'
       ]),
   ClubInfo(
-      id: i++,
+      id: _i++,
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
   ClubInfo(
-      id: i++,
+      id: _i++,
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
   ClubInfo(
-      id: i++,
+      id: _i++,
       name: 'soccer club',
       introduction: 'hogehog',
       memberNum: 10,
       categoryList: ['club', '運動']),
 ];
+
+final dummyScheduleListOnDay = [
+  Schedule(
+      title: 'title',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      details: 'details',
+      place: 'place01',
+      createdBy: 'hogehoge'),
+  Schedule(
+      title: 'title',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      details: 'details',
+      place: 'place01',
+      createdBy: 'hogehoge'),
+  Schedule(
+      title: 'title',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      details: 'details',
+      place: 'place01',
+      createdBy: 'hogehoge'),
+  Schedule(
+      title: 'title',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      details: 'details',
+      place: 'place01',
+      createdBy: 'hogehoge'),
+];
+
+final dummySchedules = {
+  DateTime.now(): [
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+  ],
+  DateTime.now().add(Duration(days: 7)): [
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+  ],
+  DateTime.now().add(Duration(days: 3)): [
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+    Schedule(
+        title: 'title',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+        createdBy: 'hogehoge'),
+  ],
+};
+
+final dummyTaskList = {
+  'name0': [
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+  ],
+  'name1': [
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+  ],
+  'name2': [
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+  ],
+  'name3': [
+    Task(title: 'tmp'),
+    Task(title: 'tmp'),
+  ],
+  'name4': [
+    Task(title: 'tmp'),
+  ]
+};

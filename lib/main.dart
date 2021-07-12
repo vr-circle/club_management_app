@@ -1,7 +1,7 @@
-import 'dart:html';
+// import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_application_1/pages/user_settings/settings.dart';
+import 'package:flutter_application_1/pages/user_settings/user_settings.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -48,9 +48,6 @@ class MyApp extends HookWidget {
                 Brightness.dark
             ? ThemeData.dark()
             : ThemeData.light(),
-        //  useProvider(darkModeProvider)
-        //     ? ThemeData.dark()
-        //     : ThemeData.light(),
         routeInformationParser: myRouteAppState.routeInformationParser,
         routerDelegate: myRouteAppState.routerDelegate);
   }
@@ -62,24 +59,28 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       RouteInformation routeInformation) async {
     final uri = Uri.parse(routeInformation.location);
 
-    if (uri.pathSegments.isNotEmpty) {
-      if (uri.pathSegments.first == 'login') {
+    if (uri.pathSegments.isEmpty) {
+      return LoginPath();
+    }
+    final params = uri.queryParameters;
+    final pathSegments = uri.pathSegments;
+
+    switch (uri.pathSegments.first) {
+      case LoginPath.location:
         return LoginPath();
-      }
-      if (uri.pathSegments.first == 'home') {
+      case HomePath.location:
         return HomePath();
-      }
-      if (uri.pathSegments.first == 'schedule') {
-        if (uri.pathSegments.length == 2) {
+      case SchedulePath.location:
+        if (pathSegments.length == 2) {
           try {
-            var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
+            var x = DateFormat('yyyy-MM-dd').parseStrict(pathSegments[1]);
             return ScheduleListViewPath(x);
           } catch (e) {
             print(e);
           }
-        } else if (uri.pathSegments.length == 3) {
+        } else if (pathSegments.length == 3) {
           try {
-            var x = DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[1]);
+            var x = DateFormat('yyyy-MM-dd').parseStrict(pathSegments[1]);
             var scheduleId = uri.pathSegments[2];
             return ScheduleDetailPath(x, scheduleId);
           } catch (e) {
@@ -87,47 +88,37 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           }
         }
         return SchedulePath();
-      }
-      if (uri.pathSegments.first == 'todo') {
-        if (uri.pathSegments.length == 2) {
+      case GroupViewPath.location:
+        return GroupViewPath(params['keywords'] ?? '');
+        break;
+      case 'todo':
+        if (pathSegments.length == 2) {
           try {
-            return TodoPath(int.parse(uri.pathSegments[1]));
+            return TodoPath(int.parse(pathSegments[1]));
           } catch (e) {
             print(e);
           }
-        } else if (uri.pathSegments.length == 3 &&
-            uri.pathSegments[2] == 'add') {
+        } else if (pathSegments.length == 3 && pathSegments[2] == 'add') {
           try {
-            return TodoAddPath(int.parse(uri.pathSegments[1]));
+            return TodoPath(int.parse(pathSegments[1]));
           } catch (e) {
             print(e);
           }
         }
         return TodoPath(0);
-      }
-      if (uri.pathSegments.first == 'search') {
-        if (uri.pathSegments.length == 2) {
-          final String tmp = uri.queryParameters['param'];
-          return GroupViewPath(tmp);
+      case 'club':
+        if (pathSegments.length == 2) {
+          return ClubDetailViewPath(pathSegments[1]);
         }
         return GroupViewPath('');
-      } else if (uri.pathSegments.first == 'clubs') {
-        if (uri.pathSegments.length == 2) {
-          return ClubDetailViewPath(uri.pathSegments[1]);
-        }
-        return GroupViewPath('');
-      }
-      if (uri.pathSegments.first == 'settings') {
-        if (uri.pathSegments.length >= 2) {
-          if (uri.pathSegments[1] == 'user') {
-            return UserSettingsPath();
-          }
+      case 'settings':
+        if (pathSegments.length == 2 && pathSegments[1] == 'user') {
+          return UserSettingsPath();
         }
         return SettingsPath();
-      }
+      default:
+        return LoginPath();
     }
-    // if not true in any case
-    return LoginPath();
   }
 
   @override
@@ -246,7 +237,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       return;
     } else if (path is ScheduleDetailPath) {
       appState.selectedIndex = SchedulePath.index;
-      appState.setSelectedScheduleById(path.day, path.id);
+      // appState.setSelectedScheduleById(path.day, path.id);
       return;
     }
 
@@ -295,7 +286,8 @@ class _AppShellState extends State<AppShell> {
   ChildBackButtonDispatcher _backButtonDispatcher;
 
   void initState() {
-    storeService = StoreService(userId: widget.appState.getCurrentUser().uid);
+    // storeService = FireStoreService(userId: widget.appState.getCurrentUser().uid);
+    dbService = FireStoreService(userId: widget.appState.getCurrentUser().uid);
     _routerDelegate = InnerRouterDelegate(widget.appState);
     super.initState();
   }

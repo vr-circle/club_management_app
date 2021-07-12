@@ -64,14 +64,13 @@ class SettingsPage extends HookWidget {
             title: const Text('Dark mode'),
             onTap: () async {
               watch(darkModeProvider.notifier).changeSwitch(!isDarkMode);
-              await storeService.setUserTheme(!isDarkMode ? 'dark' : 'normal');
+              await dbService.setUserTheme();
             },
             trailing: Switch(
               value: isDarkMode,
               onChanged: (value) async {
                 watch(darkModeProvider.notifier).changeSwitch(value);
-                await storeService
-                    .setUserTheme(!isDarkMode ? 'dark' : 'normal');
+                await dbService.setUserTheme();
               },
             ),
           );

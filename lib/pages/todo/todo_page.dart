@@ -133,16 +133,16 @@ class TaskListTabState extends State<TaskListTab> {
                 await showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return SimpleDialog(
+                      return AlertDialog(
                         title: Text('Add Group'),
-                        children: [
-                          Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: TextField(
-                                controller: controller,
-                                decoration: const InputDecoration(
-                                    labelText: 'New Group'),
-                              )),
+                        content: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: TextField(
+                              controller: controller,
+                              decoration:
+                                  const InputDecoration(labelText: 'New Group'),
+                            )),
+                        actions: [
                           TextButton(
                               onPressed: () async {
                                 await todoCollection.addGroup(controller.text);
@@ -199,20 +199,16 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
   }
 
   Future<void> addTask(Task task) async {
+    Future.delayed(Duration(seconds: 1));
     setState(() {
       widget.taskList.addTask(task);
     });
   }
 
-  Future<void> deleteTask(Task task) async {
+  Future<void> deleteTask(Task targetTask) async {
+    Future.delayed(Duration(seconds: 1));
     setState(() {
-      widget.taskList.deleteTask(task);
-    });
-  }
-
-  Future<void> toggleDone(Task task) async {
-    setState(() {
-      widget.taskList.toggleDone(task);
+      widget.taskList.deleteTask(targetTask);
     });
   }
 
@@ -228,9 +224,10 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
           await showDialog(
               context: context,
               builder: (BuildContext context) {
-                return SimpleDialog(
+                return AlertDialog(
                   title: Text(widget.groupName),
-                  children: [
+                  content: const Text('Do you want to remove?'),
+                  actions: <Widget>[
                     TextButton(
                         onPressed: () async {
                           await widget.deleteGroup(widget.groupName);
@@ -255,7 +252,7 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
                     context: context,
                     builder: (BuildContext context) {
                       return SimpleDialog(
-                        title: const Text(''),
+                        title: Text('Add task in ${widget.groupName}'),
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8),
@@ -263,12 +260,13 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
                               controller: controller,
                               decoration: const InputDecoration(
                                 labelText: 'Enter new task title',
+                                icon: const Icon(Icons.task),
                               ),
                             ),
                           ),
                           TextButton(
-                              onPressed: () {
-                                addTask(Task(title: controller.text));
+                              onPressed: () async {
+                                await addTask(Task(title: controller.text));
                                 Navigator.pop(context);
                               },
                               child: const Text('Add')),
@@ -291,18 +289,6 @@ class TaskExpansionTileState extends State<TaskExpansionTile> {
               });
             },
             title: Text(widget.groupName),
-            children: widget.taskList.taskList.map((Task task) {
-              return TaskListTile(
-                  task: task,
-                  deleteTask: () async {
-                    deleteTask(task);
-                  },
-                  addTask: () async {
-                    addTask(task);
-                  },
-                  toggleDone: () {
-                    toggleDone(task);
-                  });
-            }).toList()));
+            children: widget.taskList.getListTiles(this.deleteTask)));
   }
 }
