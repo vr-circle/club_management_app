@@ -130,11 +130,11 @@ final List<NavigationState> navigationList = [
         return TodoPath(appState.selectedTabInTodo);
       },
       initAppState: (appState) {
-        appState.selectedTabInTodo = 0;
+        appState.selectedTabInTodo = '';
         appState.isOpeningAddTodoPage = false;
       },
       onPopPage: (appState) {
-        appState.selectedTabInTodo = 0;
+        appState.selectedTabInTodo = '';
         appState.isOpeningAddTodoPage = false;
       },
       getPages: (appState) {
@@ -245,13 +245,13 @@ class ScheduleAddPage extends RoutePath {}
 class TodoPath extends RoutePath {
   static final int index = 2;
   static const String location = 'todo';
-  final int targetTabIndex;
-  TodoPath(this.targetTabIndex);
+  final String targetTabId;
+  TodoPath(this.targetTabId);
 }
 
 class TodoAddPath extends RoutePath {
-  final int targetTabIndex;
-  TodoAddPath(this.targetTabIndex);
+  final String targetTabId;
+  TodoAddPath(this.targetTabId);
 }
 
 class SearchViewPath extends RoutePath {

@@ -23,34 +23,40 @@ class FireStoreService extends DatabaseService {
   @override
   Future<List<String>> getParticipatingOrganizationIdList() async {
     print('getParticipatingOrganizationIdList');
-    final data = await _store
-        .collection(usersCollectionName)
-        .doc(userId)
-        .collection(settingsCollectionName)
-        .doc(settingsOrganizationName)
-        .get() as Map<String, dynamic>;
-    final res = [];
-    data.forEach((key, value) {
-      res.add(key);
-    });
-    return res;
+    try {
+      final data = await _store
+          .collection(usersCollectionName)
+          .doc(userId)
+          .collection(settingsCollectionName)
+          .doc(settingsOrganizationName)
+          .get();
+      final res = <String>[...data['ids']];
+      return res;
+    } catch (e) {
+      print(e);
+    }
+    return [];
   }
 
   @override
   Future<OrganizationInfo> getOrganizationInfo(String id) async {
     print('getOrganizationInfo');
-    final list = await _store
-        .collection(organizationCollectionName)
-        .doc(id)
-        .get() as Map<String, dynamic>;
-    final res = OrganizationInfo(
+    try {
+      final list =
+          await _store.collection(organizationCollectionName).doc(id).get();
+      final res = OrganizationInfo(
         id: id,
         name: list['name'],
         memberNum: list['memberNum'],
         introduction: list['introduction'],
-        categoryList: list['categoryList'],
-        otherInfo: list['others']);
-    return res;
+        categoryList: List<String>.from(list['categoryList']),
+        // otherInfo: list ?? []
+      );
+      return res;
+    } catch (e) {
+      print(e);
+    }
+    return null;
   }
 
   @override
@@ -269,28 +275,40 @@ class FireStoreService extends DatabaseService {
   Future<Map<String, List<Task>>> getTaskList(String id) async {
     print('getTaskList');
     Map<String, List<Task>> res = {};
+    List<String> target;
     if (id.isEmpty) {
-      // private
-      final _data = await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(todoCollectionName)
-          .doc(taskGroupDocName)
-          .get() as Map<String, List<String>>;
-      _data.forEach((key, value) {
-        res.addAll({key: value.map((e) => Task(title: e))});
-      });
-      return res;
+      target = [
+        usersCollectionName,
+        userId,
+        todoCollectionName,
+        taskGroupDocName
+      ];
+    } else {
+      target = [
+        organizationCollectionName,
+        id,
+        todoCollectionName,
+        taskGroupDocName,
+      ];
     }
-    final _data = await _store
-        .collection(organizationCollectionName)
-        .doc(id)
-        .collection(todoCollectionName)
-        .doc(taskGroupDocName)
-        .get() as Map<String, List<String>>;
-    _data.forEach((key, value) {
-      res.addAll({key: value.map((e) => Task(title: e))});
-    });
+    try {
+      final _data = (await _store
+              .collection(target[0])
+              .doc(target[1])
+              .collection(target[2])
+              .doc(target[3])
+              .get())
+          .data();
+      if (_data == null) {
+        return res;
+      }
+      _data.forEach((key, value) {
+        final _tmp = List<String>.from(value);
+        res[key] = _tmp.map((e) => Task(title: e)).toList();
+      });
+    } catch (e) {
+      print(e);
+    }
     return res;
   }
 
@@ -304,9 +322,7 @@ class FireStoreService extends DatabaseService {
           .doc(userId)
           .collection(todoCollectionName)
           .doc(taskGroupDocName)
-          .set({
-        listName: ['']
-      });
+          .update({listName: []});
       return;
     }
     await _store
@@ -314,9 +330,7 @@ class FireStoreService extends DatabaseService {
         .doc(targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)
-        .set({
-      listName: ['']
-    });
+        .update({listName: []});
   }
 
   @override
@@ -333,7 +347,7 @@ class FireStoreService extends DatabaseService {
       return;
     }
     await _store
-        .collection(usersCollectionName)
+        .collection(organizationCollectionName)
         .doc(targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_application_1/store/store_service.dart';
@@ -88,27 +89,10 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return SchedulePath();
       case SearchViewPath.location:
         return SearchViewPath(params['keywords'] ?? '');
-        break;
       case TodoPath.location:
-        if (pathSegments.length == 2) {
-          try {
-            return TodoPath(int.parse(pathSegments[1]));
-          } catch (e) {
-            print(e);
-          }
-        } else if (pathSegments.length == 3 && pathSegments[2] == 'add') {
-          try {
-            return TodoPath(int.parse(pathSegments[1]));
-          } catch (e) {
-            print(e);
-          }
-        }
-        return TodoPath(0);
+        return TodoPath(uri.queryParameters['id'] ?? '');
       case OrganizationDetailViewPath.location:
-        if (pathSegments.length == 2) {
-          return OrganizationDetailViewPath(pathSegments[1]);
-        }
-        return SearchViewPath('');
+        return OrganizationDetailViewPath(uri.queryParameters['id'] ?? '');
       case SettingsPath.location:
         if (pathSegments.length == 2 && pathSegments[1] == 'user') {
           return UserSettingsPath();
@@ -128,7 +112,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
     // home
     if (path is HomePath) {
-      return RouteInformation(location: '/${HomePath.index}');
+      return RouteInformation(location: '/${HomePath.location}');
     }
 
     // schedule
@@ -147,10 +131,10 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is TodoPath) {
       // get target tab name from tab index.
       return RouteInformation(
-          location: '/${TodoPath.location}/${path.targetTabIndex}');
+          location: '/${TodoPath.location}/${path.targetTabId}');
     } else if (path is TodoAddPath) {
       return RouteInformation(
-          location: '/${TodoPath.location}/${path.targetTabIndex}/add');
+          location: '/${TodoPath.location}/${path.targetTabId}/add');
     }
 
     // search
@@ -165,7 +149,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     // club
     if (path is OrganizationDetailViewPath) {
       return RouteInformation(
-          location: '/${OrganizationDetailViewPath.location}/${path.id}');
+          location: '/${OrganizationDetailViewPath.location}/?${path.id}');
     }
 
     // settings
@@ -182,9 +166,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 class MyRouterDelegate extends RouterDelegate<RoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
   final GlobalKey<NavigatorState> navigatorKey;
-  MyAppState appState = MyAppState();
+  MyAppState appState;
 
-  MyRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>() {
+  MyRouterDelegate()
+      : navigatorKey = GlobalKey<NavigatorState>(),
+        appState = MyAppState() {
     appState.addListener(notifyListeners);
   }
 
@@ -200,21 +186,29 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      pages: [
-        if (appState.getCurrentUser() == null)
-          FadeAnimationPage(
-              child: LoginPage(appState), key: ValueKey('LoginPage'))
-        else
-          MaterialPage(child: AppShell(appState: appState)),
-      ],
-      onPopPage: (route, result) {
-        if (!route.didPop(result)) {
-          return false;
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (_, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container();
         }
-        notifyListeners();
-        return true;
+        return Navigator(
+          key: navigatorKey,
+          pages: [
+            if (appState.getCurrentUser() == null)
+              FadeAnimationPage(
+                  child: LoginPage(appState), key: ValueKey('LoginPage'))
+            else
+              MaterialPage(child: AppShell(appState: appState)),
+          ],
+          onPopPage: (route, result) {
+            if (!route.didPop(result)) {
+              return false;
+            }
+            notifyListeners();
+            return true;
+          },
+        );
       },
     );
   }
@@ -244,11 +238,11 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
     if (path is TodoPath) {
       appState.selectedIndex = TodoPath.index;
-      appState.selectedTabInTodo = path.targetTabIndex;
+      appState.selectedTabInTodo = path.targetTabId;
       return;
     } else if (path is TodoAddPath) {
       appState.selectedIndex = TodoPath.index;
-      appState.selectedTabInTodo = path.targetTabIndex;
+      appState.selectedTabInTodo = path.targetTabId;
     }
 
     if (path is SearchViewPath) {

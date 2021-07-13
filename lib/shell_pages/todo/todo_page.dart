@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
@@ -22,7 +24,7 @@ class TodoPageState extends State<TodoPage> {
   List<TabInfo> tabs = [];
 
   Future<List<TabInfo>> getTabs() async {
-    tabs.add(TabInfo(id: 'private', name: 'private'));
+    tabs.add(TabInfo(id: '', name: 'private'));
     final clubIdList = await dbService.getParticipatingOrganizationIdList();
     await Future.forEach(clubIdList, (id) async {
       final _clubInfo = await dbService.getOrganizationInfo(id);
@@ -68,10 +70,25 @@ class TodoTabControllerState extends State<TodoTabController>
 
   @override
   void initState() {
+    bool isRedirect = true;
+    int tabIndex;
+    for (int i = 0; i < widget.tabs.length; i++) {
+      if (widget.tabs[i].id == widget.appState.selectedTabInTodo) {
+        isRedirect = false;
+        tabIndex = i;
+        break;
+      }
+    }
+    if (isRedirect) {
+      setState(() {
+        widget.appState.selectedTabInTodo = '';
+      });
+    }
     _tabController = TabController(
-        length: widget.tabs.length,
-        vsync: this,
-        initialIndex: widget.appState.selectedTabInTodo);
+      length: widget.tabs.length,
+      vsync: this,
+      initialIndex: tabIndex,
+    );
     _tabController.addListener(_handleTabSelection);
     super.initState();
   }
@@ -86,7 +103,7 @@ class TodoTabControllerState extends State<TodoTabController>
     if (_tabController.indexIsChanging) {
       return;
     }
-    widget.appState.selectedTabInTodo = _tabController.index;
+    widget.appState.selectedTabInTodo = widget.tabs[_tabController.index].id;
   }
 
   @override

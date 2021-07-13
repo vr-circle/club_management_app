@@ -8,10 +8,10 @@ import 'package:flutter_application_1/store/store_service.dart';
 
 class MyAppState extends ChangeNotifier {
   MyAppState()
-      : _selectedIndex = TodoPath.index,
+      : _selectedIndex = HomePath.index,
         _selectedDay = null,
         _selectedSchedule = null,
-        _selectedTabInTodo = 0,
+        _selectedTabInTodo = '',
         _isSelectedUserSettings = false,
         _selectedSearchingOrganizationId = '',
         _isSelectedSearching = false,
@@ -27,7 +27,7 @@ class MyAppState extends ChangeNotifier {
   bool isOpeningAddSchedulePage;
 
   // todo
-  int _selectedTabInTodo;
+  String _selectedTabInTodo;
   bool isOpeningAddTodoPage;
 
   // search
@@ -86,8 +86,8 @@ class MyAppState extends ChangeNotifier {
   }
 
   // ---------------- todo ----------------
-  int get selectedTabInTodo => _selectedTabInTodo;
-  set selectedTabInTodo(int target) {
+  String get selectedTabInTodo => _selectedTabInTodo;
+  set selectedTabInTodo(String target) {
     _selectedTabInTodo = target;
     notifyListeners();
   }
@@ -118,7 +118,6 @@ class MyAppState extends ChangeNotifier {
 
   User getCurrentUser() {
     final x = _authService.getCurrentUser();
-    notifyListeners();
     return x;
   }
 }
