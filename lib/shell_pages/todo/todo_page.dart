@@ -70,19 +70,12 @@ class TodoTabControllerState extends State<TodoTabController>
 
   @override
   void initState() {
-    bool isRedirect = true;
     int tabIndex;
     for (int i = 0; i < widget.tabs.length; i++) {
       if (widget.tabs[i].id == widget.appState.selectedTabInTodo) {
-        isRedirect = false;
         tabIndex = i;
         break;
       }
-    }
-    if (isRedirect) {
-      setState(() {
-        widget.appState.selectedTabInTodo = '';
-      });
     }
     _tabController = TabController(
       length: widget.tabs.length,

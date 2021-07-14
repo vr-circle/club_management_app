@@ -186,29 +186,21 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (_, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container();
+    return Navigator(
+      key: navigatorKey,
+      pages: [
+        if (appState.getCurrentUser() == null)
+          FadeAnimationPage(
+              child: LoginPage(appState), key: ValueKey('LoginPage'))
+        else
+          MaterialPage(child: AppShell(appState: appState)),
+      ],
+      onPopPage: (route, result) {
+        if (!route.didPop(result)) {
+          return false;
         }
-        return Navigator(
-          key: navigatorKey,
-          pages: [
-            if (appState.getCurrentUser() == null)
-              FadeAnimationPage(
-                  child: LoginPage(appState), key: ValueKey('LoginPage'))
-            else
-              MaterialPage(child: AppShell(appState: appState)),
-          ],
-          onPopPage: (route, result) {
-            if (!route.didPop(result)) {
-              return false;
-            }
-            notifyListeners();
-            return true;
-          },
-        );
+        notifyListeners();
+        return true;
       },
     );
   }

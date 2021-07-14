@@ -18,6 +18,8 @@ class FireStoreService extends DatabaseService {
   final settingsCollectionName = 'settings';
   final settingsOrganizationName = 'organizations';
   final taskGroupDocName = 'group';
+  final public = 'public';
+  final private = 'private';
 
   // --------------------------- club ------------------------------------------
   @override
@@ -119,39 +121,25 @@ class FireStoreService extends DatabaseService {
   Future<Map<DateTime, List<Schedule>>> getSchedules(String targetId) async {
     print('getSchedules');
     Map<DateTime, List<Schedule>> res = {};
+    List<String> targets = [];
     if (targetId.isEmpty) {
-      final data = await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(scheduleCollectionName)
-          .doc()
-          .get() as Map<String, List<dynamic>>;
-      data.forEach((key, value) {
-        try {
-          final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
-          final tmpList = <Schedule>[];
-          value.forEach((e) {
-            tmpList.add(Schedule(
-              title: e['title'],
-              place: e['place'],
-              details: e['details'],
-              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-            ));
-          });
-          res.addAll({tmpDate: tmpList});
-        } catch (e) {
-          print(e);
-        }
-      });
-      return res;
+      targets.add(organizationCollectionName);
+      targets.add(targetId);
+      targets.add(scheduleCollectionName);
+      targets.add(public);
+    } else {
+      targets.add(usersCollectionName);
+      targets.add(userId);
+      targets.add(scheduleCollectionName);
+      targets.add(public);
     }
-    final data = await _store
-        .collection(organizationCollectionName)
-        .doc(targetId)
-        .collection(scheduleCollectionName)
-        .doc()
-        .get() as Map<String, List<dynamic>>;
+    final data = (await _store
+            .collection(targets[0])
+            .doc(targets[1])
+            .collection(targets[2])
+            .doc(targets[3])
+            .get())
+        .data();
     data.forEach((key, value) {
       try {
         final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
@@ -170,7 +158,6 @@ class FireStoreService extends DatabaseService {
         print(e);
       }
     });
-
     return res;
   }
 
