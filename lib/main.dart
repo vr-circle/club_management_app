@@ -146,7 +146,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           location: '/${SearchViewPath.location}/?param=${path.searchParam}');
     }
 
-    // club
+    // organization
     if (path is OrganizationDetailViewPath) {
       return RouteInformation(
           location: '/${OrganizationDetailViewPath.location}/?${path.id}');
@@ -303,22 +303,21 @@ class _AppShellState extends State<AppShell> {
     if (size.width > 550) {
       return Scaffold(
         appBar: AppBar(
-          title: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: 90,
-              child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () {
-                      appState.selectedIndex = HomePath.index;
-                    },
+          title: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                  onTap: () {
+                    appState.selectedIndex = HomePath.index;
+                  },
+                  child: FittedBox(
+                    fit: BoxFit.contain,
                     child: Row(
                       children: [FlutterLogo(), Text('CMA')],
                     ),
                   ))),
           actions: [
             SizedBox(
-              width: MediaQuery.of(context).size.width / 4,
+              width: size.width / 4,
             ),
             Padding(
               padding: EdgeInsets.only(right: 16),
@@ -362,15 +361,14 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: 90,
-            child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    appState.selectedIndex = HomePath.index;
-                  },
+        title: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+                onTap: () {
+                  appState.selectedIndex = HomePath.index;
+                },
+                child: FittedBox(
+                  fit: BoxFit.contain,
                   child: Row(
                     children: [FlutterLogo(), Text('CMA')],
                   ),

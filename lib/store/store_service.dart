@@ -54,33 +54,52 @@ class FireStoreService extends DatabaseService {
         categoryList: List<String>.from(list['categoryList']),
         // otherInfo: list ?? []
       );
+      print('success getOrganizationInfo');
+      print(res);
       return res;
     } catch (e) {
       print(e);
     }
+    print('failed getOrganizationInfo');
     return null;
   }
 
   @override
   Future<List<OrganizationInfo>> getOrganizationList() async {
     print('getOrganizationList');
-    final data = await _store.collection(organizationCollectionName).get()
-        as Map<String, dynamic>;
-    final res = data.entries
-        .map((e) => OrganizationInfo(
-            id: e.key,
-            name: e.value['name'],
-            introduction: e.value['introduction'],
-            categoryList: e.value['categoryList'],
-            memberNum: e.value['memberNum'],
-            otherInfo: e.value['otherInfo']))
-        .toList();
+    final res = <OrganizationInfo>[];
+    final data = await _store.collection(organizationCollectionName).get();
+    data.docs.forEach((element) {
+      try {
+        res.add(OrganizationInfo(
+          id: element.id,
+          memberNum: element['memberNum'],
+          categoryList: List<String>.from(element['categoryList']),
+          name: element['name'],
+          introduction: element['introduction'],
+          // otherInfo: element['otherInfo'],
+        ));
+      } catch (e) {
+        print(e);
+      }
+    });
+    print(res);
     return res;
+    // final res = data.entries
+    //     .map((e) => OrganizationInfo(
+    //         id: e.key,
+    //         name: e.value['name'],
+    //         introduction: e.value['introduction'],
+    //         categoryList: e.value['categoryList'],
+    //         memberNum: e.value['memberNum'],
+    //         otherInfo: e.value['otherInfo']))
+    //     .toList();
+    // return res;
   }
 
   @override
   Future<void> createOrganization(OrganizationInfo newOrganization) async {
-    print('create club ${newOrganization.name}');
+    print('create organization ${newOrganization.name}');
     await _store.collection(organizationCollectionName).doc().set({
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
@@ -92,7 +111,7 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> joinOrganization(OrganizationInfo targetOrganization) async {
-    print('join club ${targetOrganization.name}');
+    print('join organization ${targetOrganization.name}');
     await _store
         .collection(usersCollectionName)
         .doc(userId)
@@ -125,14 +144,12 @@ class FireStoreService extends DatabaseService {
     if (targetId.isEmpty) {
       targets.add(organizationCollectionName);
       targets.add(targetId);
-      targets.add(scheduleCollectionName);
-      targets.add(public);
     } else {
       targets.add(usersCollectionName);
       targets.add(userId);
-      targets.add(scheduleCollectionName);
-      targets.add(public);
     }
+    targets.add(scheduleCollectionName);
+    targets.add(public);
     final data = (await _store
             .collection(targets[0])
             .doc(targets[1])
@@ -399,40 +416,6 @@ class FireStoreService extends DatabaseService {
     await dummyDelay();
   }
 }
-
-int _i = 0;
-final dummyOrganizationInfoList = <OrganizationInfo>[
-  OrganizationInfo(
-      id: (_i++).toString(),
-      name: 'Hitech',
-      introduction: 'hogehog',
-      memberNum: 10,
-      otherInfo: [
-        {'hogehoge': 'fugafuga'}
-      ],
-      categoryList: [
-        'cultual',
-        'circle'
-      ]),
-  OrganizationInfo(
-      id: (_i++).toString(),
-      name: 'soccer club',
-      introduction: 'hogehog',
-      memberNum: 10,
-      categoryList: ['club', '運動']),
-  OrganizationInfo(
-      id: (_i++).toString(),
-      name: 'soccer club',
-      introduction: 'hogehog',
-      memberNum: 10,
-      categoryList: ['club', '運動']),
-  OrganizationInfo(
-      id: (_i++).toString(),
-      name: 'soccer club',
-      introduction: 'hogehog',
-      memberNum: 10,
-      categoryList: ['club', '運動']),
-];
 
 final dummyScheduleListOnDay = [
   Schedule(

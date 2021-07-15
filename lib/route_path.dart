@@ -6,7 +6,7 @@ import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_list_on_day.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
-import 'package:flutter_application_1/shell_pages/search/club_details.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_page.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/settings.dart';
@@ -174,7 +174,7 @@ final List<NavigationState> navigationList = [
             MaterialPage(
                 key: ValueKey('OrganizationDetail'),
                 child: OrganizationDetailPage(
-                  clubId: appState.selectedSearchingOrganizationId,
+                  organizationId: appState.selectedSearchingOrganizationId,
                 )),
         ];
       }),
@@ -264,7 +264,7 @@ class SearchViewPath extends RoutePath {
 class OrganizationDetailViewPath extends RoutePath {
   final String id;
   OrganizationDetailViewPath(this.id);
-  static const String location = 'club';
+  static const String location = 'organization';
 }
 
 // class SearchPath extends RoutePath {
