@@ -1,123 +1,91 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
+import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/route_path.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
-import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 
-class MyAppState extends ChangeNotifier {
-  MyAppState()
-      : _selectedIndex = HomePath.index,
-        _selectedDay = null,
-        _selectedSchedule = null,
-        _selectedTabInTodo = '',
-        _isSelectedUserSettings = false,
-        _selectedSearchingOrganizationId = '',
-        _isSelectedSearching = false,
-        _searchingParams = '';
+class AppState extends ChangeNotifier {
+  AppState()
+      : _loggedinState = LoggedInState.loggedOut,
+        _bottomNavigationIndex = HomePath.index,
+        _searchingParam = '',
+        _isOpenAccountView = false,
+        _isDarkMode = false,
+        _targetTodoTabId = '',
+        _targetOrganizationId = '',
+        _authService = AuthService();
 
-  // app shell
-  int _selectedIndex;
-
-  // schedule
-  DateTime _selectedDay;
-  DateTime _selectedCalendarPage;
-  Schedule _selectedSchedule;
-  bool isOpeningAddSchedulePage;
+  int _bottomNavigationIndex;
+  int get bottomNavigationIndex => _bottomNavigationIndex;
+  set bottomNavigationIndex(int index) {
+    _bottomNavigationIndex = index;
+    notifyListeners();
+  }
 
   // todo
-  String _selectedTabInTodo;
-  bool isOpeningAddTodoPage;
+  String _targetTodoTabId;
+  String get targetTodoTabId => _targetTodoTabId;
+  set targetTodoTabId(String value) {
+    _targetTodoTabId = value;
+    notifyListeners();
+  }
 
   // search
-  String _searchingParams;
-  bool _isSelectedSearching;
-  String _selectedSearchingOrganizationId;
+  String _searchingParam;
+  String get searchingParam => _searchingParam;
+  set searchingParam(String value) {
+    _searchingParam = value;
+    notifyListeners();
+  }
+
+  String _targetOrganizationId;
+  String get targetOrganizationId => _targetOrganizationId;
+  set targetOrganizationId(String value) {
+    _targetOrganizationId = value;
+    notifyListeners();
+  }
 
   // settings
-  bool _isSelectedUserSettings;
-
-  Future<List<OrganizationInfo>> getOrganizationList() async {
-    return (await dbService.getOrganizationList());
-  }
-
-  String get searchingParams => _searchingParams;
-  set searchingParams(String value) {
-    _searchingParams = value;
+  bool _isDarkMode;
+  bool _isOpenAccountView;
+  bool get isOpenAccountView => _isOpenAccountView;
+  set isOpenAccountView(bool value) {
+    _isOpenAccountView = value;
     notifyListeners();
   }
 
-  bool get isSelectedSearching => _isSelectedSearching;
-  set isSelectedSearching(bool value) {
-    _isSelectedSearching = value;
+  Stream<User> Function() authStateChange() {
+    return _authService.authStateChange();
+  }
+
+  void handleChangeLoggedInState(LoggedInState state) {
+    this._loggedinState = state;
     notifyListeners();
   }
 
-  String get selectedSearchingOrganizationId =>
-      _selectedSearchingOrganizationId;
-  set selectedSearchingOrganizationId(String id) {
-    _selectedSearchingOrganizationId = id;
+  User get user => _authService.user;
+  set user(User user) {
+    _authService.user = user;
+    this._loggedinState = LoggedInState.loggedIn;
     notifyListeners();
   }
 
-  bool get isSelectedUserSettings => _isSelectedUserSettings;
-  set isSelectedUserSettings(bool value) {
-    _isSelectedUserSettings = value;
+  AuthService _authService;
+  LoggedInState _loggedinState;
+  LoggedInState get loggedInState => _loggedinState;
+  Future<void> logIn(String email, String password) async {
+    _loggedinState = LoggedInState.loading;
     notifyListeners();
-  }
-
-  int get selectedIndex => _selectedIndex;
-  set selectedIndex(int idx) {
-    _selectedIndex = idx;
-    notifyListeners();
-  }
-
-  DateTime get selectedDay => _selectedDay;
-  set selectedDay(DateTime day) {
-    _selectedDay = day;
-    notifyListeners();
-  }
-
-  Schedule get selectedSchedule => _selectedSchedule;
-  set selectedSchedule(Schedule schedule) {
-    _selectedSchedule = schedule;
-    notifyListeners();
-  }
-
-  // ---------------- todo ----------------
-  String get selectedTabInTodo => _selectedTabInTodo;
-  set selectedTabInTodo(String target) {
-    _selectedTabInTodo = target;
-    notifyListeners();
-  }
-
-  // ---------------- schedule ----------------
-  void setSelectedDay(DateTime day) {
-    if (day == null) return;
-    selectedDay = day;
-    notifyListeners();
-  }
-
-  // ---------------- auth ----------------
-  AuthService _authService = AuthService();
-  Future<void> signInWithEmailAndPassword(String email, String password) async {
     await _authService.signInWithEmailAndPassword(email, password);
+    _loggedinState = LoggedInState.loggedIn;
     notifyListeners();
   }
 
-  Future<void> signOut() async {
-    await _authService.signOut();
+  Future<void> logOut() async {
+    _loggedinState = LoggedInState.loading;
     notifyListeners();
-  }
-
-  Future<void> signUpWithEmailAndPassword(String email, String password) async {
-    await _authService.signUpWithEmailAndPassword(email, password);
+    await Future.delayed(Duration(seconds: 2));
+    _loggedinState = LoggedInState.loggedOut;
     notifyListeners();
-  }
-
-  User getCurrentUser() {
-    final x = _authService.getCurrentUser();
-    return x;
   }
 }

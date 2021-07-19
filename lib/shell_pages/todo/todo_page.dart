@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
@@ -15,7 +13,7 @@ class TabInfo {
 
 class TodoPage extends StatefulWidget {
   TodoPage({Key key, @required this.appState}) : super(key: key);
-  final MyAppState appState;
+  final AppState appState;
   TodoPageState createState() => TodoPageState();
 }
 
@@ -44,22 +42,47 @@ class TodoPageState extends State<TodoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: futureTabs,
-        builder: (BuildContext context, AsyncSnapshot<List<TabInfo>> snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: const CircularProgressIndicator());
-          }
-          return TodoTabController(tabs: tabs, appState: widget.appState);
-        });
+    return Scaffold(
+        appBar: AppBar(
+          title: Row(children: [
+            FlutterLogo(),
+            const Text('CMA'),
+          ]),
+        ),
+        body: FutureBuilder(
+            future: futureTabs,
+            builder:
+                (BuildContext context, AsyncSnapshot<List<TabInfo>> snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: const CircularProgressIndicator());
+              }
+              int index = 0;
+              for (int i = 0; i < tabs.length; i++) {
+                if (tabs[i].id == widget.appState.targetTodoTabId) {
+                  index = i;
+                }
+              }
+              return TodoTabController(
+                tabs: tabs,
+                targetIndex: index,
+                handleChangeTab: (id) {
+                  widget.appState.targetTodoTabId = id;
+                },
+              );
+            }));
   }
 }
 
 class TodoTabController extends StatefulWidget {
-  TodoTabController({Key key, @required this.tabs, @required this.appState})
+  TodoTabController(
+      {Key key,
+      @required this.tabs,
+      @required this.targetIndex,
+      @required this.handleChangeTab})
       : super(key: key);
-  final MyAppState appState;
+  final int targetIndex;
   final List<TabInfo> tabs;
+  final Function(String id) handleChangeTab;
   @override
   TodoTabControllerState createState() => TodoTabControllerState();
 }
@@ -70,17 +93,10 @@ class TodoTabControllerState extends State<TodoTabController>
 
   @override
   void initState() {
-    int tabIndex;
-    for (int i = 0; i < widget.tabs.length; i++) {
-      if (widget.tabs[i].id == widget.appState.selectedTabInTodo) {
-        tabIndex = i;
-        break;
-      }
-    }
     _tabController = TabController(
       length: widget.tabs.length,
       vsync: this,
-      initialIndex: tabIndex,
+      initialIndex: widget.targetIndex,
     );
     _tabController.addListener(_handleTabSelection);
     super.initState();
@@ -96,7 +112,7 @@ class TodoTabControllerState extends State<TodoTabController>
     if (_tabController.indexIsChanging) {
       return;
     }
-    widget.appState.selectedTabInTodo = widget.tabs[_tabController.index].id;
+    widget.handleChangeTab(widget.tabs[_tabController.index].id);
   }
 
   @override

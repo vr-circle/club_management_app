@@ -10,6 +10,6 @@ class NoAnimationPage extends Page {
         pageBuilder: (context, animation, animation2) {
           return child;
         },
-        transitionDuration: Duration(seconds: 0));
+        transitionDuration: Duration(milliseconds: 1));
   }
 }

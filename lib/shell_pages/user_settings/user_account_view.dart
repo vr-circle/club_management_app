@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class UserAccountView extends HookWidget {
-  UserAccountView({this.user});
+  UserAccountView({@required this.user});
   final User user;
   @override
   Widget build(BuildContext context) {

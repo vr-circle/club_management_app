@@ -2,13 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 
 class OrganizationPartsListView extends StatelessWidget {
   OrganizationPartsListView({Key key, @required this.appState})
       : super(key: key);
-  final MyAppState appState;
+  final AppState appState;
   Future<List<OrganizationInfo>> getOrganizationInfoList() async {
     await Future.delayed(Duration(seconds: 1));
     return [
@@ -55,10 +54,10 @@ class OrganizationPartsListView extends StatelessWidget {
                                 width: 200,
                                 child: GestureDetector(
                                   onTap: () {
-                                    appState.selectedIndex =
-                                        SearchViewPath.index;
-                                    appState.selectedSearchingOrganizationId =
-                                        snapshot.data[index].id.toString();
+                                    // appState.selectedIndex =
+                                    //     SearchViewPath.index;
+                                    // appState.selectedSearchingOrganizationId =
+                                    //     snapshot.data[index].id.toString();
                                   },
                                   child: Card(
                                       child: Text(snapshot.data[index].name)),

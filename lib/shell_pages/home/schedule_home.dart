@@ -1,16 +1,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class ScheduleHomeView extends StatelessWidget {
-  ScheduleHomeView({Key key, @required this.handleChangeSelectedIndex})
-      : super(key: key);
-  final void Function(int index) handleChangeSelectedIndex;
-  Future<List<Schedule>> getScheduleList() async {
-    return await dbService.getSchedulesOnDay(DateTime.now(), ['']);
+  ScheduleHomeView({Key key, @required this.appState}) : super(key: key);
+  final AppState appState;
+  Future<List<Schedule>> _getScheduleList() async {
+    return await dbService.getSchedulesOnDay(DateTime.now(),
+        [...await dbService.getParticipatingOrganizationIdList()]);
   }
 
   @override
@@ -18,10 +18,10 @@ class ScheduleHomeView extends StatelessWidget {
     return Column(
       children: [
         const ListTile(
-          title: Text('Schedule in today'),
+          title: const Text('Schedule in today'),
         ),
         FutureBuilder(
-            future: getScheduleList(),
+            future: _getScheduleList(),
             builder:
                 (BuildContext context, AsyncSnapshot<List<Schedule>> snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
@@ -44,11 +44,6 @@ class ScheduleHomeView extends StatelessWidget {
                     ));
                   });
             }),
-        TextButton(
-            onPressed: () {
-              handleChangeSelectedIndex(SchedulePath.index);
-            },
-            child: const Text('More')),
       ],
     );
   }

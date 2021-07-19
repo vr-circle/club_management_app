@@ -1,22 +1,27 @@
-import 'package:uuid/uuid.dart';
-
-var _uuid = Uuid();
-
 class Schedule {
-  Schedule(
-      {String id,
-      this.title,
-      this.start,
-      this.end,
-      this.place,
-      this.details,
-      this.createdBy})
-      : id = id ?? _uuid.v4();
+  Schedule({
+    this.id,
+    this.title,
+    this.start,
+    this.end,
+    this.place,
+    this.details,
+  });
   String id;
   String title;
-  String place;
   DateTime start;
   DateTime end;
+  String place;
   String details;
+}
+
+class PersonalSchedule extends Schedule {}
+
+class OrganizationSchedule extends Schedule {
+  OrganizationSchedule({
+    this.isPublic,
+    this.createdBy,
+  });
+  bool isPublic;
   String createdBy;
 }

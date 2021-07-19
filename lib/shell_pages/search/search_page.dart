@@ -5,7 +5,7 @@ import 'package:flutter_application_1/store/store_service.dart';
 
 class SearchPage extends StatefulWidget {
   SearchPage({Key key, @required this.appState}) : super(key: key);
-  final MyAppState appState;
+  final AppState appState;
   @override
   SearchPageState createState() => SearchPageState();
 }
@@ -26,12 +26,12 @@ class SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     this._controller =
-        TextEditingController(text: widget.appState.searchingParams);
+        TextEditingController(text: widget.appState.searchingParam);
     super.initState();
   }
 
   List<OrganizationInfo> _search() {
-    final String _param = widget.appState.searchingParams;
+    final String _param = widget.appState.searchingParam;
     if (_param.isEmpty) {
       return allOrganizationList;
     }
@@ -52,45 +52,53 @@ class SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const FlutterLogo(),
+              const Text('CMA'),
+            ],
+          ),
+        ),
         body: Column(
-      children: [
-        Padding(
-            padding: const EdgeInsets.all(12),
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                  icon: Icon(Icons.search),
-                  labelText: 'Search by name or category'),
-              onSubmitted: (value) {
-                widget.appState.searchingParams = value;
-                setState(() {
-                  this.searchResultList = _search();
-                });
+          children: [
+            Padding(
+                padding: const EdgeInsets.all(12),
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.search),
+                      labelText: 'Search by name or category'),
+                  onSubmitted: (value) {
+                    widget.appState.searchingParam = value;
+                    setState(() {
+                      this.searchResultList = _search();
+                    });
+                  },
+                )),
+            const ListTile(title: Text('Organization list')),
+            Expanded(
+                // searching result list
+                child: FutureBuilder(
+              future: this._getOrganizationList(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<OrganizationInfo>> snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(
+                    child: const CircularProgressIndicator(),
+                  );
+                }
+                this.searchResultList = this._search();
+                return OrganizationListView(
+                  clubList: this.searchResultList,
+                  handleChangeOrganizationId: (String targetId) {
+                    widget.appState.targetOrganizationId = targetId;
+                  },
+                );
               },
             )),
-        const ListTile(title: Text('Organization list')),
-        Expanded(
-            // searching result list
-            child: FutureBuilder(
-          future: this._getOrganizationList(),
-          builder: (BuildContext context,
-              AsyncSnapshot<List<OrganizationInfo>> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(
-                child: const CircularProgressIndicator(),
-              );
-            }
-            this.searchResultList = this._search();
-            return OrganizationListView(
-              clubList: this.searchResultList,
-              handleChangeOrganizationId: (String targetId) {
-                widget.appState.selectedSearchingOrganizationId = targetId;
-              },
-            );
-          },
-        )),
-      ],
-    ));
+          ],
+        ));
   }
 }
 

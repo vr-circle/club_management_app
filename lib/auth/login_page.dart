@@ -1,54 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'signup_page.dart';
-
-final loginInfoStateProvider = StateNotifierProvider((ref) => LoginInfoState());
-
-class UserStateNotifier extends StateNotifier<UserState> {
-  UserStateNotifier() : super(UserState());
+enum LoggedInState {
+  loading,
+  loggedIn,
+  loggedOut,
 }
 
-class UserState {
-  UserState();
-  LoginInfo loginInfo = LoginInfo();
+class LoginPage extends StatefulWidget {
+  LoginPage({Key key, @required this.handleLogin}) : super(key: key);
+  final Future<void> Function(String email, String password) handleLogin;
+  @override
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class LoginInfoState extends StateNotifier<LoginInfo> {
-  LoginInfoState() : super(LoginInfo());
-
-  String get email => state.email;
-  String get password => state.password;
-  void updateEmail(String value) {
-    state.email = value;
+class _LoginPageState extends State<LoginPage> {
+  String email = '', password = '';
+  @override
+  void initState() {
+    super.initState();
   }
-
-  void updatePassword(String value) {
-    state.password = value;
-  }
-}
-
-class LoginInfo {
-  LoginInfo() {
-    email = '';
-    password = '';
-  }
-  String email;
-  String password;
-}
-
-class LoginPage extends HookWidget {
-  LoginPage(this.appState);
-  final MyAppState appState;
 
   @override
   Widget build(BuildContext context) {
-    print('build login page');
     return Scaffold(
         appBar: AppBar(
-          title: Text('Club Management App'),
+          title: Text('Organization Management App'),
         ),
         body: Center(
             child: Padding(
@@ -58,9 +34,7 @@ class LoginPage extends HookWidget {
               decoration:
                   InputDecoration(icon: Icon(Icons.mail), labelText: 'Email'),
               onChanged: (value) {
-                context
-                    .read(loginInfoStateProvider.notifier)
-                    .updateEmail(value);
+                this.email = value;
               },
             ),
             TextField(
@@ -69,36 +43,24 @@ class LoginPage extends HookWidget {
               obscureText: true,
               keyboardType: TextInputType.visiblePassword,
               onChanged: (value) {
-                context
-                    .read(loginInfoStateProvider.notifier)
-                    .updatePassword(value);
+                this.password = value;
               },
             ),
-            Consumer(builder: (context, watch, child) {
-              return TextButton(
-                  onPressed: () async {
-                    String email =
-                        context.read(loginInfoStateProvider.notifier).email;
-                    String password =
-                        context.read(loginInfoStateProvider.notifier).password;
-                    try {
-                      await appState.signInWithEmailAndPassword(
-                          email, password);
-                    } catch (e) {
-                      print('failed to login');
-                    }
-                  },
-                  child: Text('login'));
-            }),
+            TextButton(
+                onPressed: () async {
+                  // login
+                  widget.handleLogin(this.email, this.password);
+                },
+                child: const Text('Login')),
             SizedBox(
               height: 32,
             ),
             TextButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return SignUpPage(appState);
-                  }));
+                  // Navigator.of(context)
+                  //     .push(MaterialPageRoute(builder: (context) {
+                  //   return SignUpPage();
+                  // }));
                 },
                 child: Text('Do you have an account?'))
           ]),

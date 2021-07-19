@@ -9,9 +9,13 @@ import 'schedule.dart';
 class SchedulePage extends StatefulWidget {
   SchedulePage({
     Key key,
+    @required this.initFocusDay,
+    @required this.handleChangeCalendarPage,
     @required this.handleOpenListPage,
     @required this.handleSelectSchedule,
   }) : super(key: key);
+  final DateTime initFocusDay;
+  final void Function(DateTime target) handleChangeCalendarPage;
   final void Function(DateTime day) handleOpenListPage;
   final void Function(Schedule schedule) handleSelectSchedule;
   @override
@@ -21,7 +25,7 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
-  DateTime _focusDay = DateTime.now();
+  DateTime _focusDay;
   DateTime _selectedDay = DateTime.now();
   ScheduleCollection scheduleCollection;
 
@@ -35,6 +39,8 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   void initState() {
+    print('initState in SchedulePage');
+    _focusDay = widget.initFocusDay;
     scheduleCollection = ScheduleCollection();
     this._futureSchedules = getScheduleData();
     super.initState();
@@ -51,6 +57,14 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const FlutterLogo(),
+              const Text('CMA'),
+            ],
+          ),
+        ),
         body: FutureBuilder(
             future: this._futureSchedules,
             builder: (context,
@@ -63,10 +77,15 @@ class _SchedulePageState extends State<SchedulePage> {
               }
               return Column(children: [
                 TableCalendar(
+                  onPageChanged: (DateTime day) {
+                    widget.handleChangeCalendarPage(day);
+                    setState(() {
+                      _focusDay = day;
+                    });
+                  },
                   calendarBuilders: CalendarBuilders(singleMarkerBuilder:
                       (BuildContext context, DateTime data, Schedule event) {
-                    Color color =
-                        event.createdBy == 'private' ? Colors.blue : Colors.red;
+                    Color color = Colors.red;
                     return Container(
                       decoration:
                           BoxDecoration(shape: BoxShape.circle, color: color),

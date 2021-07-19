@@ -23,12 +23,12 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
   @override
   void initState() {
     this._newSchedule = new Schedule(
-        title: widget.targetSchedule.title,
-        place: widget.targetSchedule.place,
-        start: widget.targetSchedule.start,
-        end: widget.targetSchedule.end,
-        details: widget.targetSchedule.details,
-        createdBy: widget.targetSchedule.createdBy);
+      title: widget.targetSchedule.title,
+      place: widget.targetSchedule.place,
+      start: widget.targetSchedule.start,
+      end: widget.targetSchedule.end,
+      details: widget.targetSchedule.details,
+    );
     this._titleTextEditingController =
         new TextEditingController(text: this._newSchedule.title);
     this._placeTextEditingController =
@@ -87,7 +87,6 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
               if (_newSchedule.details.isEmpty) {
                 _newSchedule.details = '(Empty)';
               }
-              _newSchedule.createdBy = this._selectedTargetUser;
               // widget.addSchedule(this.newSchedule, this._selectedTargetUsers);
               Navigator.of(context).pop();
             },

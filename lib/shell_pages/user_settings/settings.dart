@@ -1,90 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/store/store_service.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final darkModeProvider =
-    StateNotifierProvider<DarkModeState, bool>((refs) => DarkModeState());
-
-class DarkModeState extends StateNotifier<bool> {
-  DarkModeState() : super(true);
-
-  void changeSwitch(bool e) => this.state = e;
+class SettingsPage extends StatefulWidget {
+  SettingsPage({Key key, @required this.appState});
+  final AppState appState;
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
 }
 
-final expandedSettingNotifierProvider =
-    StateNotifierProvider<ExpandedState, bool>((refs) => ExpandedState());
-
-class ExpandedState extends StateNotifier<bool> {
-  ExpandedState() : super(false);
-
-  void toggleExpand(bool e) => this.state = e;
-}
-
-class SettingsPage extends HookWidget {
-  SettingsPage({this.signOut, this.handleOpenUserSettings});
-  final Future<void> Function() signOut;
-  final void Function() handleOpenUserSettings;
-
+class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = useProvider(darkModeProvider);
     return Scaffold(
-        body: SingleChildScrollView(
-      child: Column(children: [
-        const ListTile(
-          title: const Text('Account'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.account_box),
-          title: const Text('Account management'),
-          onTap: () {
-            handleOpenUserSettings();
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.logout),
-          title: const Text(
-            'SignOut',
-            style: const TextStyle(color: Colors.red),
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const FlutterLogo(),
+              const Text('CMA'),
+            ],
           ),
-          onTap: () async {
-            await signOut();
-          },
         ),
-        Divider(
-          color: isDarkMode ? Colors.white : Colors.black,
-        ),
-        const ListTile(
-          title: Text('General'),
-        ),
-        Consumer(builder: (context, watch, child) {
-          return ListTile(
-            leading: const Icon(Icons.dark_mode),
-            title: const Text('Dark mode'),
-            onTap: () async {
-              watch(darkModeProvider.notifier).changeSwitch(!isDarkMode);
-              await dbService.setUserTheme();
-            },
-            trailing: Switch(
-              value: isDarkMode,
-              onChanged: (value) async {
-                watch(darkModeProvider.notifier).changeSwitch(value);
-                await dbService.setUserTheme();
+        body: SingleChildScrollView(
+          child: Column(children: [
+            const ListTile(
+              title: const Text('Account'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.account_box),
+              title: const Text('Account management'),
+              onTap: () {
+                widget.appState.isOpenAccountView = true;
               },
             ),
-          );
-        }),
-        Divider(
-          color: isDarkMode ? Colors.white : Colors.black,
-        ),
-        const ListTile(title: const Text('Information')),
-        const ListTile(
-          leading: const Icon(Icons.info),
-          title: const Text('Version'),
-          subtitle: const Text('beta'),
-        ),
-      ]),
-    ));
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                'SignOut',
+                style: const TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
+                widget.appState.logOut();
+              },
+            ),
+            const Divider(),
+            const ListTile(
+              title: const Text('General'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.dark_mode),
+              title: const Text('Dark mode'),
+              onTap: () async {
+                await dbService.setUserTheme();
+              },
+              trailing: Switch(
+                value: true,
+                onChanged: (value) async {
+                  await dbService.setUserTheme();
+                },
+              ),
+            ),
+            const Divider(),
+            const ListTile(title: const Text('Information')),
+            const ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('Version'),
+              subtitle: const Text('beta'),
+            ),
+          ]),
+        ));
   }
 }
