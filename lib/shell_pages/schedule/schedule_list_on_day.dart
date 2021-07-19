@@ -19,7 +19,7 @@ class ScheduleListOnDay extends StatefulWidget {
 
 class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
   Future<List<Schedule>> getSchedules(DateTime day) async {
-    final data = await dbService.getSchedulesOnDay(day, ['']);
+    final data = await dbService.getDaySchedules(day, false);
     return data;
   }
 

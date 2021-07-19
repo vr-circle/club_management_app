@@ -85,16 +85,6 @@ class FireStoreService extends DatabaseService {
     });
     print(res);
     return res;
-    // final res = data.entries
-    //     .map((e) => OrganizationInfo(
-    //         id: e.key,
-    //         name: e.value['name'],
-    //         introduction: e.value['introduction'],
-    //         categoryList: e.value['categoryList'],
-    //         memberNum: e.value['memberNum'],
-    //         otherInfo: e.value['otherInfo']))
-    //     .toList();
-    // return res;
   }
 
   @override
@@ -137,51 +127,47 @@ class FireStoreService extends DatabaseService {
 
   // --------------------------- schedule --------------------------------------
   @override
-  Future<Map<DateTime, List<Schedule>>> getSchedules(String targetId) async {
+  Future<Map<DateTime, List<Schedule>>> getMonthSchedules(
+      DateTime day, bool isAll) async {
     print('getSchedules');
     Map<DateTime, List<Schedule>> res = {};
-    List<String> targets = [];
-    if (targetId.isEmpty) {
-      targets.add(organizationCollectionName);
-      targets.add(targetId);
-    } else {
-      targets.add(usersCollectionName);
-      targets.add(userId);
-    }
-    targets.add(scheduleCollectionName);
-    targets.add(public);
-    final data = (await _store
-            .collection(targets[0])
-            .doc(targets[1])
-            .collection(targets[2])
-            .doc(targets[3])
-            .get())
-        .data();
-    data.forEach((key, value) {
-      try {
-        final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
-        final tmpList = <Schedule>[];
-        value.forEach((e) {
-          tmpList.add(Schedule(
-            title: e['title'],
-            place: e['place'],
-            details: e['details'],
-            start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-            end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-          ));
-        });
-        res.addAll({tmpDate: tmpList});
-      } catch (e) {
-        print(e);
-      }
+    List<String> targetIdList =
+        await dbService.getParticipatingOrganizationIdList();
+    targetIdList.forEach((id) async {
+      final _data = (await _store
+              .collection(organizationCollectionName)
+              .doc(id)
+              .collection(scheduleCollectionName)
+              .doc(public)
+              .get())
+          .data();
+      _data.forEach((key, value) {
+        try {
+          final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
+          final tmpList = <Schedule>[];
+          value.forEach((e) {
+            tmpList.add(Schedule(
+              title: e['title'],
+              place: e['place'],
+              details: e['details'],
+              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+            ));
+          });
+          res.addAll({tmpDate: tmpList});
+        } catch (e) {
+          print(e);
+        }
+      });
     });
-    return res;
+    // return res;
+    return dummySchedules;
   }
 
   @override
-  Future<List<Schedule>> getSchedulesOnDay(
-      DateTime day, List<String> targetIdList) async {
+  Future<List<Schedule>> getDaySchedules(DateTime day, bool isAll) async {
     print('getScheduleOnDay');
+    Future.delayed(Duration(seconds: 1));
     return dummyScheduleListOnDay;
   }
 

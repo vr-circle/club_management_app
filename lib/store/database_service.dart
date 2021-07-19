@@ -12,9 +12,9 @@ abstract class DatabaseService {
   Future<void> leaveOrganization(OrganizationInfo targetOrganization);
 
   // schedule
-  Future<Map<DateTime, List<Schedule>>> getSchedules(String targetId);
-  Future<List<Schedule>> getSchedulesOnDay(
-      DateTime day, List<String> targetIdList);
+  Future<Map<DateTime, List<Schedule>>> getMonthSchedules(
+      DateTime day, bool isAll);
+  Future<List<Schedule>> getDaySchedules(DateTime day, bool isAll);
   Future<void> addSchedule(Schedule newSchedule, String targetId);
   Future<void> deleteSchedule(Schedule schedule, String targetId);
 

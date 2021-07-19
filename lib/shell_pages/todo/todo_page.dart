@@ -5,10 +5,17 @@ import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
+// todo: implement reload
+
 class TabInfo {
-  String name;
+  TabInfo({
+    @required this.id,
+    @required this.name,
+    //  @required this.todoCollection
+  });
   String id;
-  TabInfo({@required this.id, @required this.name});
+  String name;
+  // TodoCollection todoCollection;
 }
 
 class TodoPage extends StatefulWidget {
@@ -22,12 +29,23 @@ class TodoPageState extends State<TodoPage> {
   List<TabInfo> tabs = [];
 
   Future<List<TabInfo>> getTabs() async {
-    tabs.add(TabInfo(id: '', name: 'private'));
+    TodoCollection privateCollection = TodoCollection();
+    privateCollection.initTasks('');
+    tabs.add(TabInfo(
+      id: '', name: 'private',
+      // todoCollection: privateCollection
+    ));
+
     final clubIdList = await dbService.getParticipatingOrganizationIdList();
     await Future.forEach(clubIdList, (id) async {
       final _clubInfo = await dbService.getOrganizationInfo(id);
       if (_clubInfo != null) {
-        tabs.add(TabInfo(id: id, name: _clubInfo.name));
+        final TodoCollection _todoCollection = TodoCollection();
+        await _todoCollection.initTasks(id);
+        tabs.add(TabInfo(
+          id: id, name: _clubInfo.name,
+          // todoCollection: _todoCollection
+        ));
       }
     });
     return tabs;

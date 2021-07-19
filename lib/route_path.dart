@@ -56,6 +56,12 @@ class SettingPath extends RoutePath {
   static const String location = '/setting';
 }
 
+class SettingOrganizationPath extends RoutePath {
+  SettingOrganizationPath(this.id);
+  static const String location = '/organization';
+  final String id;
+}
+
 class OrganizationDetailPath extends RoutePath {
   OrganizationDetailPath(this.id);
   final String id;

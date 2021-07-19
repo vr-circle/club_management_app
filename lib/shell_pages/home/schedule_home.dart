@@ -9,8 +9,7 @@ class ScheduleHomeView extends StatelessWidget {
   ScheduleHomeView({Key key, @required this.appState}) : super(key: key);
   final AppState appState;
   Future<List<Schedule>> _getScheduleList() async {
-    return await dbService.getSchedulesOnDay(DateTime.now(),
-        [...await dbService.getParticipatingOrganizationIdList()]);
+    return await dbService.getDaySchedules(DateTime.now(), true);
   }
 
   @override

@@ -3,22 +3,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 
 class AppState extends ChangeNotifier {
   AppState()
-      : _loggedinState = LoggedInState.loggedOut,
+      : _authService = AuthService(),
+        _loggedinState = LoggedInState.loggedOut,
         _bottomNavigationIndex = HomePath.index,
         _searchingParam = '',
         _isOpenAccountView = false,
         _isDarkMode = false,
         _targetTodoTabId = '',
         _targetOrganizationId = '',
-        _authService = AuthService();
+        _focusDay = DateTime.now(),
+        _targetCalendarPageDate = DateTime.now(),
+        _isOpenScheduleListView = false,
+        _selectedSchedule = null,
+        _settingOrganizationId = '';
 
   int _bottomNavigationIndex;
   int get bottomNavigationIndex => _bottomNavigationIndex;
   set bottomNavigationIndex(int index) {
     _bottomNavigationIndex = index;
+    notifyListeners();
+  }
+
+  // schedule
+  DateTime _targetCalendarPageDate;
+  DateTime get targetCalendarPageDate => _targetCalendarPageDate;
+  set targetCalendarPageDate(DateTime day) {
+    _targetCalendarPageDate = day;
+    notifyListeners();
+  }
+
+  DateTime _focusDay;
+  DateTime get focusDay => _focusDay;
+  set focusDay(DateTime day) {
+    _focusDay = day;
+    notifyListeners();
+  }
+
+  bool _isOpenScheduleListView;
+  bool get isOpenScheduleListView => _isOpenScheduleListView;
+  set isOpenScheduleListView(bool value) {
+    _isOpenScheduleListView = value;
+    notifyListeners();
+  }
+
+  Schedule _selectedSchedule;
+  Schedule get selectedSchedule => _selectedSchedule;
+  set selectedSchedule(Schedule newSchedule) {
+    _selectedSchedule = newSchedule;
     notifyListeners();
   }
 
@@ -54,6 +89,13 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _settingOrganizationId;
+  String get settingOrganizationId => _settingOrganizationId;
+  set settingOrganizationId(String value) {
+    _settingOrganizationId = value;
+    notifyListeners();
+  }
+
   Stream<User> Function() authStateChange() {
     return _authService.authStateChange();
   }
@@ -66,7 +108,7 @@ class AppState extends ChangeNotifier {
   User get user => _authService.user;
   set user(User user) {
     _authService.user = user;
-    this._loggedinState = LoggedInState.loggedIn;
+    if (user != null) this._loggedinState = LoggedInState.loggedIn;
     notifyListeners();
   }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/animation_pages/fade_animation_page.dart';
 import 'package:flutter_application_1/app_shell.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
@@ -18,6 +17,8 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (_appState.user == null) {
       print('return LoginPath');
       return LoginPath();
+    } else if (uri.pathSegments.isEmpty) {
+      return HomePath();
     }
     print('/' + uri.pathSegments.first + ' : ' + routeInformation.location);
     switch ('/' + uri.pathSegments.first) {
@@ -26,8 +27,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       case SchedulePath.location:
         return SchedulePath();
       case TodoPath.location:
-        if (uri.pathSegments.length == 2)
+        print('TodoPath');
+        if (uri.pathSegments.length == 2) {
+          print('uri.pathSegments[1] == ${uri.pathSegments[1]}');
           return TodoPath(targetId: uri.pathSegments[1]);
+        }
         return TodoPath(targetId: '');
       case SearchPath.location:
         return SearchPath(searchingParam: uri.queryParameters['keyword'] ?? '');
@@ -35,10 +39,12 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         return OrganizationDetailPath(uri.queryParameters['id'] ?? '');
       case SettingPath.location:
         if (uri.pathSegments.length == 2 && uri.pathSegments[1] == 'user') {
-          print('UserSettingPath');
           return UserSettingPath();
         }
-        print('SettingPath');
+        if (uri.pathSegments.length == 3 &&
+            uri.pathSegments[1] == 'organization') {
+          return SettingOrganizationPath(uri.pathSegments[2]);
+        }
         return SettingPath();
       default:
         return null;
@@ -80,6 +86,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is SettingPath) {
       return RouteInformation(location: '${SettingPath.location}');
     }
+    if (path is SettingOrganizationPath) {
+      return RouteInformation(
+          location:
+              '${SettingPath.location}${SettingOrganizationPath.location}/${path.id}');
+    }
     if (path is UserSettingPath) {
       return RouteInformation(location: '${UserSettingPath.location}');
     }
@@ -96,7 +107,6 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   final AppState appState;
 
   RoutePath get currentConfiguration {
-    print('currentConfiguration');
     if (appState.loggedInState == LoggedInState.loggedOut) {
       return LoginPath();
     }
@@ -105,11 +115,13 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
+    print('build in MyRouterDelegate');
+    print(appState.loggedInState);
     return Navigator(
       key: navigatorKey,
       pages: [
         if (appState.loggedInState == LoggedInState.loggedOut)
-          FadeAnimationPage(child: LoginPage(
+          MaterialPage(child: LoginPage(
             handleLogin: (email, password) async {
               await appState.logIn(email, password);
             },
@@ -144,6 +156,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.bottomNavigationIndex = SchedulePath.index;
     } else if (path is TodoPath) {
       appState.bottomNavigationIndex = TodoPath.index;
+      appState.targetTodoTabId = path.targetId;
     } else if (path is SearchPath) {
       appState.bottomNavigationIndex = SearchPath.index;
       appState.targetOrganizationId = '';
@@ -152,6 +165,9 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     } else if (path is SettingPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
+      appState.settingOrganizationId = '';
+    } else if (path is SettingOrganizationPath) {
+      appState.settingOrganizationId = path.id;
     } else if (path is UserSettingPath) {
       appState.isOpenAccountView = true;
     }

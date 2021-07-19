@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
+import 'package:flutter_application_1/dummy_test/dummy_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/home/home.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
@@ -50,10 +51,7 @@ List<ShellState> shellList = <ShellState>[
           MaterialPage(
               child: SchedulePage(
             key: ValueKey('schedule'),
-            initFocusDay: DateTime.now(),
-            handleChangeCalendarPage: (day) {},
-            handleOpenListPage: (day) {},
-            handleSelectSchedule: (schedule) {},
+            appState: appState,
           ))
         ];
       },
@@ -121,13 +119,19 @@ List<ShellState> shellList = <ShellState>[
                 child: UserAccountView(
               user: appState.user,
             )),
+          if (appState.settingOrganizationId.isNotEmpty)
+            MaterialPage(child: DummyPage())
         ];
       },
       getRoutePath: (appState) {
         if (appState.isOpenAccountView) return UserSettingPath();
+        if (appState.settingOrganizationId.isNotEmpty)
+          return SettingOrganizationPath(appState.settingOrganizationId);
         return SettingPath();
       },
       onPopPage: (appState) {
-        appState.isOpenAccountView = false;
+        if (appState.isOpenAccountView) appState.isOpenAccountView = false;
+        if (appState.settingOrganizationId.isNotEmpty)
+          appState.settingOrganizationId = '';
       }),
 ];

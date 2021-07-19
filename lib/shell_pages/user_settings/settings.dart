@@ -11,6 +11,11 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -23,6 +28,34 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         body: SingleChildScrollView(
           child: Column(children: [
+            const ListTile(
+              title: const Text('Organizations'),
+            ),
+            FutureBuilder(
+                future: dbService.getParticipatingOrganizationIdList(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<String>> snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const ListTile(
+                      title: const CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.data.isEmpty) {
+                    return ListTile(
+                        leading: Icon(Icons.error), title: Text('No data'));
+                  }
+                  return Column(
+                    children: snapshot.data
+                        .map((e) => ListTile(
+                              onTap: () {
+                                widget.appState.settingOrganizationId = e;
+                              },
+                              leading: const Icon(Icons.people),
+                              title: Text(e),
+                            ))
+                        .toList(),
+                  );
+                }),
             const ListTile(
               title: const Text('Account'),
             ),
@@ -65,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const ListTile(
               leading: const Icon(Icons.info),
               title: const Text('Version'),
-              subtitle: const Text('beta'),
+              subtitle: const Text('0.1.0'),
             ),
           ]),
         ));

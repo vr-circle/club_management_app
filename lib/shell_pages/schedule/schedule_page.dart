@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -7,17 +8,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'schedule.dart';
 
 class SchedulePage extends StatefulWidget {
-  SchedulePage({
-    Key key,
-    @required this.initFocusDay,
-    @required this.handleChangeCalendarPage,
-    @required this.handleOpenListPage,
-    @required this.handleSelectSchedule,
-  }) : super(key: key);
-  final DateTime initFocusDay;
-  final void Function(DateTime target) handleChangeCalendarPage;
-  final void Function(DateTime day) handleOpenListPage;
-  final void Function(Schedule schedule) handleSelectSchedule;
+  SchedulePage({Key key, this.appState}) : super(key: key);
+  final AppState appState;
   @override
   _SchedulePageState createState() => _SchedulePageState();
 }
@@ -25,14 +17,14 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
-  DateTime _focusDay;
   DateTime _selectedDay = DateTime.now();
   ScheduleCollection scheduleCollection;
 
   Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
 
   Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
-    final Map<DateTime, List<Schedule>> res = await dbService.getSchedules('');
+    final Map<DateTime, List<Schedule>> res = await dbService.getMonthSchedules(
+        widget.appState.targetCalendarPageDate, false);
     scheduleCollection.initScheduleCollection(res);
     return scheduleCollection.schedules;
   }
@@ -40,7 +32,6 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     print('initState in SchedulePage');
-    _focusDay = widget.initFocusDay;
     scheduleCollection = ScheduleCollection();
     this._futureSchedules = getScheduleData();
     super.initState();
@@ -78,10 +69,8 @@ class _SchedulePageState extends State<SchedulePage> {
               return Column(children: [
                 TableCalendar(
                   onPageChanged: (DateTime day) {
-                    widget.handleChangeCalendarPage(day);
-                    setState(() {
-                      _focusDay = day;
-                    });
+                    widget.appState.targetCalendarPageDate = day;
+                    widget.appState.focusDay = day;
                   },
                   calendarBuilders: CalendarBuilders(singleMarkerBuilder:
                       (BuildContext context, DateTime data, Schedule event) {
@@ -97,7 +86,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   firstDay: DateTime.utc(2020, 1, 1),
                   lastDay: DateTime.utc(2050, 12, 31),
-                  focusedDay: _focusDay,
+                  focusedDay: widget.appState.focusDay,
                   calendarFormat: _calendarFormat,
                   selectedDayPredicate: (day) {
                     return isSameDay(_selectedDay, day);
@@ -107,10 +96,12 @@ class _SchedulePageState extends State<SchedulePage> {
                     if (!isSameDay(_selectedDay, selectedDay)) {
                       setState(() {
                         this._selectedDay = selectedDay;
-                        this._focusDay = focusedDay;
+                        widget.appState.focusDay = focusedDay;
                       });
-                    } else if (isSameDay(_focusDay, selectedDay)) {
-                      widget.handleOpenListPage(selectedDay);
+                    } else if (isSameDay(
+                        widget.appState.focusDay, selectedDay)) {
+                      widget.appState.isOpenScheduleListView = true;
+                      widget.appState.focusDay = selectedDay;
                     }
                   },
                 ),
@@ -122,8 +113,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                   child: ListTile(
                                 title: Text(e.title),
                                 onTap: () {
-                                  widget.handleSelectSchedule(e);
-                                  widget.handleOpenListPage(_selectedDay);
+                                  widget.appState.selectedSchedule = e;
                                 },
                               )))
                           .toList()),
