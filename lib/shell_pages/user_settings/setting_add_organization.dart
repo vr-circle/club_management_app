@@ -47,36 +47,39 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
         body: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const ListTile(
-                title: Text('Name'),
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'name',
-                  // icon: const Icon(Icons.people),
+              const Text('Organization Name'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'name',
+                    // icon: const Icon(Icons.people),
+                  ),
+                  controller: name,
                 ),
-                controller: name,
               ),
               const SizedBox(
                 height: 16,
               ),
-              const ListTile(
-                title: Text('Introduction'),
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: 'introduction'),
-                controller: introduction,
+              const Text('Introduction'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  decoration: InputDecoration(labelText: 'introduction'),
+                  controller: introduction,
+                ),
               ),
               const SizedBox(
                 height: 16,
               ),
-              const ListTile(
-                  title: Text('category list'),
-                  leading: Icon(Icons.local_offer)),
+              const Text('Category List'),
               categoryList.isEmpty
-                  ? ListTile(
-                      title: Text('There is no categories.'),
+                  ? const ListTile(
+                      title: const Text('There is no categories.'),
                     )
                   : Padding(
                       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
@@ -89,9 +92,17 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                                         padding:
                                             EdgeInsets.fromLTRB(4, 0, 0, 0),
                                         child: Row(children: [
+                                          const Icon(
+                                            Icons.local_offer,
+                                            size: 14,
+                                          ),
+                                          const SizedBox(
+                                            width: 4,
+                                          ),
                                           Text(
                                             e,
-                                            style: TextStyle(fontSize: 14),
+                                            style:
+                                                const TextStyle(fontSize: 14),
                                           ),
                                           IconButton(
                                             iconSize: 14,
@@ -106,34 +117,37 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                                         ])))))
                             .toList(),
                       )),
-              Row(children: [
-                Flexible(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: 'new category',
-                      // icon: Icon(Icons.category)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: Row(children: [
+                  Flexible(
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'new category',
+                        // icon: Icon(Icons.category)
+                      ),
+                      controller: newCategory,
+                      onSubmitted: (value) {
+                        if (value.isEmpty) return;
+                        setState(() {
+                          categoryList.add(value);
+                          newCategory.text = '';
+                        });
+                      },
                     ),
-                    controller: newCategory,
-                    onSubmitted: (value) {
-                      if (value.isEmpty) return;
-                      setState(() {
-                        categoryList.add(value);
-                        newCategory.text = '';
-                      });
-                    },
+                    flex: 4,
                   ),
-                  flex: 4,
-                ),
-                IconButton(
-                    onPressed: () {
-                      if (newCategory.text.isEmpty) return;
-                      setState(() {
-                        categoryList.add(newCategory.text);
-                        newCategory.text = '';
-                      });
-                    },
-                    icon: const Icon(Icons.add_box_outlined)),
-              ]),
+                  IconButton(
+                      onPressed: () {
+                        if (newCategory.text.isEmpty) return;
+                        setState(() {
+                          categoryList.add(newCategory.text);
+                          newCategory.text = '';
+                        });
+                      },
+                      icon: const Icon(Icons.add_box_outlined)),
+                ]),
+              ),
             ],
           ),
         ));

@@ -91,6 +91,12 @@ class AppState extends ChangeNotifier {
 
   // settings
   bool _isDarkMode;
+  bool get isDarkMode => _isDarkMode;
+  set isDarkMode(bool value) {
+    _isDarkMode = value;
+    notifyListeners();
+  }
+
   bool _isOpenAccountView;
   bool get isOpenAccountView => _isOpenAccountView;
   set isOpenAccountView(bool value) {
