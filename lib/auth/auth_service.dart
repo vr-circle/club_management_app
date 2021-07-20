@@ -15,12 +15,19 @@ class AuthService {
     this._user = user;
   }
 
-  Future<void> signUpWithEmailAndPassword(String email, String password) async {
+  Future<void> updateDisplayName(String name) async {
+    await _user.updateDisplayName(name);
+  }
+
+  Future<void> signUpWithEmailAndPasswordAndName(
+      String email, String password, String displayName) async {
     try {
-      final _ = await _firebaseAuth.createUserWithEmailAndPassword(
-          email: email, password: password);
+      final resUserCredential = await _firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
+      await resUserCredential.user.updateDisplayName(displayName);
       return;
     } catch (e) {
+      print(e);
       return;
     }
   }

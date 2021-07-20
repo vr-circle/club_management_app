@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
         }
         _appState.user = snapshot.data;
         return MaterialApp.router(
-          title: 'CMA',
+          title: 'OMA',
           debugShowCheckedModeBanner: false,
           theme: SchedulerBinding.instance.window.platformBrightness ==
                   Brightness.dark

@@ -14,6 +14,11 @@ class TodoCollection {
     return taskMap;
   }
 
+  List<String> getSortedKey() {
+    final keyAsc = taskMap.keys.toList()..sort((a, b) => a.compareTo(b));
+    return keyAsc;
+  }
+
   Future<void> addGroup(String name, String id) async {
     if (this.taskMap.containsKey(name)) {
       return;

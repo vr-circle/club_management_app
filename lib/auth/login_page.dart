@@ -7,7 +7,12 @@ enum LoggedInState {
 }
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key, @required this.handleLogin}) : super(key: key);
+  LoginPage(
+      {Key key,
+      @required this.handleLogin,
+      @required this.handleChangeOpeningSignUpPage})
+      : super(key: key);
+  final void Function(bool value) handleChangeOpeningSignUpPage;
   final Future<void> Function(String email, String password) handleLogin;
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -57,10 +62,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextButton(
                 onPressed: () {
-                  // Navigator.of(context)
-                  //     .push(MaterialPageRoute(builder: (context) {
-                  //   return SignUpPage();
-                  // }));
+                  widget.handleChangeOpeningSignUpPage(true);
                 },
                 child: Text('Do you have an account?'))
           ]),

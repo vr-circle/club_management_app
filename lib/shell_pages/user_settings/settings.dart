@@ -10,6 +10,16 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  Future<List<String>> getOrganizationName() async {
+    List<String> res = [];
+    final ids = await dbService.getParticipatingOrganizationIdList();
+    await Future.forEach(ids, (id) async {
+      final _name = (await dbService.getOrganizationInfo(id)).name;
+      res.add(_name);
+    });
+    return res;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,30 +41,34 @@ class _SettingsPageState extends State<SettingsPage> {
             const ListTile(
               title: const Text('Organizations'),
             ),
+            ListTile(
+              leading: Icon(Icons.person_add_alt),
+              onTap: () {
+                widget.appState.isOpenAddOrganizationPage = true;
+              },
+              title: const Text('New Organization'),
+            ),
             FutureBuilder(
-                future: dbService.getParticipatingOrganizationIdList(),
+                future: this.getOrganizationName(),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<String>> snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const ListTile(
-                      title: const CircularProgressIndicator(),
+                      title: const Text('Loading...'),
                     );
                   }
-                  if (snapshot.data.isEmpty) {
-                    return ListTile(
-                        leading: Icon(Icons.error), title: Text('No data'));
-                  }
-                  return Column(
-                    children: snapshot.data
+                  return Column(children: [
+                    ...snapshot.data
                         .map((e) => ListTile(
                               onTap: () {
                                 widget.appState.settingOrganizationId = e;
+                                // todo : e => id
                               },
                               leading: const Icon(Icons.people),
                               title: Text(e),
                             ))
                         .toList(),
-                  );
+                  ]);
                 }),
             const ListTile(
               title: const Text('Account'),

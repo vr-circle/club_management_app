@@ -228,17 +228,16 @@ class TaskListTabState extends State<TaskListTab> {
               },
             ),
             body: ListView(
-              children: todoCollection.taskMap.entries.map((e) {
-                return TaskExpansionTile(
-                  organizationId: widget.organizationId,
-                  groupName: e.key,
-                  taskList: e.value,
-                  deleteGroup: () async {
-                    await deleteGroup(e.key);
-                  },
-                );
-              }).toList(),
-            ),
+                children: todoCollection
+                    .getSortedKey()
+                    .map((e) => TaskExpansionTile(
+                        organizationId: widget.organizationId,
+                        groupName: e,
+                        taskList: todoCollection.taskMap[e],
+                        deleteGroup: () async {
+                          await deleteGroup(e);
+                        }))
+                    .toList()),
           );
         });
   }

@@ -33,9 +33,12 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-            // IconButton(onPressed: () {}, icon: Icon(Icons.notifications)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.person)),
+            IconButton(
+                onPressed: () {
+                  widget.appState.isOpenAccountView = true;
+                  widget.appState.bottomNavigationIndex = SettingPath.index;
+                },
+                icon: Icon(Icons.person)),
           ],
         ),
         body: FutureBuilder(

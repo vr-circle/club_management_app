@@ -9,6 +9,7 @@ class AppState extends ChangeNotifier {
   AppState()
       : _authService = AuthService(),
         _loggedinState = LoggedInState.loggedOut,
+        _isOpenSignUpPage = false,
         _bottomNavigationIndex = HomePath.index,
         _searchingParam = '',
         _isOpenAccountView = false,
@@ -19,7 +20,15 @@ class AppState extends ChangeNotifier {
         _targetCalendarPageDate = DateTime.now(),
         _isOpenScheduleListView = false,
         _selectedSchedule = null,
-        _settingOrganizationId = '';
+        _settingOrganizationId = '',
+        _isOpenAddOrganizationPage = false;
+
+  bool _isOpenSignUpPage;
+  bool get isOpenSignUpPage => _isOpenSignUpPage;
+  set isOpenSignUpPage(bool value) {
+    _isOpenSignUpPage = value;
+    notifyListeners();
+  }
 
   int _bottomNavigationIndex;
   int get bottomNavigationIndex => _bottomNavigationIndex;
@@ -96,6 +105,13 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isOpenAddOrganizationPage;
+  bool get isOpenAddOrganizationPage => _isOpenAddOrganizationPage;
+  set isOpenAddOrganizationPage(bool value) {
+    _isOpenAddOrganizationPage = value;
+    notifyListeners();
+  }
+
   Stream<User> Function() authStateChange() {
     return _authService.authStateChange();
   }
@@ -123,10 +139,21 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateUserDisplayName(String name) async {
+    await _authService.updateDisplayName(name);
+    notifyListeners();
+  }
+
+  Future<void> signUpWithEmailAndPasswordAndName(
+      String email, String password, String displayName) async {
+    await _authService.signUpWithEmailAndPasswordAndName(
+        email, password, displayName);
+  }
+
   Future<void> logOut() async {
     _loggedinState = LoggedInState.loading;
     notifyListeners();
-    await Future.delayed(Duration(seconds: 2));
+    await _authService.signOut();
     _loggedinState = LoggedInState.loggedOut;
     notifyListeners();
   }

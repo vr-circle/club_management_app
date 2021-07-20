@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_shell.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
+import 'package:flutter_application_1/auth/signup_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_list.dart';
 
@@ -12,24 +13,31 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   @override
   Future<RoutePath> parseRouteInformation(
       RouteInformation routeInformation) async {
-    print('parseRouteInformation in MyRouteInformationParser');
+    // print('parseRouteInformation in MyRouteInformationParser');
     final uri = Uri.parse(routeInformation.location);
-    if (_appState.user == null) {
-      print('return LoginPath');
+    if (_appState.user == null &&
+        routeInformation.location == SignUpPath.location) {
+      return SignUpPath();
+    } else if (_appState.user == null &&
+        routeInformation.location == LoginPath.location) {
+      // print('return LoginPath');
       return LoginPath();
-    } else if (uri.pathSegments.isEmpty) {
+    } else if (_appState.user == null) {
+      return LoginPath();
+    }
+    if (uri.pathSegments.isEmpty) {
       return HomePath();
     }
-    print('/' + uri.pathSegments.first + ' : ' + routeInformation.location);
+    // print('/' + uri.pathSegments.first + ' : ' + routeInformation.location);
     switch ('/' + uri.pathSegments.first) {
       case HomePath.location:
         return HomePath();
       case SchedulePath.location:
         return SchedulePath();
       case TodoPath.location:
-        print('TodoPath');
+        // print('TodoPath');
         if (uri.pathSegments.length == 2) {
-          print('uri.pathSegments[1] == ${uri.pathSegments[1]}');
+          // print('uri.pathSegments[1] == ${uri.pathSegments[1]}');
           return TodoPath(targetId: uri.pathSegments[1]);
         }
         return TodoPath(targetId: '');
@@ -43,6 +51,9 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         }
         if (uri.pathSegments.length == 3 &&
             uri.pathSegments[1] == 'organization') {
+          if (uri.pathSegments[2] == 'add') {
+            return SettingAddOrganizationPath();
+          }
           return SettingOrganizationPath(uri.pathSegments[2]);
         }
         return SettingPath();
@@ -53,9 +64,12 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
-    print('restoreRouteInformation');
+    // print('restoreRouteInformation');
     if (path is LoginPath) {
       return RouteInformation(location: '${LoginPath.location}');
+    }
+    if (path is SignUpPath) {
+      return RouteInformation(location: '${SignUpPath.location}');
     }
     if (path is HomePath) {
       return RouteInformation(location: '${HomePath.location}');
@@ -91,6 +105,10 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           location:
               '${SettingPath.location}${SettingOrganizationPath.location}/${path.id}');
     }
+    if (path is SettingAddOrganizationPath) {
+      return RouteInformation(
+          location: '${SettingAddOrganizationPath.lcoation}');
+    }
     if (path is UserSettingPath) {
       return RouteInformation(location: '${UserSettingPath.location}');
     }
@@ -107,8 +125,12 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   final AppState appState;
 
   RoutePath get currentConfiguration {
-    if (appState.loggedInState == LoggedInState.loggedOut) {
+    if (appState.loggedInState == LoggedInState.loggedOut &&
+        appState.isOpenSignUpPage == false) {
       return LoginPath();
+    } else if (appState.loggedInState == LoggedInState.loggedOut &&
+        appState.isOpenSignUpPage) {
+      return SignUpPath();
     }
     return shellList[appState.bottomNavigationIndex].getRoutePath(appState);
   }
@@ -116,26 +138,41 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   @override
   Widget build(BuildContext context) {
     print('build in MyRouterDelegate');
-    print(appState.loggedInState);
+    print('appState.isOpenSignUpPage == ${appState.isOpenSignUpPage}');
     return Navigator(
       key: navigatorKey,
       pages: [
         if (appState.loggedInState == LoggedInState.loggedOut)
-          MaterialPage(child: LoginPage(
+          MaterialPage(
+              child: LoginPage(
+            handleChangeOpeningSignUpPage: (value) {
+              appState.isOpenSignUpPage = value;
+            },
             handleLogin: (email, password) async {
               await appState.logIn(email, password);
             },
-          ))
-        else if (appState.loggedInState == LoggedInState.loading)
+          )),
+        if (appState.loggedInState == LoggedInState.loggedOut &&
+            appState.isOpenSignUpPage)
+          MaterialPage(
+              child: SignUpPage(
+            appState: appState,
+          )),
+        if (appState.loggedInState == LoggedInState.loading)
           MaterialPage(
               child: const Scaffold(
             body: const Center(child: const CircularProgressIndicator()),
-          ))
-        else
+          )),
+        if (appState.loggedInState == LoggedInState.loggedIn)
           MaterialPage(child: AppShell(appState))
       ],
       onPopPage: (route, result) {
-        print('onPopPage');
+        print('popPage');
+        if (appState.isOpenSignUpPage) {
+          print('popPage: false -> isOpenSignUpPage');
+          appState.isOpenSignUpPage = false;
+          notifyListeners();
+        }
         if (!route.didPop(result)) {
           return false;
         }
@@ -147,8 +184,12 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
-    print('setNewRoutePath: new path is ${path.runtimeType}');
+    // print('setNewRoutePath: new path is ${path.runtimeType}');
     if (path is LoginPath) {
+      appState.isOpenSignUpPage = false;
+      return;
+    } else if (path is SignUpPath) {
+      appState.isOpenSignUpPage = true;
       return;
     } else if (path is HomePath) {
       appState.bottomNavigationIndex = HomePath.index;
@@ -166,8 +207,16 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
       appState.settingOrganizationId = '';
+      appState.isOpenAddOrganizationPage = false;
     } else if (path is SettingOrganizationPath) {
+      appState.bottomNavigationIndex = SettingPath.index;
+      appState.isOpenAccountView = false;
       appState.settingOrganizationId = path.id;
+    } else if (path is SettingAddOrganizationPath) {
+      appState.bottomNavigationIndex = SettingPath.index;
+      appState.isOpenAccountView = false;
+      appState.isOpenAddOrganizationPage = true;
+      appState.settingOrganizationId = '';
     } else if (path is UserSettingPath) {
       appState.isOpenAccountView = true;
     }

@@ -7,6 +7,10 @@ class LoginPath extends RoutePath {
   static const String location = '/login';
 }
 
+class SignUpPath extends RoutePath {
+  static const String location = '/signup';
+}
+
 class HomePath extends RoutePath {
   static const int index = 0;
   static const String location = '/home';
@@ -60,6 +64,12 @@ class SettingOrganizationPath extends RoutePath {
   SettingOrganizationPath(this.id);
   static const String location = '/organization';
   final String id;
+}
+
+class SettingAddOrganizationPath extends RoutePath {
+  SettingAddOrganizationPath();
+  static const String lcoation =
+      '${SettingPath.location}${SettingOrganizationPath.location}/add';
 }
 
 class OrganizationDetailPath extends RoutePath {

@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/dummy_test/dummy_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/home/home.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_page.dart';
+import 'package:flutter_application_1/shell_pages/user_settings/setting_add_organization.dart';
+import 'package:flutter_application_1/shell_pages/user_settings/setting_organization.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/settings.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/user_account_view.dart';
 
@@ -117,21 +118,30 @@ List<ShellState> shellList = <ShellState>[
           if (appState.isOpenAccountView)
             MaterialPage(
                 child: UserAccountView(
+              handleChangeUserAccountName: (String name) async {
+                await appState.updateUserDisplayName(name);
+              },
               user: appState.user,
             )),
           if (appState.settingOrganizationId.isNotEmpty)
-            MaterialPage(child: DummyPage())
+            MaterialPage(child: SettingOrganization(appState: appState)),
+          if (appState.isOpenAddOrganizationPage)
+            MaterialPage(child: SettingAddOrganization(appState: appState)),
         ];
       },
       getRoutePath: (appState) {
         if (appState.isOpenAccountView) return UserSettingPath();
         if (appState.settingOrganizationId.isNotEmpty)
           return SettingOrganizationPath(appState.settingOrganizationId);
+        if (appState.isOpenAddOrganizationPage)
+          return SettingAddOrganizationPath();
         return SettingPath();
       },
       onPopPage: (appState) {
         if (appState.isOpenAccountView) appState.isOpenAccountView = false;
         if (appState.settingOrganizationId.isNotEmpty)
           appState.settingOrganizationId = '';
+        if (appState.isOpenAddOrganizationPage)
+          appState.isOpenAddOrganizationPage = false;
       }),
 ];
