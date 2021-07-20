@@ -10,12 +10,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  Future<List<String>> getOrganizationName() async {
-    List<String> res = [];
+  Future<List<OrganizationIdAndName>> getOrganizationName() async {
+    List<OrganizationIdAndName> res = [];
     final ids = await dbService.getParticipatingOrganizationIdList();
     await Future.forEach(ids, (id) async {
       final _name = (await dbService.getOrganizationInfo(id)).name;
-      res.add(_name);
+      final _tmp = OrganizationIdAndName(id: id, name: _name);
+      res.add(_tmp);
     });
     return res;
   }
@@ -51,7 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
             FutureBuilder(
                 future: this.getOrganizationName(),
                 builder: (BuildContext context,
-                    AsyncSnapshot<List<String>> snapshot) {
+                    AsyncSnapshot<List<OrganizationIdAndName>> snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const ListTile(
                       title: const Text('Loading...'),
@@ -61,11 +62,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     ...snapshot.data
                         .map((e) => ListTile(
                               onTap: () {
-                                widget.appState.settingOrganizationId = e;
+                                widget.appState.settingOrganizationId = e.id;
                                 // todo : e => id
                               },
                               leading: const Icon(Icons.people),
-                              title: Text(e),
+                              title: Text(e.name),
                             ))
                         .toList(),
                   ]);
@@ -117,4 +118,10 @@ class _SettingsPageState extends State<SettingsPage> {
           ]),
         ));
   }
+}
+
+class OrganizationIdAndName {
+  OrganizationIdAndName({@required this.id, @required this.name});
+  String id;
+  String name;
 }

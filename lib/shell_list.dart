@@ -124,7 +124,9 @@ List<ShellState> shellList = <ShellState>[
               user: appState.user,
             )),
           if (appState.settingOrganizationId.isNotEmpty)
-            MaterialPage(child: SettingOrganization(appState: appState)),
+            MaterialPage(
+                child: SettingOrganization(
+                    id: appState.settingOrganizationId, appState: appState)),
           if (appState.isOpenAddOrganizationPage)
             MaterialPage(child: SettingAddOrganization(appState: appState)),
         ];
