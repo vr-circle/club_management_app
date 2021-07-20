@@ -60,7 +60,7 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
                     Padding(
                       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
                       child: Wrap(
-                        children: targetOrganizationInfo.categoryList
+                        children: targetOrganizationInfo.tagList
                             .map((e) => (Card(
                                 child: FittedBox(
                                     fit: BoxFit.contain,

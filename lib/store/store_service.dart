@@ -51,7 +51,7 @@ class FireStoreService extends DatabaseService {
         name: list['name'],
         memberNum: list['memberNum'],
         introduction: list['introduction'],
-        categoryList: List<String>.from(list['categoryList']),
+        tagList: List<String>.from(list['tagList']),
         // otherInfo: list ?? []
       );
       // print('success getOrganizationInfo');
@@ -74,7 +74,7 @@ class FireStoreService extends DatabaseService {
         res.add(OrganizationInfo(
           id: element.id,
           memberNum: element['memberNum'],
-          categoryList: List<String>.from(element['categoryList']),
+          tagList: List<String>.from(element['tagList']),
           name: element['name'],
           introduction: element['introduction'],
           // otherInfo: element['otherInfo'],
@@ -93,7 +93,7 @@ class FireStoreService extends DatabaseService {
     await _store.collection(organizationCollectionName).doc().set({
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
-      'categoryList': newOrganization.categoryList,
+      'tagList': newOrganization.tagList,
       'otherInfo': newOrganization.otherInfo,
       'memberNum': newOrganization.memberNum
     });

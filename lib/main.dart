@@ -37,7 +37,10 @@ class _MyAppState extends State<MyApp> {
       stream: _appState.authStateChange()(),
       builder: (context, AsyncSnapshot<User> snapshot) {
         if (snapshot.connectionState != ConnectionState.active) {
-          return const Center(child: const CircularProgressIndicator());
+          return const Center(
+              child: const FlutterLogo(
+            size: 32,
+          ));
         } else if (snapshot.hasError) {
           return const Center(child: const Text('Error'));
         }

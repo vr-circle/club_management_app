@@ -13,14 +13,14 @@ class SettingAddOrganization extends StatefulWidget {
 class _SettingAddOrganizationState extends State<SettingAddOrganization> {
   // String name, introduction, newCategory;
   TextEditingController name, introduction, newCategory;
-  List<String> categoryList = [];
+  List<String> tagList = [];
   @override
   void initState() {
     super.initState();
     name = TextEditingController();
     introduction = TextEditingController();
     newCategory = TextEditingController();
-    categoryList = [];
+    tagList = [];
   }
 
   @override
@@ -37,7 +37,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                       final newOrganization = OrganizationInfo(
                           name: name.text,
                           introduction: introduction.text,
-                          categoryList: categoryList);
+                          tagList: tagList);
                       // await dbService.createOrganization(newOrganization);
                       // widget.appState.isOpenAddOrganizationPage = false;
                     },
@@ -77,14 +77,14 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                 height: 16,
               ),
               const Text('Category List'),
-              categoryList.isEmpty
+              tagList.isEmpty
                   ? const ListTile(
                       title: const Text('There is no categories.'),
                     )
                   : Padding(
                       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
                       child: Wrap(
-                        children: categoryList
+                        children: tagList
                             .map((e) => Card(
                                 child: FittedBox(
                                     fit: BoxFit.contain,
@@ -108,7 +108,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                                             iconSize: 14,
                                             onPressed: () {
                                               setState(() {
-                                                categoryList.remove(e);
+                                                tagList.remove(e);
                                               });
                                             },
                                             icon:
@@ -123,14 +123,14 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                   Flexible(
                     child: TextField(
                       decoration: const InputDecoration(
-                        labelText: 'new category',
+                        labelText: 'Add a tag',
                         // icon: Icon(Icons.category)
                       ),
                       controller: newCategory,
                       onSubmitted: (value) {
                         if (value.isEmpty) return;
                         setState(() {
-                          categoryList.add(value);
+                          tagList.add(value);
                           newCategory.text = '';
                         });
                       },
@@ -141,7 +141,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                       onPressed: () {
                         if (newCategory.text.isEmpty) return;
                         setState(() {
-                          categoryList.add(newCategory.text);
+                          tagList.add(newCategory.text);
                           newCategory.text = '';
                         });
                       },

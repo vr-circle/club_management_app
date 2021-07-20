@@ -5,12 +5,12 @@ class OrganizationInfo {
     this.introduction,
     this.memberNum,
     this.otherInfo,
-    this.categoryList,
+    this.tagList,
   });
   String id;
   String name;
   int memberNum;
   String introduction;
-  List<String> categoryList;
+  List<String> tagList;
   List<Map<String, dynamic>> otherInfo; // Users set info
 }

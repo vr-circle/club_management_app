@@ -39,7 +39,7 @@ class SearchPageState extends State<SearchPage> {
     List<OrganizationInfo> res = [];
     allOrganizationList.forEach((OrganizationInfo element) {
       for (final keyword in keywordList) {
-        if (element.categoryList.contains(keyword) ||
+        if (element.tagList.contains(keyword) ||
             element.name.contains(keyword)) {
           res.add(element);
           break;
@@ -131,16 +131,16 @@ class OrganizationListView extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  SizedBox(
-                                    width: MediaQuery.of(context)
-                                            .size
-                                            .shortestSide /
-                                        4,
-                                    child: const FlutterLogo(),
-                                  ),
-                                  const SizedBox(
-                                    width: 12,
-                                  ),
+                                  // SizedBox(
+                                  //   width: MediaQuery.of(context)
+                                  //           .size
+                                  //           .shortestSide /
+                                  //       4,
+                                  //   child: const FlutterLogo(),
+                                  // ),
+                                  // const SizedBox(
+                                  //   width: 12,
+                                  // ),
                                   Flexible(
                                       child: Column(
                                           mainAxisAlignment:
@@ -158,45 +158,12 @@ class OrganizationListView extends StatelessWidget {
                                         const SizedBox(
                                           height: 16,
                                         ),
-                                        Text(dummyOrganizationInfoList[index]
-                                            .introduction),
+                                        Text(
+                                          this.clubList[index].introduction,
+                                        ),
                                       ]))
                                 ],
                               )))));
             });
   }
 }
-
-int i = 0;
-final dummyOrganizationInfoList = <OrganizationInfo>[
-  OrganizationInfo(
-      id: (i++).toString(),
-      name: 'Hitech',
-      introduction: 'hogehog',
-      memberNum: 10,
-      otherInfo: [
-        {'hogehoge': 'fugafuga'}
-      ],
-      categoryList: [
-        'cultual',
-        'circle'
-      ]),
-  OrganizationInfo(
-      id: (i++).toString(),
-      name: 'soccer club',
-      introduction: 'hogehog',
-      memberNum: 10,
-      categoryList: ['club', '運動']),
-  OrganizationInfo(
-      id: (i++).toString(),
-      name: 'soccer club',
-      introduction: 'hogehog',
-      memberNum: 10,
-      categoryList: ['club', '運動']),
-  OrganizationInfo(
-      id: (i++).toString(),
-      name: 'soccer club',
-      introduction: 'hogehog',
-      memberNum: 10,
-      categoryList: ['club', '運動']),
-];

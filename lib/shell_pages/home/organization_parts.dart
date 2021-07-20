@@ -15,7 +15,7 @@ class OrganizationPartsListView extends StatelessWidget {
           id: 0.toString(),
           name: 'Hitech',
           memberNum: 10,
-          categoryList: ['circle'],
+          tagList: ['circle'],
           introduction: 'hogehoge',
           otherInfo: [
             {'hogehoeg': 'hogehoe'}
