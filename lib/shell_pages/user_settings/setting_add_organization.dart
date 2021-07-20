@@ -115,6 +115,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                     ),
                     controller: newCategory,
                     onSubmitted: (value) {
+                      if (value.isEmpty) return;
                       setState(() {
                         categoryList.add(value);
                         newCategory.text = '';
@@ -125,6 +126,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                 ),
                 IconButton(
                     onPressed: () {
+                      if (newCategory.text.isEmpty) return;
                       setState(() {
                         categoryList.add(newCategory.text);
                         newCategory.text = '';
