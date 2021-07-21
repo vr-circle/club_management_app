@@ -6,7 +6,6 @@ import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/auth/signup_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_list.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
@@ -45,7 +44,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
             final int _month = int.parse(uri.queryParameters['month']);
             if (uri.queryParameters.containsKey('day')) {
               final int _day = int.parse(uri.queryParameters['day']);
-              return ScheduleListViewPath(DateTime(_year, _month, _day));
+              if (uri.pathSegments.length == 3 &&
+                  uri.pathSegments[2] == 'add') {
+                return ScheduleAddPath(DateTime(_year, _month, _day));
+              }
+              return ScheduleListViewPath(day: DateTime(_year, _month, _day));
             }
             return SchedulePath(targetDate: DateTime(_year, _month));
           } catch (e) {
@@ -110,8 +113,14 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
           location:
               '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}&day=${path.day.day}');
     }
+    if (path is ScheduleAddPath) {
+      return RouteInformation(
+          location:
+              '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}&day=${path.day.day}/add');
+    }
     if (path is ScheduleDetailPath) {
-      return RouteInformation(location: '${SchedulePath.location}/detail');
+      return RouteInformation(
+          location: '${SchedulePath.location}/detail/${path.targetId}');
     }
     if (path is TodoPath) {
       if (path.targetId.isEmpty) {
@@ -232,16 +241,24 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     } else if (path is SchedulePath) {
       appState.bottomNavigationIndex = SchedulePath.index;
       appState.targetCalendarMonth = path.targetDate;
+      appState.selectedDayForScheduleList = null;
+      appState.isOpenAddSchedulePage = false;
+      appState.selectedSchedule = null;
     } else if (path is ScheduleListViewPath) {
+      appState.bottomNavigationIndex = SchedulePath.index;
       appState.selectedDayForScheduleList = path.day;
-      // appState.targetCalendarMonth = path.day;
+      appState.isOpenAddSchedulePage = false;
+      appState.selectedSchedule = null;
     } else if (path is ScheduleDetailPath) {
+      appState.bottomNavigationIndex = SchedulePath.index;
       // todo: create Schedule from path info
       final data = await dbService.getSchedulesForDay(DateTime.now(), false);
       appState.selectedSchedule = data[0] ?? null;
     } else if (path is ScheduleAddPath) {
+      appState.bottomNavigationIndex = SchedulePath.index;
       appState.selectedDayForScheduleList = path.day;
       appState.isOpenAddSchedulePage = true;
+      appState.selectedSchedule = null;
     } else if (path is TodoPath) {
       appState.bottomNavigationIndex = TodoPath.index;
       appState.targetTodoTabId = path.targetId;

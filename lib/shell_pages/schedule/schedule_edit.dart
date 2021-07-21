@@ -88,7 +88,7 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
                 _newSchedule.details = '(Empty)';
               }
               // widget.addSchedule(this.newSchedule, this._selectedTargetUsers);
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
             },
             child: const Text('Edit'),
           ),

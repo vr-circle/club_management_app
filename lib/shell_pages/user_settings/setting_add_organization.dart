@@ -11,15 +11,14 @@ class SettingAddOrganization extends StatefulWidget {
 }
 
 class _SettingAddOrganizationState extends State<SettingAddOrganization> {
-  // String name, introduction, newCategory;
-  TextEditingController name, introduction, newCategory;
+  TextEditingController name, introduction, newTag;
   List<String> tagList = [];
   @override
   void initState() {
     super.initState();
     name = TextEditingController();
     introduction = TextEditingController();
-    newCategory = TextEditingController();
+    newTag = TextEditingController();
     tagList = [];
   }
 
@@ -45,7 +44,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
           ],
         ),
         body: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,7 +75,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
               const SizedBox(
                 height: 16,
               ),
-              const Text('Category List'),
+              const Text('Tag List'),
               tagList.isEmpty
                   ? const ListTile(
                       title: const Text('There is no categories.'),
@@ -124,14 +123,13 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                     child: TextField(
                       decoration: const InputDecoration(
                         labelText: 'Add a tag',
-                        // icon: Icon(Icons.category)
                       ),
-                      controller: newCategory,
+                      controller: newTag,
                       onSubmitted: (value) {
                         if (value.isEmpty) return;
                         setState(() {
                           tagList.add(value);
-                          newCategory.text = '';
+                          newTag.text = '';
                         });
                       },
                     ),
@@ -139,10 +137,10 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                   ),
                   IconButton(
                       onPressed: () {
-                        if (newCategory.text.isEmpty) return;
+                        if (newTag.text.isEmpty) return;
                         setState(() {
-                          tagList.add(newCategory.text);
-                          newCategory.text = '';
+                          tagList.add(newTag.text);
+                          newTag.text = '';
                         });
                       },
                       icon: const Icon(Icons.add_box_outlined)),

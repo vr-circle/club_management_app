@@ -25,7 +25,7 @@ class SchedulePath extends RoutePath {
 }
 
 class ScheduleListViewPath extends RoutePath {
-  ScheduleListViewPath(this.day);
+  ScheduleListViewPath({@required this.day});
   String get location =>
       '${SchedulePath.location}/${this.day.year}-${this.day.month}';
   final DateTime day;

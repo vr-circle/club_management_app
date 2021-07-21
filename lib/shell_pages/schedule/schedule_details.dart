@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'schedule.dart';
-import 'schedule_edit.dart';
 
 class ScheduleDetails extends StatelessWidget {
   ScheduleDetails({
@@ -18,30 +17,54 @@ class ScheduleDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(schedule.title),
-        ),
+        appBar: AppBar(),
         body: Column(children: [
           Expanded(
-              child: Container(
+              child: Padding(
+            padding: EdgeInsets.all(32),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ListTile(
-                  leading: const Text('Start time'),
-                  title: Text(_format.format(schedule.start)),
+                const Text('Title'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
+                  child: Text(
+                    schedule.title,
+                    style: const TextStyle(fontSize: 24),
+                  ),
                 ),
-                ListTile(
-                  leading: const Text('End time'),
-                  title: Text(_format.format(schedule.end)),
+                const SizedBox(
+                  height: 12,
                 ),
-                ListTile(
-                  leading: const Text('Place'),
-                  title: Text(schedule.place),
+                const Text('Start time'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
+                  child: Text(_format.format(schedule.start)),
                 ),
-                ListTile(
-                  leading: const Text('Details'),
-                  title: Text(schedule.details),
+                const SizedBox(
+                  height: 12,
                 ),
+                const Text('End time'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
+                  child: Text(_format.format(schedule.end)),
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                const Text('Place'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
+                  child: Text(schedule.place),
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                const Text('Details'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
+                  child: Text(schedule.details),
+                )
               ],
             ),
           )),
@@ -50,13 +73,10 @@ class ScheduleDetails extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             FloatingActionButton(
-              child: Icon(Icons.edit),
+              child: const Icon(Icons.edit),
               onPressed: () {
                 // edit schedule
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return ScheduleEditPage(targetSchedule: schedule);
-                }));
+                // todo : create EditSchedulePath
               },
             ),
             const SizedBox(

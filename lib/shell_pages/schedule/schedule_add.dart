@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/store/store_service.dart';
+import 'package:tuple/tuple.dart';
 import 'schedule.dart';
 import 'package:intl/intl.dart';
 
@@ -13,35 +15,65 @@ class AddSchedulePage extends StatefulWidget {
 }
 
 class _AddSchedulePageState extends State<AddSchedulePage> {
-  final _format = new DateFormat('yyyy/MM/dd(E)');
-
-  TextEditingController startTextFiledController;
-  TextEditingController endTextFiledController;
-  List<String> targetUsers;
-  String _selectedTargetUsers;
+  Future<List<Tuple2<String, String>>>
+      _getParticipatingOrganizationIdAndNameList() async {
+    List<Tuple2<String, String>> targetIdAndNameList = [];
+    final _ids = await dbService.getParticipatingOrganizationIdList();
+    targetIdAndNameList.add(Tuple2('private', 'private'));
+    await Future.forEach(_ids, (id) async {
+      final _name = (await dbService.getOrganizationInfo(id)).name;
+      targetIdAndNameList.add(Tuple2(id, _name));
+    });
+    return targetIdAndNameList;
+  }
 
   @override
   void initState() {
     super.initState();
-    this.startTextFiledController = new TextEditingController(
-        text: DateFormat('yyyy/MM/dd HH:mm').format(widget.targetDate));
-    this.endTextFiledController = new TextEditingController(
-        text: DateFormat('yyyy/MM/dd HH:mm')
-            .format(widget.targetDate.add(Duration(days: 1))));
-    this.targetUsers = [
-      'private',
-      'circle'
-    ]; // todo: generate list from user setting
-    this._selectedTargetUsers = 'private';
   }
 
-  Schedule newSchedule = new Schedule(
-    title: '',
-    place: '',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: '',
-  );
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: FutureBuilder(
+      future: _getParticipatingOrganizationIdAndNameList(),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<Tuple2<String, String>>> snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(
+            child: const CircularProgressIndicator(),
+          );
+        }
+        return AddScheduleField(
+          targetIdAndName: snapshot.data,
+          targetDate: widget.targetDate,
+          addSchedule: widget.addSchedule,
+        );
+      },
+    ));
+  }
+}
+
+class AddScheduleField extends StatefulWidget {
+  AddScheduleField(
+      {Key key,
+      @required this.targetIdAndName,
+      @required this.targetDate,
+      @required this.addSchedule})
+      : super(key: key);
+  final DateTime targetDate;
+  final List<Tuple2<String, String>> targetIdAndName;
+  final Future<void> Function(Schedule schedule, String target) addSchedule;
+  @override
+  _AddScheduleFieldState createState() => _AddScheduleFieldState();
+}
+
+class _AddScheduleFieldState extends State<AddScheduleField> {
+  final _format = new DateFormat('yyyy/MM/dd(E)');
+
+  TextEditingController startTextFiledController;
+  TextEditingController endTextFiledController;
+  String _selectedTarget;
 
   Future<DateTime> _selectTime(BuildContext context) async {
     TimeOfDay newSelectedTime = await showTimePicker(
@@ -62,135 +94,166 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     }
   }
 
+  Schedule newSchedule = new Schedule(
+    title: '',
+    place: '',
+    start: DateTime.now(),
+    end: DateTime.now(),
+    details: '',
+  );
+
+  @override
+  void initState() {
+    this.startTextFiledController = new TextEditingController(
+        text: DateFormat('yyyy/MM/dd HH:mm').format(widget.targetDate));
+    this.endTextFiledController = new TextEditingController(
+        text: DateFormat('yyyy/MM/dd HH:mm')
+            .format(widget.targetDate.add(Duration(days: 1))));
+    this._selectedTarget = widget.targetIdAndName.first.item2;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_format.format(widget.targetDate)),
-      ),
-      body: Padding(
-          padding: const EdgeInsets.all(32),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('target'),
-                    DropdownButton(
-                      value: _selectedTargetUsers,
-                      items: this
-                          .targetUsers
-                          .map((e) => DropdownMenuItem(
-                                child: Text(e),
-                                value: e,
-                              ))
-                          .toList(),
-                      onChanged: (newValue) {
-                        this._selectedTargetUsers = newValue;
-                      },
-                    ),
-                  ],
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: const Icon(Icons.title), labelText: 'Title'),
-                  onChanged: (value) {
-                    this.newSchedule.title = value;
-                  },
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: const Icon(Icons.place), labelText: 'Place'),
-                  onChanged: (value) {
-                    this.newSchedule.place = value;
-                  },
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: const Icon(Icons.timer), labelText: 'Start time'),
-                  onTap: () async {
-                    var newDate = await _selectTime(context);
-                    startTextFiledController.text =
-                        DateFormat('yyyy/MM/dd HH:mm').format(newDate);
-                    this.newSchedule.start = newDate;
-                  },
-                  controller: this.startTextFiledController,
-                  enableInteractiveSelection: false,
-                  focusNode: FocusNode(),
-                  readOnly: true,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      icon: const Icon(Icons.timer), labelText: 'End time'),
-                  onTap: () async {
-                    var newDate = await _selectTime(context);
-                    endTextFiledController.text =
-                        DateFormat('yyyy/MM/dd HH:mm').format(newDate);
-                    this.newSchedule.end = newDate;
-                  },
-                  controller: this.endTextFiledController,
-                  enableInteractiveSelection: false,
-                  focusNode: FocusNode(),
-                  readOnly: true,
-                ),
-                TextField(
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    icon: const Icon(Icons.content_copy),
-                    labelText: 'Details',
-                  ),
-                  onChanged: (value) {
-                    this.newSchedule.details = value;
-                  },
-                ),
-              ],
-            ),
-          )),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-                height: 50,
-                child: Center(
-                  child: TextButton(
-                      onPressed: () async {
-                        final format = DateFormat('yyyy/MM/dd HH:mm');
-                        newSchedule.start =
-                            format.parseStrict(startTextFiledController.text);
-                        newSchedule.end =
-                            format.parseStrict(endTextFiledController.text);
-                        if (newSchedule.title.isEmpty) {
-                          print('this is mandatory');
-                          Navigator.of(context).pop();
-                          return;
-                        }
-                        if (newSchedule.place.isEmpty) {
-                          newSchedule.place = '(Empty)';
-                        }
-                        if (newSchedule.details.isEmpty) {
-                          newSchedule.details = '(Empty)';
-                        }
-                        widget.addSchedule(
-                            this.newSchedule, this._selectedTargetUsers);
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Add')),
-                )),
-            SizedBox(
-                height: 50,
-                child: Center(
-                  child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Cancel')),
-                )),
+        appBar: AppBar(
+          actions: [
+            TextButton(
+                onPressed: () {
+                  final format = DateFormat('yyyy/MM/dd HH:mm');
+                  newSchedule.start =
+                      format.parseStrict(startTextFiledController.text);
+                  newSchedule.end =
+                      format.parseStrict(endTextFiledController.text);
+                  if (newSchedule.title.isEmpty) {
+                    print('This is mandatory');
+                    return;
+                  }
+                  if (newSchedule.place.isEmpty) {
+                    newSchedule.place = '(Empty)';
+                  }
+                  if (newSchedule.details.isEmpty) {
+                    newSchedule.details = '(Empty)';
+                  }
+                  widget.addSchedule(this.newSchedule, this._selectedTarget);
+                },
+                child: const Text('Add'))
           ],
         ),
-      ),
-    );
+        body: Padding(
+            padding: const EdgeInsets.all(32),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    _format.format(widget.targetDate),
+                    style: TextStyle(fontSize: 24),
+                  ),
+                  const SizedBox(
+                    height: 32,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Target'),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      FormField(builder: (FormFieldState<String> state) {
+                        return InputDecorator(
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0))),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              hint: const Text('Select target'),
+                              value: _selectedTarget,
+                              isDense: true,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  _selectedTarget = newValue;
+                                });
+                              },
+                              items: widget.targetIdAndName
+                                  .map((e) => DropdownMenuItem(
+                                        child: Text(e.item2),
+                                        value: e.item1,
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                        icon: const Icon(Icons.title), labelText: 'Title'),
+                    onChanged: (value) {
+                      this.newSchedule.title = value;
+                    },
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                        icon: const Icon(Icons.place), labelText: 'Place'),
+                    onChanged: (value) {
+                      this.newSchedule.place = value;
+                    },
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                        icon: const Icon(Icons.timer), labelText: 'Start time'),
+                    onTap: () async {
+                      var newDate = await _selectTime(context);
+                      startTextFiledController.text =
+                          DateFormat('yyyy/MM/dd HH:mm').format(newDate);
+                      this.newSchedule.start = newDate;
+                    },
+                    controller: this.startTextFiledController,
+                    enableInteractiveSelection: false,
+                    focusNode: FocusNode(),
+                    readOnly: true,
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                        icon: const Icon(Icons.timer), labelText: 'End time'),
+                    onTap: () async {
+                      var newDate = await _selectTime(context);
+                      endTextFiledController.text =
+                          DateFormat('yyyy/MM/dd HH:mm').format(newDate);
+                      this.newSchedule.end = newDate;
+                    },
+                    controller: this.endTextFiledController,
+                    enableInteractiveSelection: false,
+                    focusNode: FocusNode(),
+                    readOnly: true,
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  TextField(
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      icon: const Icon(Icons.content_copy),
+                      labelText: 'Details',
+                    ),
+                    onChanged: (value) {
+                      this.newSchedule.details = value;
+                    },
+                  ),
+                ],
+              ),
+            )));
   }
 }

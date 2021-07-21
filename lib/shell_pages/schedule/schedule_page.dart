@@ -17,14 +17,12 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime _lastDay = DateTime.utc(DateTime.now().year + 10, 1, 1);
   Future<bool> _future;
   DateTime _selectedDay;
-  DateTime _focusDay;
   ScheduleCollection _scheduleCollection;
 
   @override
   void initState() {
     print('initState in SchedulePage');
     this._selectedDay = DateTime.now();
-    this._focusDay = DateTime.now();
     this._scheduleCollection = ScheduleCollection();
     this._future =
         _getSchedulesForMonth(widget.appState.targetCalendarMonth, false);
@@ -46,21 +44,20 @@ class _SchedulePageState extends State<SchedulePage> {
   void _onPageChanged(DateTime day) {
     print('onPageChanged');
     widget.appState.targetCalendarMonth = day;
+    // todo: false -> userSetting
     _getSchedulesForMonth(day, false);
-    setState(() {
-      // todo: false -> userSetting
-      _focusDay = day;
-    });
+    widget.appState.targetCalendarMonth = day;
   }
 
   void _onDaySelected(DateTime newSelectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, newSelectedDay)) {
       setState(() {
         this._selectedDay = newSelectedDay;
-        this._focusDay = focusedDay;
+        widget.appState.targetCalendarMonth = focusedDay;
       });
-    } else if (isSameDay(_focusDay, newSelectedDay)) {
-      widget.appState.selectedDayForScheduleList = _focusDay;
+    } else if (isSameDay(widget.appState.targetCalendarMonth, newSelectedDay)) {
+      widget.appState.selectedDayForScheduleList =
+          widget.appState.targetCalendarMonth;
     }
   }
 
@@ -111,7 +108,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   calendarFormat: CalendarFormat.month,
                   firstDay: _firstDay,
                   lastDay: _lastDay,
-                  focusedDay: _focusDay,
+                  focusedDay: widget.appState.targetCalendarMonth,
                   calendarBuilders: _getCalendarBuilder(),
                   onPageChanged: _onPageChanged,
                   headerStyle: HeaderStyle(

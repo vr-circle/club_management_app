@@ -95,7 +95,24 @@ List<ShellState> shellList = <ShellState>[
       },
       getRoutePath: (appState) {
         print('getRoutePath');
-        return SchedulePath(targetDate: appState.targetCalendarMonth);
+        if (appState.selectedDayForScheduleList != null) {
+          if (appState.isOpenAddSchedulePage) {
+            return ScheduleAddPath(appState.selectedDayForScheduleList);
+          } else if (appState.selectedSchedule != null) {
+            // todo: change schedulePath -> ScheduleDetailPath
+            return SchedulePath(targetDate: appState.targetCalendarMonth);
+          } else {
+            return ScheduleListViewPath(
+                day: appState.selectedDayForScheduleList);
+          }
+        } else {
+          if (appState.selectedSchedule != null) {
+            // todo: change schedulePath -> ScheduleDetailPath
+            return SchedulePath(targetDate: appState.targetCalendarMonth);
+          } else {
+            return SchedulePath(targetDate: appState.targetCalendarMonth);
+          }
+        }
       },
       onPopPage: (appState) {
         if (appState.selectedDayForScheduleList != null) {
