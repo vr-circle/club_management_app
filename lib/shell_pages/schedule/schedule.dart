@@ -1,13 +1,19 @@
+import 'package:flutter/cupertino.dart';
+import 'package:uuid/uuid.dart';
+
+Uuid _uuid = Uuid();
+
 class Schedule {
   Schedule({
-    this.id,
-    this.title,
-    this.start,
-    this.end,
-    this.place,
-    this.details,
-    this.createdBy,
-  });
+    String id,
+    @required this.title,
+    @required this.start,
+    @required this.end,
+    @required this.place,
+    @required this.details,
+    @required this.createdBy,
+    @required this.isPublic,
+  }) : id = id ?? _uuid.v1();
   String id;
   String title;
   DateTime start;
@@ -15,4 +21,5 @@ class Schedule {
   String place;
   String details;
   String createdBy;
+  bool isPublic;
 }

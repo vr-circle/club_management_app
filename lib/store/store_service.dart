@@ -128,41 +128,51 @@ class FireStoreService extends DatabaseService {
   // --------------------------- schedule --------------------------------------
   @override
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
-      DateTime day, bool isAll) async {
+      DateTime targetMonth, bool isAll) async {
     print('getSchedules');
-    return getDummySchedules(day);
-    // Map<DateTime, List<Schedule>> res = {};
-    // List<String> targetIdList =
-    //     await dbService.getParticipatingOrganizationIdList();
-    // targetIdList.forEach((id) async {
-    //   final _data = (await _store
-    //           .collection(organizationCollectionName)
-    //           .doc(id)
-    //           .collection(scheduleCollectionName)
-    //           .doc(public)
-    //           .get())
-    //       .data();
-    //   _data.forEach((key, value) {
-    //     try {
-    //       final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
-    //       final tmpList = <Schedule>[];
-    //       value.forEach((e) {
-    //         tmpList.add(Schedule(
-    //           title: e['title'],
-    //           place: e['place'],
-    //           details: e['details'],
-    //           start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-    //           end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-    //         ));
-    //       });
-    //       res.addAll({tmpDate: tmpList});
-    //     } catch (e) {
-    //       print(e);
-    //     }
-    //   });
-    // });
-    // // return res;
-    // return dummySchedules;
+    String _year = targetMonth.year.toString();
+    String _month = targetMonth.month.toString();
+    if (isAll) {
+      // await _store.collection(public).doc(scheduleCollectionName)
+    }
+    Map<DateTime, List<Schedule>> res = {};
+    List<String> targetIdList =
+        await dbService.getParticipatingOrganizationIdList();
+    targetIdList.forEach((id) async {
+      final _data = (await _store
+              .collection(organizationCollectionName)
+              .doc(id)
+              .collection(scheduleCollectionName)
+              .doc(private)
+              .collection(_year)
+              .doc(_month)
+              .get())
+          .data();
+      _data.forEach((key, value) {
+        try {
+          final _day = int.parse(key);
+          final DateTime tmpDate =
+              DateTime(targetMonth.year, targetMonth.month, _day);
+          final tmpList = <Schedule>[];
+          value.forEach((e) {
+            tmpList.add(Schedule(
+              id: e['id'],
+              createdBy: id,
+              isPublic: isAll,
+              title: e['title'],
+              place: e['place'],
+              details: e['details'],
+              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+            ));
+          });
+          res.addAll({tmpDate: tmpList});
+        } catch (e) {
+          print(e);
+        }
+      });
+    });
+    return res;
   }
 
   @override
@@ -194,6 +204,7 @@ class FireStoreService extends DatabaseService {
           .set({
         key: FieldValue.arrayUnion([
           {
+            'id': newSchedule.id,
             'title': newSchedule.title,
             'start': _start,
             'end': _end,
@@ -212,6 +223,7 @@ class FireStoreService extends DatabaseService {
         .set({
       key: FieldValue.arrayUnion([
         {
+          'id': newSchedule.id,
           'title': newSchedule.title,
           'start': _start,
           'end': _end,
@@ -238,6 +250,7 @@ class FireStoreService extends DatabaseService {
           .set({
         key: FieldValue.arrayRemove([
           {
+            'id': targetSchedule.id,
             'title': targetSchedule.title,
             'start': _start,
             'end': _end,
