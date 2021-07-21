@@ -127,48 +127,55 @@ class FireStoreService extends DatabaseService {
 
   // --------------------------- schedule --------------------------------------
   @override
-  Future<Map<DateTime, List<Schedule>>> getMonthSchedules(
+  Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
       DateTime day, bool isAll) async {
-    // print('getSchedules');
-    Map<DateTime, List<Schedule>> res = {};
-    List<String> targetIdList =
-        await dbService.getParticipatingOrganizationIdList();
-    targetIdList.forEach((id) async {
-      final _data = (await _store
-              .collection(organizationCollectionName)
-              .doc(id)
-              .collection(scheduleCollectionName)
-              .doc(public)
-              .get())
-          .data();
-      _data.forEach((key, value) {
-        try {
-          final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
-          final tmpList = <Schedule>[];
-          value.forEach((e) {
-            tmpList.add(Schedule(
-              title: e['title'],
-              place: e['place'],
-              details: e['details'],
-              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-            ));
-          });
-          res.addAll({tmpDate: tmpList});
-        } catch (e) {
-          print(e);
-        }
-      });
-    });
-    // return res;
-    return dummySchedules;
+    print('getSchedules');
+    return getDummySchedules(day);
+    // Map<DateTime, List<Schedule>> res = {};
+    // List<String> targetIdList =
+    //     await dbService.getParticipatingOrganizationIdList();
+    // targetIdList.forEach((id) async {
+    //   final _data = (await _store
+    //           .collection(organizationCollectionName)
+    //           .doc(id)
+    //           .collection(scheduleCollectionName)
+    //           .doc(public)
+    //           .get())
+    //       .data();
+    //   _data.forEach((key, value) {
+    //     try {
+    //       final DateTime tmpDate = DateFormat('yyyy-MM-dd').parseStrict(key);
+    //       final tmpList = <Schedule>[];
+    //       value.forEach((e) {
+    //         tmpList.add(Schedule(
+    //           title: e['title'],
+    //           place: e['place'],
+    //           details: e['details'],
+    //           start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+    //           end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+    //         ));
+    //       });
+    //       res.addAll({tmpDate: tmpList});
+    //     } catch (e) {
+    //       print(e);
+    //     }
+    //   });
+    // });
+    // // return res;
+    // return dummySchedules;
   }
 
   @override
-  Future<List<Schedule>> getDaySchedules(DateTime day, bool isAll) async {
+  Future<List<Schedule>> getSchedulesForDay(DateTime day, bool isAll) async {
     // print('getScheduleOnDay');
     Future.delayed(Duration(seconds: 1));
     return dummyScheduleListOnDay;
+  }
+
+  @override
+  Future<Schedule> getSchedule(String targetId) async {
+    Future.delayed(Duration(seconds: 1));
+    return dummyScheduleListOnDay.first;
   }
 
   @override
@@ -216,13 +223,13 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
-  Future<void> deleteSchedule(
-      Schedule targetSchedule, String targetOrganizationId) async {
+  Future<void> deleteSchedule(Schedule targetSchedule) async {
     // print('deleteSchedule');
     final key = DateFormat('yyyy-MM-dd').format(targetSchedule.start);
     final _start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
     final _end = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.end);
-    if (targetOrganizationId.isEmpty) {
+    if (targetSchedule.createdBy == null ||
+        targetSchedule.createdBy == userId) {
       await _store
           .collection(usersCollectionName)
           .doc(userId)
@@ -243,7 +250,7 @@ class FireStoreService extends DatabaseService {
     }
     await _store
         .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
+        .doc(targetSchedule.createdBy)
         .collection(scheduleCollectionName)
         .doc() // private or public
         .set({
@@ -433,6 +440,34 @@ final dummyScheduleListOnDay = [
   ),
 ];
 
+Map<DateTime, List<Schedule>> getDummySchedules(DateTime day) {
+  return {
+    day: [
+      Schedule(
+        title: 'te',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+      ),
+      Schedule(
+        title: 'ti',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+      ),
+      Schedule(
+        title: 'tit',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        details: 'details',
+        place: 'place01',
+      ),
+    ]
+  };
+}
+
 final dummySchedules = {
   DateTime.now(): [
     Schedule(
@@ -496,7 +531,7 @@ final dummySchedules = {
   ],
   DateTime.now().add(Duration(days: 3)): [
     Schedule(
-      title: 'title',
+      title: 'ti',
       start: DateTime.now(),
       end: DateTime.now(),
       details: 'details',
@@ -510,7 +545,7 @@ final dummySchedules = {
       place: 'place01',
     ),
     Schedule(
-      title: 'title',
+      title: 'ti',
       start: DateTime.now(),
       end: DateTime.now(),
       details: 'details',

@@ -6,6 +6,8 @@ import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/auth/signup_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_list.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 
 class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   MyRouteInformationParser(this._appState);
@@ -13,7 +15,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   @override
   Future<RoutePath> parseRouteInformation(
       RouteInformation routeInformation) async {
-    // print('parseRouteInformation in MyRouteInformationParser');
+    print('parseRouteInformation in MyRouteInformationParser');
     final uri = Uri.parse(routeInformation.location);
     if (_appState.user == null &&
         routeInformation.location == SignUpPath.location) {
@@ -33,11 +35,33 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       case HomePath.location:
         return HomePath();
       case SchedulePath.location:
-        return SchedulePath();
+        print('SchedulePath.location');
+        // /schedule/view?year=2020&month=1&day=1/add
+        // /schedule/detail?id=xxxxxxxxx&public=true&day=20200101
+        if (uri.queryParameters.containsKey('year') &&
+            uri.queryParameters.containsKey('month')) {
+          try {
+            final int _year = int.parse(uri.queryParameters['year']);
+            final int _month = int.parse(uri.queryParameters['month']);
+            if (uri.queryParameters.containsKey('day')) {
+              final int _day = int.parse(uri.queryParameters['day']);
+              return ScheduleListViewPath(DateTime(_year, _month, _day));
+            }
+            return SchedulePath(targetDate: DateTime(_year, _month));
+          } catch (e) {
+            print(e);
+            return SchedulePath(targetDate: DateTime.now());
+          }
+        } else if (uri.queryParameters.containsKey('id')) {
+          // todo : getSchedule from queryParam
+          // if data is not exit, redirect for SchedulePath
+          return SchedulePath(targetDate: DateTime.now());
+          // return ScheduleDetailPath();
+        }
+        print('return SchedulePath(targetDate: DateTime.now());');
+        return SchedulePath(targetDate: DateTime.now());
       case TodoPath.location:
-        // print('TodoPath');
         if (uri.pathSegments.length == 2) {
-          // print('uri.pathSegments[1] == ${uri.pathSegments[1]}');
           return TodoPath(targetId: uri.pathSegments[1]);
         }
         return TodoPath(targetId: '');
@@ -64,7 +88,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
-    // print('restoreRouteInformation');
+    print('restoreRouteInformation');
     if (path is LoginPath) {
       return RouteInformation(location: '${LoginPath.location}');
     }
@@ -75,7 +99,19 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       return RouteInformation(location: '${HomePath.location}');
     }
     if (path is SchedulePath) {
-      return RouteInformation(location: '${SchedulePath.location}');
+      print('path is SchedulePath');
+      print(path.targetDate);
+      return RouteInformation(
+          location:
+              '${SchedulePath.location}/view?year=${path.targetDate.year}&month=${path.targetDate.month}');
+    }
+    if (path is ScheduleListViewPath) {
+      return RouteInformation(
+          location:
+              '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}&day=${path.day.day}');
+    }
+    if (path is ScheduleDetailPath) {
+      return RouteInformation(location: '${SchedulePath.location}/detail');
     }
     if (path is TodoPath) {
       if (path.targetId.isEmpty) {
@@ -125,6 +161,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   final AppState appState;
 
   RoutePath get currentConfiguration {
+    print('currentConfiguration');
     if (appState.loggedInState == LoggedInState.loggedOut &&
         appState.isOpenSignUpPage == false) {
       return LoginPath();
@@ -138,7 +175,6 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   @override
   Widget build(BuildContext context) {
     print('build in MyRouterDelegate');
-    print('appState.isOpenSignUpPage == ${appState.isOpenSignUpPage}');
     return Navigator(
       key: navigatorKey,
       pages: [
@@ -184,7 +220,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
-    // print('setNewRoutePath: new path is ${path.runtimeType}');
+    print('setNewRoutePath: new path is ${path.runtimeType}');
     if (path is LoginPath) {
       appState.isOpenSignUpPage = false;
       return;
@@ -195,6 +231,17 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.bottomNavigationIndex = HomePath.index;
     } else if (path is SchedulePath) {
       appState.bottomNavigationIndex = SchedulePath.index;
+      appState.targetCalendarMonth = path.targetDate;
+    } else if (path is ScheduleListViewPath) {
+      appState.selectedDayForScheduleList = path.day;
+      // appState.targetCalendarMonth = path.day;
+    } else if (path is ScheduleDetailPath) {
+      // todo: create Schedule from path info
+      final data = await dbService.getSchedulesForDay(DateTime.now(), false);
+      appState.selectedSchedule = data[0] ?? null;
+    } else if (path is ScheduleAddPath) {
+      appState.selectedDayForScheduleList = path.day;
+      appState.isOpenAddSchedulePage = true;
     } else if (path is TodoPath) {
       appState.bottomNavigationIndex = TodoPath.index;
       appState.targetTodoTabId = path.targetId;

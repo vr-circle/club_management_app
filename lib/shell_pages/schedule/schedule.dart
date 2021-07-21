@@ -6,6 +6,7 @@ class Schedule {
     this.end,
     this.place,
     this.details,
+    this.createdBy,
   });
   String id;
   String title;
@@ -13,15 +14,5 @@ class Schedule {
   DateTime end;
   String place;
   String details;
-}
-
-class PersonalSchedule extends Schedule {}
-
-class OrganizationSchedule extends Schedule {
-  OrganizationSchedule({
-    this.isPublic,
-    this.createdBy,
-  });
-  bool isPublic;
   String createdBy;
 }

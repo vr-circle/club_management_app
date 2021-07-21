@@ -1,8 +1,6 @@
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_collection.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
@@ -15,34 +13,77 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-
-  DateTime _selectedDay = DateTime.now();
-  ScheduleCollection scheduleCollection;
-
-  Future<LinkedHashMap<DateTime, List<Schedule>>> _futureSchedules;
-
-  Future<LinkedHashMap<DateTime, List<Schedule>>> getScheduleData() async {
-    final Map<DateTime, List<Schedule>> res = await dbService.getMonthSchedules(
-        widget.appState.targetCalendarPageDate, false);
-    scheduleCollection.initScheduleCollection(res);
-    return scheduleCollection.schedules;
-  }
+  DateTime _firstDay = DateTime.utc(DateTime.now().year - 4, 1, 1);
+  DateTime _lastDay = DateTime.utc(DateTime.now().year + 10, 1, 1);
+  Future<bool> _future;
+  DateTime _selectedDay;
+  DateTime _focusDay;
+  ScheduleCollection _scheduleCollection;
 
   @override
   void initState() {
     print('initState in SchedulePage');
-    scheduleCollection = ScheduleCollection();
-    this._futureSchedules = getScheduleData();
+    this._selectedDay = DateTime.now();
+    this._focusDay = DateTime.now();
+    this._scheduleCollection = ScheduleCollection();
+    this._future =
+        _getSchedulesForMonth(widget.appState.targetCalendarMonth, false);
     super.initState();
   }
 
-  int getHashCode(DateTime key) {
-    return key.day * 1000000 + key.month * 10000 + key.year;
+  Future<bool> _getSchedulesForMonth(DateTime targetMonth, bool isAll) async {
+    // await Future.delayed(Duration(seconds: 2));
+    await _scheduleCollection.getSchedulesForMonth(
+        widget.appState.targetCalendarMonth, isAll);
+    setState(() {});
+    return true;
   }
 
-  List<Schedule> getEventForDay(DateTime day) {
-    return scheduleCollection.getScheduleList(day);
+  List<Schedule> _getEventForDay(DateTime day) {
+    return _scheduleCollection.getScheduleList(day);
+  }
+
+  void _onPageChanged(DateTime day) {
+    print('onPageChanged');
+    widget.appState.targetCalendarMonth = day;
+    _getSchedulesForMonth(day, false);
+    setState(() {
+      // todo: false -> userSetting
+      _focusDay = day;
+    });
+  }
+
+  void _onDaySelected(DateTime newSelectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, newSelectedDay)) {
+      setState(() {
+        this._selectedDay = newSelectedDay;
+        this._focusDay = focusedDay;
+      });
+    } else if (isSameDay(_focusDay, newSelectedDay)) {
+      widget.appState.selectedDayForScheduleList = _focusDay;
+    }
+  }
+
+  bool _selectedDayPredicate(DateTime day) {
+    return isSameDay(_selectedDay, day);
+  }
+
+  CalendarBuilders<Schedule> _getCalendarBuilder() {
+    final res = CalendarBuilders<Schedule>(singleMarkerBuilder:
+        (BuildContext context, DateTime date, Schedule event) {
+      Color _color = Colors.red;
+      // todo: change color by event.createdBy;
+      if (event.title == 'title') {
+        _color = Colors.blue;
+      }
+      return Container(
+        decoration: BoxDecoration(shape: BoxShape.circle, color: _color),
+        width: 7,
+        height: 7,
+        margin: const EdgeInsets.symmetric(horizontal: 1.5),
+      );
+    });
+    return res;
   }
 
   @override
@@ -57,10 +98,8 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         body: FutureBuilder(
-            future: this._futureSchedules,
-            builder: (context,
-                AsyncSnapshot<LinkedHashMap<DateTime, List<Schedule>>>
-                    snapshot) {
+            future: this._future,
+            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(
                   child: const CircularProgressIndicator(),
@@ -68,47 +107,24 @@ class _SchedulePageState extends State<SchedulePage> {
               }
               return Column(children: [
                 TableCalendar(
-                  onPageChanged: (DateTime day) {
-                    widget.appState.targetCalendarPageDate = day;
-                    widget.appState.focusDay = day;
-                  },
-                  calendarBuilders: CalendarBuilders(singleMarkerBuilder:
-                      (BuildContext context, DateTime data, Schedule event) {
-                    Color color = Colors.red;
-                    return Container(
-                      decoration:
-                          BoxDecoration(shape: BoxShape.circle, color: color),
-                    );
-                  }),
                   locale: 'en_US',
+                  calendarFormat: CalendarFormat.month,
+                  firstDay: _firstDay,
+                  lastDay: _lastDay,
+                  focusedDay: _focusDay,
+                  calendarBuilders: _getCalendarBuilder(),
+                  onPageChanged: _onPageChanged,
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
                   ),
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.utc(2050, 12, 31),
-                  focusedDay: widget.appState.focusDay,
-                  calendarFormat: _calendarFormat,
-                  selectedDayPredicate: (day) {
-                    return isSameDay(_selectedDay, day);
-                  },
-                  eventLoader: getEventForDay,
-                  onDaySelected: (selectedDay, focusedDay) {
-                    if (!isSameDay(_selectedDay, selectedDay)) {
-                      setState(() {
-                        this._selectedDay = selectedDay;
-                        widget.appState.focusDay = focusedDay;
-                      });
-                    } else if (isSameDay(
-                        widget.appState.focusDay, selectedDay)) {
-                      widget.appState.isOpenScheduleListView = true;
-                      widget.appState.focusDay = selectedDay;
-                    }
-                  },
+                  selectedDayPredicate: _selectedDayPredicate,
+                  eventLoader: _getEventForDay,
+                  onDaySelected: _onDaySelected,
                 ),
                 Expanded(
                     child: ListView(shrinkWrap: true, children: [
                   Column(
-                      children: getEventForDay(_selectedDay)
+                      children: _getEventForDay(_selectedDay)
                           .map((e) => Card(
                                   child: ListTile(
                                 title: Text(e.title),

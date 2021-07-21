@@ -10,14 +10,15 @@ class ScheduleCollection {
   }
   LinkedHashMap<DateTime, List<Schedule>> _schedules;
   LinkedHashMap<DateTime, List<Schedule>> get schedules => _schedules;
+
   int _getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
   }
 
-  void initScheduleCollection(Map<DateTime, List<Schedule>> collection) {
-    // this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
-    //   ..addAll(collection);
-    this._schedules.addAll(collection);
+  Future<void> getSchedulesForMonth(DateTime targetMonth, bool isAll) async {
+    final _data = await dbService.getSchedulesForMonth(targetMonth, isAll);
+    this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
+      ..addAll(_data);
   }
 
   List<Schedule> getScheduleList(DateTime day) {

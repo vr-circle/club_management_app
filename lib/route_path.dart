@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 
 abstract class RoutePath {}
 
@@ -17,8 +18,10 @@ class HomePath extends RoutePath {
 }
 
 class SchedulePath extends RoutePath {
+  SchedulePath({@required this.targetDate});
   static const int index = 1;
   static const String location = '/schedule';
+  DateTime targetDate;
 }
 
 class ScheduleListViewPath extends RoutePath {
@@ -36,9 +39,10 @@ class ScheduleAddPath extends RoutePath {
 }
 
 class ScheduleDetailPath extends RoutePath {
-  ScheduleDetailPath(this.id);
+  ScheduleDetailPath({this.targetId, this.isPublic});
   static const String location = '';
-  final String id;
+  final String targetId;
+  final bool isPublic;
 }
 
 class TodoPath extends RoutePath {

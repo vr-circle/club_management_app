@@ -7,21 +7,28 @@ import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 
 class AppState extends ChangeNotifier {
   AppState()
-      : _authService = AuthService(),
+      :
+        // auth
+        _authService = AuthService(),
         _loggedinState = LoggedInState.loggedOut,
         _isOpenSignUpPage = false,
+        // shell
         _bottomNavigationIndex = HomePath.index,
-        _searchingParam = '',
-        _isOpenAccountView = false,
-        _isDarkMode = false,
+        // schedule
+        _targetCalendarMonth = DateTime.now(),
+        _selectedDayForScheduleList = null,
+        _selectedSchedule = null,
+        _isOpenAddSchedulePage = false,
+        // todo
         _targetTodoTabId = '',
         _targetOrganizationId = '',
-        _focusDay = DateTime.now(),
-        _targetCalendarPageDate = DateTime.now(),
-        _isOpenScheduleListView = false,
-        _selectedSchedule = null,
-        _settingOrganizationId = '',
-        _isOpenAddOrganizationPage = false;
+        // search
+        _searchingParam = '',
+        _isOpenAddOrganizationPage = false,
+        // setting
+        _isDarkMode = false,
+        _isOpenAccountView = false,
+        _settingOrganizationId = '';
 
   bool _isOpenSignUpPage;
   bool get isOpenSignUpPage => _isOpenSignUpPage;
@@ -38,24 +45,17 @@ class AppState extends ChangeNotifier {
   }
 
   // schedule
-  DateTime _targetCalendarPageDate;
-  DateTime get targetCalendarPageDate => _targetCalendarPageDate;
-  set targetCalendarPageDate(DateTime day) {
-    _targetCalendarPageDate = day;
+  DateTime _targetCalendarMonth;
+  DateTime get targetCalendarMonth => _targetCalendarMonth;
+  set targetCalendarMonth(DateTime day) {
+    _targetCalendarMonth = day;
     notifyListeners();
   }
 
-  DateTime _focusDay;
-  DateTime get focusDay => _focusDay;
-  set focusDay(DateTime day) {
-    _focusDay = day;
-    notifyListeners();
-  }
-
-  bool _isOpenScheduleListView;
-  bool get isOpenScheduleListView => _isOpenScheduleListView;
-  set isOpenScheduleListView(bool value) {
-    _isOpenScheduleListView = value;
+  DateTime _selectedDayForScheduleList;
+  DateTime get selectedDayForScheduleList => _selectedDayForScheduleList;
+  set selectedDayForScheduleList(DateTime day) {
+    _selectedDayForScheduleList = day;
     notifyListeners();
   }
 
@@ -63,6 +63,13 @@ class AppState extends ChangeNotifier {
   Schedule get selectedSchedule => _selectedSchedule;
   set selectedSchedule(Schedule newSchedule) {
     _selectedSchedule = newSchedule;
+    notifyListeners();
+  }
+
+  bool _isOpenAddSchedulePage;
+  bool get isOpenAddSchedulePage => _isOpenAddSchedulePage;
+  set isOpenAddSchedulePage(bool value) {
+    _isOpenAddSchedulePage = value;
     notifyListeners();
   }
 

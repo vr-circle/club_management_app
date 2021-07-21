@@ -3,23 +3,23 @@ import 'package:flutter_application_1/store/store_service.dart';
 import 'package:intl/intl.dart';
 import 'schedule.dart';
 
-class ScheduleListOnDay extends StatefulWidget {
-  ScheduleListOnDay({
+class ScheduleListViewForDay extends StatefulWidget {
+  ScheduleListViewForDay({
     Key key,
     @required this.targetDate,
     @required this.handleOpenAddPage,
-    @required this.handleOpenScheduleDetails,
+    @required this.handleChangeScheduleDetails,
   }) : super(key: key);
   final DateTime targetDate;
-  final void Function(Schedule schedule) handleOpenScheduleDetails;
+  final void Function(Schedule schedule) handleChangeScheduleDetails;
   final void Function() handleOpenAddPage;
   @override
-  _ScheduleListOnDayState createState() => _ScheduleListOnDayState();
+  _ScheduleListViewForDayState createState() => _ScheduleListViewForDayState();
 }
 
-class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
-  Future<List<Schedule>> getSchedules(DateTime day) async {
-    final data = await dbService.getDaySchedules(day, false);
+class _ScheduleListViewForDayState extends State<ScheduleListViewForDay> {
+  Future<List<Schedule>> _getSchedules(DateTime day) async {
+    final data = await dbService.getSchedulesForDay(day, false);
     return data;
   }
 
@@ -28,8 +28,9 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
     super.initState();
   }
 
-  final _appBarFormat = new DateFormat('yyyy/MM/dd(E)');
-  final _timeFormat = new DateFormat('HH:mm');
+  final _appBarFormat = DateFormat('yyyy/MM/dd(E)');
+  final _timeFormat = DateFormat('HH:mm');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +38,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
           title: Text(_appBarFormat.format(widget.targetDate)),
         ),
         body: FutureBuilder(
-          future: getSchedules(widget.targetDate),
+          future: _getSchedules(widget.targetDate),
           builder:
               (BuildContext context, AsyncSnapshot<List<Schedule>> snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
@@ -53,7 +54,7 @@ class _ScheduleListOnDayState extends State<ScheduleListOnDay> {
                           subtitle: Text(
                               '${_timeFormat.format(e.start)} ~ ${_timeFormat.format(e.end)}'),
                           onTap: () {
-                            widget.handleOpenScheduleDetails(e);
+                            widget.handleChangeScheduleDetails(e);
                           },
                         ),
                       ))

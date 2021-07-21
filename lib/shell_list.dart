@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/home/home.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_add.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_details.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_list_view_for_day.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
@@ -11,6 +15,7 @@ import 'package:flutter_application_1/shell_pages/user_settings/setting_add_orga
 import 'package:flutter_application_1/shell_pages/user_settings/setting_organization.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/settings.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/user_account_view.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 
 class ShellState {
   ShellState(
@@ -48,19 +53,66 @@ List<ShellState> shellList = <ShellState>[
       name: 'Schedule',
       icon: const Icon(Icons.calendar_today),
       getPages: (appState) {
+        print('getPages in SchellState');
         return [
           MaterialPage(
               child: SchedulePage(
-            key: ValueKey('schedule'),
+            key: ValueKey('SchedulePage'),
             appState: appState,
-          ))
+          )),
+          if (appState.selectedDayForScheduleList != null)
+            MaterialPage(
+                child: ScheduleListViewForDay(
+              targetDate: appState.selectedDayForScheduleList,
+              handleOpenAddPage: () {
+                appState.isOpenAddSchedulePage = true;
+              },
+              handleChangeScheduleDetails: (Schedule schedule) {
+                appState.selectedSchedule = schedule;
+              },
+            )),
+          if (appState.selectedDayForScheduleList != null &&
+              appState.isOpenAddSchedulePage)
+            MaterialPage(
+                child: AddSchedulePage(
+              targetDate: appState.selectedDayForScheduleList,
+              addSchedule: (Schedule newSchedule, String targetId) async {
+                await dbService.addSchedule(newSchedule, targetId);
+              },
+            )),
+          if (appState.selectedSchedule != null)
+            MaterialPage(
+                child: ScheduleDetails(
+              schedule: appState.selectedSchedule,
+              deleteSchedule: (Schedule targetSchedule) async {
+                await dbService.deleteSchedule(targetSchedule);
+              },
+              handleCloseDetailsPage: () {
+                appState.selectedSchedule = null;
+              },
+            ))
         ];
       },
       getRoutePath: (appState) {
-        return SchedulePath();
+        print('getRoutePath');
+        return SchedulePath(targetDate: appState.targetCalendarMonth);
       },
       onPopPage: (appState) {
-        //
+        if (appState.selectedDayForScheduleList != null) {
+          if (appState.isOpenAddSchedulePage) {
+            appState.isOpenAddSchedulePage = false;
+            return;
+          }
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          } else {
+            appState.selectedDayForScheduleList = null;
+          }
+        } else {
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          }
+        }
       }),
   ShellState(
       name: 'Todo',

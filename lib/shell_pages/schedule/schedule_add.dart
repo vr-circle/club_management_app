@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'schedule.dart';
 import 'package:intl/intl.dart';
 
-class ScheduleAddPage extends StatefulWidget {
-  ScheduleAddPage(
-      {Key key, this.addSchedule, this.targetDate, DateTime initSchedule})
+class AddSchedulePage extends StatefulWidget {
+  AddSchedulePage(
+      {Key key, @required this.addSchedule, @required this.targetDate})
       : super(key: key);
   final Future<void> Function(Schedule schedule, String target) addSchedule;
   final DateTime targetDate;
   @override
-  _ScheduleAddPageState createState() => _ScheduleAddPageState();
+  _AddSchedulePageState createState() => _AddSchedulePageState();
 }
 
-class _ScheduleAddPageState extends State<ScheduleAddPage> {
+class _AddSchedulePageState extends State<AddSchedulePage> {
   final _format = new DateFormat('yyyy/MM/dd(E)');
 
   TextEditingController startTextFiledController;
@@ -88,9 +88,7 @@ class _ScheduleAddPageState extends State<ScheduleAddPage> {
                               ))
                           .toList(),
                       onChanged: (newValue) {
-                        setState(() {
-                          this._selectedTargetUsers = newValue;
-                        });
+                        this._selectedTargetUsers = newValue;
                       },
                     ),
                   ],
