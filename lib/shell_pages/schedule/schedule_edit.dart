@@ -22,12 +22,15 @@ class _ScheduleEditPageState extends State<ScheduleEditPage> {
 
   @override
   void initState() {
-    this._newSchedule = new Schedule(
+    this._newSchedule = Schedule(
+      id: widget.targetSchedule.id,
       title: widget.targetSchedule.title,
       place: widget.targetSchedule.place,
       start: widget.targetSchedule.start,
       end: widget.targetSchedule.end,
       details: widget.targetSchedule.details,
+      createdBy: widget.targetSchedule.createdBy,
+      isPublic: widget.targetSchedule.isPublic,
     );
     this._titleTextEditingController =
         new TextEditingController(text: this._newSchedule.title);

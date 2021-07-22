@@ -8,16 +8,19 @@ abstract class DatabaseService {
   Future<List<String>> getParticipatingOrganizationIdList();
   Future<OrganizationInfo> getOrganizationInfo(String id);
   Future<void> createOrganization(OrganizationInfo newOrganization);
-  Future<void> joinOrganization(OrganizationInfo targetOrganization);
+  Future<void> requestJoinOrganization(OrganizationInfo targetOrganization);
   Future<void> leaveOrganization(OrganizationInfo targetOrganization);
 
   // schedule
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
-      DateTime day, bool isAll);
-  Future<List<Schedule>> getSchedulesForDay(DateTime day, bool isAll);
-  Future<Schedule> getSchedule(String targetId);
-  Future<void> addSchedule(Schedule newSchedule, String targetId);
-  Future<void> deleteSchedule(Schedule schedule);
+      DateTime day, bool isContainPublicSchedule);
+  Future<List<Schedule>> getSchedulesForDay(
+      DateTime day, bool isContainPublicSchedule);
+  Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay);
+  Future<void> addPersonalSchedule(Schedule newSchedule);
+  Future<void> addOrganizationSchedule(Schedule newSchedule);
+  Future<void> deletePersonalSchedule(Schedule targetSchedule);
+  Future<void> deleteOrganizationSchedule(Schedule targetSchedule);
 
   // todo
   Future<Map<String, List<Task>>> getTaskList(String id);
@@ -29,9 +32,5 @@ abstract class DatabaseService {
       Task task, String targetGroupName, String targetOrganizationId);
 
   // settings
-  Future<void> setUserTheme();
-}
-
-Future<void> dummyDelay() async {
-  await Future.delayed(Duration(seconds: 1));
+  Future<void> setUserGeneralTheme(bool isDark);
 }

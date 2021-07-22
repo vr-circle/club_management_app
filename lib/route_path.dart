@@ -33,16 +33,21 @@ class ScheduleListViewPath extends RoutePath {
 
 class ScheduleAddPath extends RoutePath {
   ScheduleAddPath(this.day);
-  String get location =>
-      '${SchedulePath.location}/${this.day.year}-${this.day.month}/add';
   final DateTime day;
 }
 
 class ScheduleDetailPath extends RoutePath {
-  ScheduleDetailPath({this.targetId, this.isPublic});
+  // /schedule/detail/year-month-day/organizationId/groupName/scheduleId
+  ScheduleDetailPath(
+      {@required this.day,
+      @required this.organizationId,
+      @required this.groupName,
+      @required this.scheduleId});
   static const String location = '';
-  final String targetId;
-  final bool isPublic;
+  final DateTime day;
+  final String organizationId;
+  final String groupName;
+  final String scheduleId;
 }
 
 class TodoPath extends RoutePath {

@@ -7,6 +7,7 @@ import 'package:flutter_application_1/auth/signup_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_list.dart';
 import 'package:flutter_application_1/store/store_service.dart';
+import 'package:intl/intl.dart';
 
 class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   MyRouteInformationParser(this._appState);
@@ -34,9 +35,11 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       case HomePath.location:
         return HomePath();
       case SchedulePath.location:
-        print('SchedulePath.location');
-        // /schedule/view?year=2020&month=1&day=1/add
-        // /schedule/detail?id=xxxxxxxxx&public=true&day=20200101
+        // /schedule/view?year=2020&month=1/list?day=1/add
+        // /schedule/detail/year-month-day/organizationId/groupName/scheduleId
+        if (uri.pathSegments.length <= 1) {
+          return SchedulePath(targetDate: DateTime.now());
+        }
         if (uri.queryParameters.containsKey('year') &&
             uri.queryParameters.containsKey('month')) {
           try {
@@ -55,13 +58,24 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
             print(e);
             return SchedulePath(targetDate: DateTime.now());
           }
-        } else if (uri.queryParameters.containsKey('id')) {
-          // todo : getSchedule from queryParam
-          // if data is not exit, redirect for SchedulePath
-          return SchedulePath(targetDate: DateTime.now());
-          // return ScheduleDetailPath();
+        } else if (uri.queryParameters[1] == 'detail') {
+          try {
+            final DateTime _day =
+                DateFormat('yyyy-MM-dd').parseStrict(uri.pathSegments[2]);
+            final _organizationId = uri.pathSegments[3];
+            final _groupName = uri.pathSegments[4];
+            final _scheduleId = uri.pathSegments[5];
+            return ScheduleDetailPath(
+              day: _day,
+              groupName: _groupName,
+              organizationId: _organizationId,
+              scheduleId: _scheduleId,
+            );
+          } catch (e) {
+            print(e);
+            return SchedulePath(targetDate: DateTime.now());
+          }
         }
-        print('return SchedulePath(targetDate: DateTime.now());');
         return SchedulePath(targetDate: DateTime.now());
       case TodoPath.location:
         if (uri.pathSegments.length == 2) {
@@ -111,16 +125,17 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is ScheduleListViewPath) {
       return RouteInformation(
           location:
-              '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}&day=${path.day.day}');
+              '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}/list?day=${path.day.day}');
     }
     if (path is ScheduleAddPath) {
       return RouteInformation(
           location:
-              '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}&day=${path.day.day}/add');
+              '${SchedulePath.location}/view?year=${path.day.year}&month=${path.day.month}/list?day=${path.day.day}/add');
     }
     if (path is ScheduleDetailPath) {
       return RouteInformation(
-          location: '${SchedulePath.location}/detail/${path.targetId}');
+          location:
+              '${SchedulePath.location}/detail/${DateFormat('yyyy-mm-dd').format(path.day)}/${path.organizationId}/${path.groupName}/${path.scheduleId}');
     }
     if (path is TodoPath) {
       if (path.targetId.isEmpty) {
@@ -252,8 +267,8 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     } else if (path is ScheduleDetailPath) {
       appState.bottomNavigationIndex = SchedulePath.index;
       // todo: create Schedule from path info
-      final data = await dbService.getSchedulesForDay(DateTime.now(), false);
-      appState.selectedSchedule = data[0] ?? null;
+      final _data = await dbService.getSchedule(path.scheduleId, path.day);
+      appState.selectedSchedule = _data;
     } else if (path is ScheduleAddPath) {
       appState.bottomNavigationIndex = SchedulePath.index;
       appState.selectedDayForScheduleList = path.day;

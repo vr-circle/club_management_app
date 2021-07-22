@@ -76,16 +76,22 @@ List<ShellState> shellList = <ShellState>[
             MaterialPage(
                 child: AddSchedulePage(
               targetDate: appState.selectedDayForScheduleList,
-              addSchedule: (Schedule newSchedule, String targetId) async {
-                await dbService.addSchedule(newSchedule, targetId);
+              addSchedule: (Schedule newSchedule, bool isPersonal) async {
+                if (isPersonal)
+                  await dbService.addPersonalSchedule(newSchedule);
+                else
+                  await dbService.addOrganizationSchedule(newSchedule);
               },
             )),
           if (appState.selectedSchedule != null)
             MaterialPage(
                 child: ScheduleDetails(
               schedule: appState.selectedSchedule,
-              deleteSchedule: (Schedule targetSchedule) async {
-                await dbService.deleteSchedule(targetSchedule);
+              deleteSchedule: (Schedule targetSchedule, bool isPersonal) async {
+                if (isPersonal)
+                  await dbService.deletePersonalSchedule(targetSchedule);
+                else
+                  await dbService.deleteOrganizationSchedule(targetSchedule);
               },
               handleCloseDetailsPage: () {
                 appState.selectedSchedule = null;
@@ -99,16 +105,24 @@ List<ShellState> shellList = <ShellState>[
           if (appState.isOpenAddSchedulePage) {
             return ScheduleAddPath(appState.selectedDayForScheduleList);
           } else if (appState.selectedSchedule != null) {
-            // todo: change schedulePath -> ScheduleDetailPath
-            return SchedulePath(targetDate: appState.targetCalendarMonth);
+            return ScheduleDetailPath(
+                day: appState.selectedSchedule.start,
+                groupName:
+                    appState.selectedSchedule.isPublic ? 'public' : 'private',
+                organizationId: appState.selectedSchedule.createdBy,
+                scheduleId: appState.selectedSchedule.id);
           } else {
             return ScheduleListViewPath(
                 day: appState.selectedDayForScheduleList);
           }
         } else {
           if (appState.selectedSchedule != null) {
-            // todo: change schedulePath -> ScheduleDetailPath
-            return SchedulePath(targetDate: appState.targetCalendarMonth);
+            return ScheduleDetailPath(
+                day: appState.selectedSchedule.start,
+                groupName:
+                    appState.selectedSchedule.isPublic ? 'public' : 'private',
+                organizationId: appState.selectedSchedule.createdBy,
+                scheduleId: appState.selectedSchedule.id);
           } else {
             return SchedulePath(targetDate: appState.targetCalendarMonth);
           }

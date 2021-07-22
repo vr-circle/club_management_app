@@ -98,13 +98,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.dark_mode),
               title: const Text('Dark mode'),
-              onTap: () async {
-                await dbService.setUserTheme();
-              },
               trailing: Switch(
                 value: true,
                 onChanged: (value) async {
-                  await dbService.setUserTheme();
+                  await dbService.setUserGeneralTheme(value);
                 },
               ),
             ),

@@ -8,7 +8,7 @@ class AddSchedulePage extends StatefulWidget {
   AddSchedulePage(
       {Key key, @required this.addSchedule, @required this.targetDate})
       : super(key: key);
-  final Future<void> Function(Schedule schedule, String target) addSchedule;
+  final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
   final DateTime targetDate;
   @override
   _AddSchedulePageState createState() => _AddSchedulePageState();
@@ -63,7 +63,7 @@ class AddScheduleField extends StatefulWidget {
       : super(key: key);
   final DateTime targetDate;
   final List<Tuple2<String, String>> targetIdAndName;
-  final Future<void> Function(Schedule schedule, String target) addSchedule;
+  final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
   @override
   _AddScheduleFieldState createState() => _AddScheduleFieldState();
 }
@@ -74,6 +74,7 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
   TextEditingController startTextFiledController;
   TextEditingController endTextFiledController;
   String _selectedTarget;
+  bool _selectedIsPublic;
 
   Future<DateTime> _selectTime(BuildContext context) async {
     TimeOfDay newSelectedTime = await showTimePicker(
@@ -95,12 +96,13 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
   }
 
   Schedule newSchedule = new Schedule(
-    title: '',
-    place: '',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: '',
-  );
+      title: '',
+      place: '',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      details: '',
+      createdBy: '',
+      isPublic: false);
 
   @override
   void initState() {
@@ -110,6 +112,7 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
         text: DateFormat('yyyy/MM/dd HH:mm')
             .format(widget.targetDate.add(Duration(days: 1))));
     this._selectedTarget = widget.targetIdAndName.first.item2;
+    this._selectedIsPublic = false;
     super.initState();
   }
 
@@ -135,7 +138,12 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
                   if (newSchedule.details.isEmpty) {
                     newSchedule.details = '(Empty)';
                   }
-                  widget.addSchedule(this.newSchedule, this._selectedTarget);
+                  newSchedule.isPublic = this._selectedIsPublic;
+                  newSchedule.createdBy =
+                      _selectedTarget == 'private' ? null : _selectedTarget;
+                  widget.addSchedule(
+                      this.newSchedule, _selectedTarget == 'private');
+                  setState(() {});
                 },
                 child: const Text('Add'))
           ],
@@ -185,6 +193,49 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
                           ),
                         );
                       }),
+                      Visibility(
+                          visible: _selectedTarget != 'private',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 24,
+                              ),
+                              const Text('Publish setting'),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              FormField(builder: (FormFieldState<bool> state) {
+                                return InputDecorator(
+                                  decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0))),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<bool>(
+                                        hint: const Text(
+                                            'Select publish setting'),
+                                        value: _selectedIsPublic,
+                                        isDense: true,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            _selectedIsPublic = newValue;
+                                          });
+                                        },
+                                        items: [
+                                          DropdownMenuItem(
+                                              child: Text('private'),
+                                              value: false),
+                                          DropdownMenuItem(
+                                            child: Text('public'),
+                                            value: true,
+                                          ),
+                                        ]),
+                                  ),
+                                );
+                              }),
+                            ],
+                          ))
                     ],
                   ),
                   TextField(

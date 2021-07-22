@@ -25,14 +25,6 @@ class ScheduleCollection {
     return this._schedules[day] ?? [];
   }
 
-  Future<void> addSchedule(Schedule schedule, target) async {
-    if (_schedules.containsKey(schedule.start) == false) {
-      _schedules[schedule.start] = [];
-    }
-    _schedules[schedule.start].add(schedule);
-    await dbService.addSchedule(schedule, target);
-  }
-
   void deleteSchedule(Schedule targetSchedule) {
     // await appState.storeService.deleteSchedule(targetSchedule);
     _schedules[targetSchedule.start] = _schedules[targetSchedule.start]

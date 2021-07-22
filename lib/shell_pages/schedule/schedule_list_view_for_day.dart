@@ -46,6 +46,11 @@ class _ScheduleListViewForDayState extends State<ScheduleListViewForDay> {
                 child: const CircularProgressIndicator(),
               );
             }
+            if (snapshot.data == null || snapshot.data.isEmpty) {
+              return Center(
+                child: Text('There is no schedules'),
+              );
+            }
             return ListView(
               children: snapshot.data
                   .map((e) => Card(

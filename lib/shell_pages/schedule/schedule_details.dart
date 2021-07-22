@@ -9,7 +9,8 @@ class ScheduleDetails extends StatelessWidget {
     @required this.deleteSchedule,
     @required this.handleCloseDetailsPage,
   });
-  final Future<void> Function(Schedule schedule) deleteSchedule;
+  final Future<void> Function(Schedule schedule, bool isPersonal)
+      deleteSchedule;
   final void Function() handleCloseDetailsPage;
   final Schedule schedule;
   final _format = new DateFormat('yyyy/MM/dd(E) HH:mm');

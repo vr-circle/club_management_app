@@ -1,9 +1,12 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/store/database_service.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 DatabaseService dbService;
 
@@ -20,6 +23,7 @@ class FireStoreService extends DatabaseService {
   final taskGroupDocName = 'group';
   final public = 'public';
   final private = 'private';
+  final publicInfo = 'publicInformations';
 
   // --------------------------- club ------------------------------------------
   @override
@@ -100,7 +104,8 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
-  Future<void> joinOrganization(OrganizationInfo targetOrganization) async {
+  Future<void> requestJoinOrganization(
+      OrganizationInfo targetOrganization) async {
     // print('join organization ${targetOrganization.name}');
     await _store
         .collection(usersCollectionName)
@@ -126,19 +131,94 @@ class FireStoreService extends DatabaseService {
   }
 
   // --------------------------- schedule --------------------------------------
+  // users          /userId         /schedule/pub       /year/month/...
+  // organizations  /organizationId /schedule/pub_or_pri/year/month/...
+
   @override
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
-      DateTime targetMonth, bool isAll) async {
+      DateTime targetMonth, bool isContainPublicSchedule) async {
     print('getSchedules');
     String _year = targetMonth.year.toString();
     String _month = targetMonth.month.toString();
-    if (isAll) {
-      // await _store.collection(public).doc(scheduleCollectionName)
-    }
     Map<DateTime, List<Schedule>> res = {};
+    if (isContainPublicSchedule) {
+      List<String> allOrganizatoinIds =
+          (await _store.collection(organizationCollectionName).get())
+              .docs
+              .map((e) => e.id)
+              .toList();
+      await Future.forEach(allOrganizatoinIds, (id) async {
+        final _publicData = (await _store
+                .collection(organizationCollectionName)
+                .doc(id)
+                .collection(scheduleCollectionName)
+                .doc(public)
+                .collection(_year)
+                .doc(_month)
+                .get())
+            .data();
+        _publicData.forEach((key, value) {
+          try {
+            final _day = int.parse(key);
+            final DateTime _tmpDate =
+                DateTime(targetMonth.year, targetMonth.month, _day);
+            final _tmpList = <Schedule>[];
+            value.forEach((e) {
+              _tmpList.add(Schedule(
+                id: e['id'],
+                title: e['title'],
+                start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+                end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+                place: e['place'],
+                details: e['details'],
+                createdBy: e['createdBy'],
+                isPublic: true,
+              ));
+            });
+            res.addAll({_tmpDate: _tmpList});
+          } catch (e) {
+            print(e);
+          }
+        });
+      });
+    }
+    final _personalData = (await _store
+            .collection(usersCollectionName)
+            .doc(userId)
+            .collection(scheduleCollectionName)
+            .doc(private)
+            .collection(_year)
+            .doc(_month)
+            .get())
+        .data();
+    if (_personalData != null) {
+      _personalData.forEach((key, value) {
+        try {
+          final _day = int.parse(key);
+          final DateTime tmpDate =
+              DateTime(targetMonth.year, targetMonth.month, _day);
+          final tmpList = <Schedule>[];
+          value.forEach((e) {
+            tmpList.add(Schedule(
+              id: e['id'],
+              createdBy: e['createdBy'],
+              isPublic: false,
+              title: e['title'],
+              place: e['place'],
+              details: e['details'],
+              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+            ));
+          });
+          res.addAll({tmpDate: tmpList});
+        } catch (e) {
+          print(e);
+        }
+      });
+    }
     List<String> targetIdList =
         await dbService.getParticipatingOrganizationIdList();
-    targetIdList.forEach((id) async {
+    await Future.forEach(targetIdList, (id) async {
       final _data = (await _store
               .collection(organizationCollectionName)
               .doc(id)
@@ -148,6 +228,9 @@ class FireStoreService extends DatabaseService {
               .doc(_month)
               .get())
           .data();
+      if (_data == null) {
+        return res;
+      }
       _data.forEach((key, value) {
         try {
           final _day = int.parse(key);
@@ -157,8 +240,8 @@ class FireStoreService extends DatabaseService {
           value.forEach((e) {
             tmpList.add(Schedule(
               id: e['id'],
-              createdBy: id,
-              isPublic: isAll,
+              createdBy: e['createdBy'],
+              isPublic: false,
               title: e['title'],
               place: e['place'],
               details: e['details'],
@@ -172,142 +255,147 @@ class FireStoreService extends DatabaseService {
         }
       });
     });
+    // print('res == $res');
     return res;
   }
 
   @override
   Future<List<Schedule>> getSchedulesForDay(DateTime day, bool isAll) async {
-    // print('getScheduleOnDay');
-    Future.delayed(Duration(seconds: 1));
-    return dummyScheduleListOnDay;
+    print('getSchedulesForDay');
+    final _data = LinkedHashMap<DateTime, List<Schedule>>(
+        equals: isSameDay,
+        hashCode: (DateTime key) {
+          return key.day * 1000000 + key.month * 10000 + key.year;
+        })
+      ..addAll(await getSchedulesForMonth(day, isAll));
+    return _data[day] ?? [];
   }
 
   @override
-  Future<Schedule> getSchedule(String targetId) async {
-    Future.delayed(Duration(seconds: 1));
-    return dummyScheduleListOnDay.first;
+  Future<Schedule> getSchedule(
+      String targetScheduleId, DateTime targetDay) async {
+    print('getSchedule');
+    final _data = await getSchedulesForDay(targetDay, false);
+    final res = _data.where((element) => element.id == targetScheduleId);
+    return res.first ?? null;
   }
 
-  @override
-  Future<void> addSchedule(
-      Schedule newSchedule, String targetOrganizationId) async {
-    // print('addSchedule');
-    final key = DateFormat('yyyy-MM-dd').format(newSchedule.start);
-    final _start = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.start);
-    final _end = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.end);
-    if (targetOrganizationId.isEmpty) {
-      await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(scheduleCollectionName)
-          .doc()
-          .set({
-        key: FieldValue.arrayUnion([
-          {
-            'id': newSchedule.id,
-            'title': newSchedule.title,
-            'start': _start,
-            'end': _end,
-            'place': newSchedule.place,
-            'details': newSchedule.details
-          }
-        ])
-      });
-      return;
-    }
-    await _store
-        .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
-        .collection(scheduleCollectionName)
-        .doc() // private or public
-        .set({
+  Future<void> setNewSchedule(
+      DocumentReference target, Schedule newSchedule) async {
+    final key = DateFormat('dd').format(newSchedule.start);
+    final start = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.start);
+    final end = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.end);
+    await target.set({
       key: FieldValue.arrayUnion([
         {
           'id': newSchedule.id,
           'title': newSchedule.title,
-          'start': _start,
-          'end': _end,
+          'start': start,
+          'end': end,
           'place': newSchedule.place,
-          'details': newSchedule.details
+          'details': newSchedule.details,
+          'createdBy': newSchedule.createdBy
+        }
+      ])
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteSchedule(
+      DocumentReference target, Schedule targetSchedule) async {
+    final key = DateFormat('dd').format(targetSchedule.start);
+    final start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
+    final end = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.end);
+    await target.set({
+      key: FieldValue.arrayRemove([
+        {
+          'id': targetSchedule.id,
+          'title': targetSchedule.title,
+          'start': start,
+          'end': end,
+          'place': targetSchedule.place,
+          'details': targetSchedule.details,
+          'createdBy': targetSchedule.createdBy
         }
       ])
     });
   }
 
   @override
-  Future<void> deleteSchedule(Schedule targetSchedule) async {
-    // print('deleteSchedule');
-    final key = DateFormat('yyyy-MM-dd').format(targetSchedule.start);
-    final _start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
-    final _end = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.end);
-    if (targetSchedule.createdBy == null ||
-        targetSchedule.createdBy == userId) {
-      await _store
-          .collection(usersCollectionName)
-          .doc(userId)
+  Future<void> addPersonalSchedule(Schedule newSchedule) async {
+    final target = _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .collection(scheduleCollectionName)
+        .doc(private)
+        .collection(newSchedule.start.year.toString())
+        .doc(newSchedule.start.month.toString());
+    await setNewSchedule(target, newSchedule);
+  }
+
+  @override
+  Future<void> addOrganizationSchedule(Schedule newSchedule) async {
+    DocumentReference target;
+    if (newSchedule.isPublic) {
+      target = _store
+          .collection(publicInfo)
+          .doc(scheduleCollectionName)
+          .collection(newSchedule.start.year.toString())
+          .doc(newSchedule.start.month.toString());
+    } else {
+      target = _store
+          .collection(organizationCollectionName)
+          .doc(newSchedule.createdBy)
           .collection(scheduleCollectionName)
-          .doc()
-          .set({
-        key: FieldValue.arrayRemove([
-          {
-            'id': targetSchedule.id,
-            'title': targetSchedule.title,
-            'start': _start,
-            'end': _end,
-            'place': targetSchedule.place,
-            'details': targetSchedule.details
-          }
-        ])
-      });
-      return;
+          .doc();
     }
-    await _store
+    await setNewSchedule(target, newSchedule);
+  }
+
+  @override
+  Future<void> deletePersonalSchedule(Schedule targetSchedule) async {
+    final target = _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .collection(scheduleCollectionName)
+        .doc(private)
+        .collection(targetSchedule.start.year.toString())
+        .doc(targetSchedule.start.month.toString());
+    await deleteSchedule(target, targetSchedule);
+  }
+
+  @override
+  Future<void> deleteOrganizationSchedule(Schedule targetSchedule) async {
+    if (targetSchedule.isPublic) {
+      final target = _store
+          .collection(publicInfo)
+          .doc(scheduleCollectionName)
+          .collection(targetSchedule.start.year.toString())
+          .doc(targetSchedule.start.month.toString());
+      await deleteSchedule(target, targetSchedule);
+    }
+    final target = _store
         .collection(organizationCollectionName)
         .doc(targetSchedule.createdBy)
         .collection(scheduleCollectionName)
-        .doc() // private or public
-        .set({
-      key: FieldValue.arrayRemove([
-        {
-          'title': targetSchedule.title,
-          'start': _start,
-          'end': _end,
-          'place': targetSchedule.place,
-          'details': targetSchedule.details
-        }
-      ])
-    });
+        .doc(private)
+        .collection(targetSchedule.start.year.toString())
+        .doc(targetSchedule.start.month.toString());
+    await deleteSchedule(target, targetSchedule);
   }
 
   // --------------------------- todo ------------------------------------------
   @override
   Future<Map<String, List<Task>>> getTaskList(String id) async {
-    // print('getTaskList');
+    print('getTaskList');
     Map<String, List<Task>> res = {};
-    List<String> target;
-    if (id.isEmpty) {
-      target = [
-        usersCollectionName,
-        userId,
-        todoCollectionName,
-        taskGroupDocName
-      ];
-    } else {
-      target = [
-        organizationCollectionName,
-        id,
-        todoCollectionName,
-        taskGroupDocName,
-      ];
-    }
+    final target = _store
+        .collection(
+            id.isEmpty ? usersCollectionName : organizationCollectionName)
+        .doc(id.isEmpty ? userId : id)
+        .collection(todoCollectionName)
+        .doc(taskGroupDocName);
     try {
-      final _data = (await _store
-              .collection(target[0])
-              .doc(target[1])
-              .collection(target[2])
-              .doc(target[3])
-              .get())
-          .data();
+      final _data = (await target.get()).data();
       if (_data == null) {
         return res;
       }
@@ -324,19 +412,13 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> addTaskGroup(
       String listName, String targetOrganizationId) async {
-    // print('addTaskGroup');
-    if (targetOrganizationId.isEmpty) {
-      await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(todoCollectionName)
-          .doc(taskGroupDocName)
-          .update({listName: []});
-      return;
-    }
+    print('addTaskGroup');
+    bool isPersonal =
+        targetOrganizationId == null || targetOrganizationId.isEmpty;
     await _store
-        .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
+        .collection(
+            isPersonal ? usersCollectionName : organizationCollectionName)
+        .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)
         .update({listName: []});
@@ -345,19 +427,13 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> deleteTaskGroup(
       String listName, String targetOrganizationId) async {
-    // print('deleteList');
-    if (targetOrganizationId.isEmpty) {
-      await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(todoCollectionName)
-          .doc(taskGroupDocName)
-          .update({listName: FieldValue.delete()});
-      return;
-    }
+    print('deleteList');
+    bool isPersonal =
+        targetOrganizationId == null || targetOrganizationId.isEmpty;
     await _store
-        .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
+        .collection(
+            isPersonal ? usersCollectionName : organizationCollectionName)
+        .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)
         .update({listName: FieldValue.delete()});
@@ -366,21 +442,13 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> addTask(
       Task task, String targetListName, String targetOrganizationId) async {
-    // print('addTask');
-    if (targetOrganizationId.isEmpty) {
-      await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(todoCollectionName)
-          .doc(taskGroupDocName)
-          .update({
-        targetListName: FieldValue.arrayUnion([task.title])
-      });
-      return;
-    }
+    print('addTask');
+    bool isPersonal =
+        targetOrganizationId == null || targetOrganizationId.isEmpty;
     await _store
-        .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
+        .collection(
+            isPersonal ? usersCollectionName : organizationCollectionName)
+        .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)
         .update({
@@ -391,22 +459,14 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> deleteTask(
       Task task, String targetListName, String targetOrganizationId) async {
-    // print('deleteTask');
-    if (targetOrganizationId.isEmpty) {
-      // private
-      await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(todoCollectionName)
-          .doc(taskGroupDocName)
-          .update({
-        targetListName: FieldValue.arrayRemove([task.title])
-      });
-      return;
-    }
+    print('deleteTask');
+    bool isPersonal =
+        targetOrganizationId == null || targetOrganizationId.isEmpty;
+    // private
     await _store
-        .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
+        .collection(
+            isPersonal ? usersCollectionName : organizationCollectionName)
+        .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)
         .update({
@@ -416,160 +476,8 @@ class FireStoreService extends DatabaseService {
 
   // --------------------------- settings --------------------------------------
   @override
-  Future<void> setUserTheme() async {
-    // print('setUserTheme');
-    await dummyDelay();
+  Future<void> setUserGeneralTheme(bool isDark) async {
+    print('setUserTheme');
+    await Future.delayed(Duration(seconds: 1));
   }
 }
-
-final dummyScheduleListOnDay = [
-  Schedule(
-    title: 'title',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: 'details',
-    place: 'place01',
-  ),
-  Schedule(
-    title: 'title',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: 'details',
-    place: 'place01',
-  ),
-  Schedule(
-    title: 'title',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: 'details',
-    place: 'place01',
-  ),
-  Schedule(
-    title: 'title',
-    start: DateTime.now(),
-    end: DateTime.now(),
-    details: 'details',
-    place: 'place01',
-  ),
-];
-
-Map<DateTime, List<Schedule>> getDummySchedules(DateTime day) {
-  return {
-    day: [
-      Schedule(
-        title: 'te',
-        start: DateTime.now(),
-        end: DateTime.now(),
-        details: 'details',
-        place: 'place01',
-      ),
-      Schedule(
-        title: 'ti',
-        start: DateTime.now(),
-        end: DateTime.now(),
-        details: 'details',
-        place: 'place01',
-      ),
-      Schedule(
-        title: 'tit',
-        start: DateTime.now(),
-        end: DateTime.now(),
-        details: 'details',
-        place: 'place01',
-      ),
-    ]
-  };
-}
-
-final dummySchedules = {
-  DateTime.now(): [
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-  ],
-  DateTime.now().add(Duration(days: 7)): [
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-  ],
-  DateTime.now().add(Duration(days: 3)): [
-    Schedule(
-      title: 'ti',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'ti',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-    Schedule(
-      title: 'title',
-      start: DateTime.now(),
-      end: DateTime.now(),
-      details: 'details',
-      place: 'place01',
-    ),
-  ],
-};
