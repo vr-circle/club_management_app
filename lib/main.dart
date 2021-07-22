@@ -19,13 +19,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  _MyAppState() : _appState = AppState();
-  final AppState _appState;
+  AppState _appState;
   MyRouteInformationParser _routeInformationParser;
   MyRouterDelegate _routerDelegate;
 
   @override
   void initState() {
+    _appState = AppState();
     _routeInformationParser = MyRouteInformationParser(_appState);
     _routerDelegate = MyRouterDelegate(_appState);
     super.initState();

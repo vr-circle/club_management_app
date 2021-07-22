@@ -3,7 +3,10 @@ import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class SettingsPage extends StatefulWidget {
-  SettingsPage({Key key, @required this.appState});
+  SettingsPage({
+    Key key,
+    @required this.appState,
+  });
   final AppState appState;
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -91,20 +94,19 @@ class _SettingsPageState extends State<SettingsPage> {
                 widget.appState.logOut();
               },
             ),
-            const Divider(),
-            const ListTile(
-              title: const Text('General'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.dark_mode),
-              title: const Text('Dark mode'),
-              trailing: Switch(
-                value: true,
-                onChanged: (value) async {
-                  await dbService.setUserGeneralTheme(value);
-                },
-              ),
-            ),
+            // const Divider(),
+            // const ListTile(
+            //   title: const Text('Theme'),
+            // ),
+            // ListTile(
+            //   leading: const Icon(Icons.dark_mode),
+            //   title: const Text('Dark mode'),
+            //   trailing: Switch(
+            //     value: widget.appState.isDarkMode,
+            //     onChanged: (value) async {
+            //     },
+            //   ),
+            // ),
             const Divider(),
             const ListTile(title: const Text('Information')),
             const ListTile(

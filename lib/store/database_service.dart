@@ -32,5 +32,6 @@ abstract class DatabaseService {
       Task task, String targetGroupName, String targetOrganizationId);
 
   // settings
+  Future<bool> getUserGeneralTheme();
   Future<void> setUserGeneralTheme(bool isDark);
 }

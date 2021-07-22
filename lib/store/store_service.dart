@@ -476,8 +476,22 @@ class FireStoreService extends DatabaseService {
 
   // --------------------------- settings --------------------------------------
   @override
+  Future<bool> getUserGeneralTheme() async {
+    try {
+      return ((await _store.collection(usersCollectionName).doc(userId).get())
+              .data())['theme'] ==
+          'dark';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
   Future<void> setUserGeneralTheme(bool isDark) async {
     print('setUserTheme');
-    await Future.delayed(Duration(seconds: 1));
+    await _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .set({'theme': isDark ? 'dark' : 'light'});
   }
 }
