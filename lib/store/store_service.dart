@@ -335,19 +335,13 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> addOrganizationSchedule(Schedule newSchedule) async {
     DocumentReference target;
-    if (newSchedule.isPublic) {
-      target = _store
-          .collection(publicInfo)
-          .doc(scheduleCollectionName)
-          .collection(newSchedule.start.year.toString())
-          .doc(newSchedule.start.month.toString());
-    } else {
-      target = _store
-          .collection(organizationCollectionName)
-          .doc(newSchedule.createdBy)
-          .collection(scheduleCollectionName)
-          .doc();
-    }
+    target = _store
+        .collection(organizationCollectionName)
+        .doc(newSchedule.createdBy)
+        .collection(scheduleCollectionName)
+        .doc(newSchedule.isPublic ? public : private)
+        .collection(newSchedule.start.year.toString())
+        .doc(newSchedule.start.month.toString());
     await setNewSchedule(target, newSchedule);
   }
 

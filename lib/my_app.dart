@@ -135,7 +135,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is ScheduleDetailPath) {
       return RouteInformation(
           location:
-              '${SchedulePath.location}/detail/${DateFormat('yyyy-mm-dd').format(path.day)}/${path.organizationId}/${path.groupName}/${path.scheduleId}');
+              '${SchedulePath.location}/detail/${DateFormat('yyyy-MM-dd').format(path.day)}/${path.organizationId}/${path.groupName}/${path.scheduleId}');
     }
     if (path is TodoPath) {
       if (path.targetId.isEmpty) {
