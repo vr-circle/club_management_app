@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
+import 'package:flutter_application_1/dummy_test/dummy_page.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
@@ -21,16 +22,21 @@ class TabInfo {
 class TodoPage extends StatefulWidget {
   TodoPage({Key key, @required this.appState}) : super(key: key);
   final AppState appState;
-  TodoPageState createState() => TodoPageState();
+  _TodoPageState createState() => _TodoPageState();
 }
 
-class TodoPageState extends State<TodoPage> {
+class _TodoPageState extends State<TodoPage> {
   Future<List<TabInfo>> futureTabs;
   List<TabInfo> tabs = [];
 
+  @override
+  Widget build(BuildContext context) {
+    return DummyPage();
+  }
+
   Future<List<TabInfo>> getTabs() async {
     TodoCollection privateCollection = TodoCollection();
-    privateCollection.initTasks('');
+    privateCollection.getTasks('');
     tabs.add(TabInfo(
       id: '', name: 'private',
       // todoCollection: privateCollection
@@ -41,7 +47,7 @@ class TodoPageState extends State<TodoPage> {
       final _clubInfo = await dbService.getOrganizationInfo(id);
       if (_clubInfo != null) {
         final TodoCollection _todoCollection = TodoCollection();
-        await _todoCollection.initTasks(id);
+        // await _todoCollection.initTasks(id);
         tabs.add(TabInfo(
           id: id, name: _clubInfo.name,
           // todoCollection: _todoCollection
@@ -58,37 +64,37 @@ class TodoPageState extends State<TodoPage> {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Row(children: [
-            FlutterLogo(),
-            const Text('CMA'),
-          ]),
-        ),
-        body: FutureBuilder(
-            future: futureTabs,
-            builder:
-                (BuildContext context, AsyncSnapshot<List<TabInfo>> snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: const CircularProgressIndicator());
-              }
-              int index = 0;
-              for (int i = 0; i < tabs.length; i++) {
-                if (tabs[i].id == widget.appState.targetTodoTabId) {
-                  index = i;
-                }
-              }
-              return TodoTabController(
-                tabs: tabs,
-                targetIndex: index,
-                handleChangeTab: (id) {
-                  widget.appState.targetTodoTabId = id;
-                },
-              );
-            }));
-  }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //       appBar: AppBar(
+  //         title: Row(children: [
+  //           FlutterLogo(),
+  //           const Text('CMA'),
+  //         ]),
+  //       ),
+  //       body: FutureBuilder(
+  //           future: futureTabs,
+  //           builder:
+  //               (BuildContext context, AsyncSnapshot<List<TabInfo>> snapshot) {
+  //             if (snapshot.connectionState != ConnectionState.done) {
+  //               return const Center(child: const CircularProgressIndicator());
+  //             }
+  //             int index = 0;
+  //             for (int i = 0; i < tabs.length; i++) {
+  //               if (tabs[i].id == widget.appState.targetTodoTabId) {
+  //                 index = i;
+  //               }
+  //             }
+  //             return TodoTabController(
+  //               tabs: tabs,
+  //               targetIndex: index,
+  //               handleChangeTab: (id) {
+  //                 widget.appState.targetTodoTabId = id;
+  //               },
+  //             );
+  //           }));
+  // }
 }
 
 class TodoTabController extends StatefulWidget {
@@ -183,63 +189,63 @@ class TaskListTabState extends State<TaskListTab> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: todoCollection.initTasks(widget.organizationId),
+        // future: todoCollection.initTasks(widget.organizationId),
         builder: (BuildContext context,
             AsyncSnapshot<Map<String, List<Task>>> snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(
-              child: const CircularProgressIndicator(),
-            );
-          }
-          return Scaffold(
-            floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.add_to_photos_outlined),
-              onPressed: () async {
-                TextEditingController controller = TextEditingController();
-                await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Add Group'),
-                        content: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: TextField(
-                              controller: controller,
-                              decoration:
-                                  const InputDecoration(labelText: 'New Group'),
-                            )),
-                        actions: [
-                          TextButton(
-                              onPressed: () async {
-                                await todoCollection.addGroup(
-                                    controller.text, widget.organizationId);
-                                setState(() {});
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Add')),
-                          TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Cancel')),
-                        ],
-                      );
-                    });
-              },
-            ),
-            body: ListView(
-                children: todoCollection
-                    .getSortedKey()
-                    .map((e) => TaskExpansionTile(
-                        organizationId: widget.organizationId,
-                        groupName: e,
-                        taskList: todoCollection.taskMap[e],
-                        deleteGroup: () async {
-                          await deleteGroup(e);
-                        }))
-                    .toList()),
-          );
-        });
+      if (snapshot.connectionState != ConnectionState.done) {
+        return const Center(
+          child: const CircularProgressIndicator(),
+        );
+      }
+      return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add_to_photos_outlined),
+          onPressed: () async {
+            TextEditingController controller = TextEditingController();
+            await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Add Group'),
+                    content: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: TextField(
+                          controller: controller,
+                          decoration:
+                              const InputDecoration(labelText: 'New Group'),
+                        )),
+                    actions: [
+                      TextButton(
+                          onPressed: () async {
+                            await todoCollection.addGroup(
+                                controller.text, widget.organizationId);
+                            setState(() {});
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Add')),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancel')),
+                    ],
+                  );
+                });
+          },
+        ),
+        body: ListView(
+            children: todoCollection
+                .getSortedKey()
+                .map((e) => TaskExpansionTile(
+                    organizationId: widget.organizationId,
+                    groupName: e,
+                    taskList: todoCollection.taskMap[e],
+                    deleteGroup: () async {
+                      await deleteGroup(e);
+                    }))
+                .toList()),
+      );
+    });
   }
 }
 

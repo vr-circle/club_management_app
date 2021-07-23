@@ -17,10 +17,10 @@ abstract class DatabaseService {
   Future<List<Schedule>> getSchedulesForDay(
       DateTime day, bool isContainPublicSchedule);
   Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay);
-  Future<void> addPersonalSchedule(Schedule newSchedule);
-  Future<void> addOrganizationSchedule(Schedule newSchedule);
-  Future<void> deletePersonalSchedule(Schedule targetSchedule);
-  Future<void> deleteOrganizationSchedule(Schedule targetSchedule);
+  Future<void> addSchedule(Schedule newSchedule, bool isPersonal);
+  Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal);
+  // Future<void> deletePersonalSchedule(Schedule targetSchedule);
+  // Future<void> deleteOrganizationSchedule(Schedule targetSchedule);
 
   // todo
   Future<Map<String, List<Task>>> getTaskList(String id);

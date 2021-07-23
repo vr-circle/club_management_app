@@ -254,6 +254,8 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     } else if (path is HomePath) {
       appState.bottomNavigationIndex = HomePath.index;
     } else if (path is SchedulePath) {
+      // todo: scheduleCollection -> in appState
+      //        appState.scheduleCollection.getSchedulesForMonth()
       appState.bottomNavigationIndex = SchedulePath.index;
       appState.targetCalendarMonth = path.targetDate;
       appState.selectedDayForScheduleList = null;

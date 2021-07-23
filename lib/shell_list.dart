@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_application_1/shell_pages/schedule/schedule_add.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_list_view_for_day.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_router.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_page.dart';
@@ -56,47 +59,43 @@ List<ShellState> shellList = <ShellState>[
         print('getPages in SchellState');
         return [
           MaterialPage(
-              child: SchedulePage(
-            key: ValueKey('SchedulePage'),
-            appState: appState,
-          )),
-          if (appState.selectedDayForScheduleList != null)
-            MaterialPage(
-                child: ScheduleListViewForDay(
-              targetDate: appState.selectedDayForScheduleList,
-              handleOpenAddPage: () {
-                appState.isOpenAddSchedulePage = true;
-              },
-              handleChangeScheduleDetails: (Schedule schedule) {
-                appState.selectedSchedule = schedule;
-              },
-            )),
-          if (appState.selectedDayForScheduleList != null &&
-              appState.isOpenAddSchedulePage)
-            MaterialPage(
-                child: AddSchedulePage(
-              targetDate: appState.selectedDayForScheduleList,
-              addSchedule: (Schedule newSchedule, bool isPersonal) async {
-                if (isPersonal)
-                  await dbService.addPersonalSchedule(newSchedule);
-                else
-                  await dbService.addOrganizationSchedule(newSchedule);
-              },
-            )),
-          if (appState.selectedSchedule != null)
-            MaterialPage(
-                child: ScheduleDetails(
-              schedule: appState.selectedSchedule,
-              deleteSchedule: (Schedule targetSchedule, bool isPersonal) async {
-                if (isPersonal)
-                  await dbService.deletePersonalSchedule(targetSchedule);
-                else
-                  await dbService.deleteOrganizationSchedule(targetSchedule);
-              },
-              handleCloseDetailsPage: () {
-                appState.selectedSchedule = null;
-              },
-            ))
+              key: ValueKey('ScheduleIndex'), child: ScheduleRouter(appState))
+          // MaterialPage(
+          //     child: SchedulePage(
+          //   key: ValueKey('SchedulePage'),
+          //   appState: appState,
+          // )),
+          // if (appState.selectedDayForScheduleList != null)
+          //   MaterialPage(
+          //       child: ScheduleListViewForDay(
+          //     targetDate: appState.selectedDayForScheduleList,
+          //     handleOpenAddPage: () {
+          //       appState.isOpenAddSchedulePage = true;
+          //     },
+          //     handleChangeScheduleDetails: (Schedule schedule) {
+          //       appState.selectedSchedule = schedule;
+          //     },
+          //   )),
+          // if (appState.selectedDayForScheduleList != null &&
+          //     appState.isOpenAddSchedulePage)
+          //   MaterialPage(
+          //       child: AddSchedulePage(
+          //     targetDate: appState.selectedDayForScheduleList,
+          //     addSchedule: (Schedule newSchedule, bool isPersonal) async {
+          //       await dbService.addSchedule(newSchedule, isPersonal);
+          //     },
+          //   )),
+          // if (appState.selectedSchedule != null)
+          //   MaterialPage(
+          //       child: ScheduleDetails(
+          //     schedule: appState.selectedSchedule,
+          //     deleteSchedule: (Schedule targetSchedule, bool isPersonal) async {
+          //       await dbService.deleteSchedule(targetSchedule, isPersonal);
+          //     },
+          //     handleCloseDetailsPage: () {
+          //       appState.selectedSchedule = null;
+          //     },
+          //   ))
         ];
       },
       getRoutePath: (appState) {
@@ -132,6 +131,7 @@ List<ShellState> shellList = <ShellState>[
         if (appState.selectedDayForScheduleList != null) {
           if (appState.isOpenAddSchedulePage) {
             appState.isOpenAddSchedulePage = false;
+            appState.getScheduleForMonth();
             return;
           }
           if (appState.selectedSchedule != null) {

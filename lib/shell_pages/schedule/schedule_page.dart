@@ -13,40 +13,37 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  DateTime _firstDay = DateTime.utc(DateTime.now().year - 4, 1, 1);
-  DateTime _lastDay = DateTime.utc(DateTime.now().year + 10, 1, 1);
+  final DateTime _firstDay = DateTime.utc(DateTime.now().year - 4, 1, 1);
+  final DateTime _lastDay = DateTime.utc(DateTime.now().year + 10, 1, 1);
   Future<bool> _future;
   DateTime _selectedDay;
   ScheduleCollection _scheduleCollection;
 
   @override
   void initState() {
+    _scheduleCollection.addListener(() {
+      setState(() {});
+    });
     print('initState in SchedulePage');
     this._selectedDay = DateTime.now();
-    this._scheduleCollection = ScheduleCollection();
-    this._future =
-        _getSchedulesForMonth(widget.appState.targetCalendarMonth, false);
+    widget.appState.getScheduleForMonth();
+    this._future = _getSchedulesForMonth();
     super.initState();
   }
 
-  Future<bool> _getSchedulesForMonth(DateTime targetMonth, bool isAll) async {
-    // await Future.delayed(Duration(seconds: 2));
-    await _scheduleCollection.getSchedulesForMonth(
-        widget.appState.targetCalendarMonth, isAll);
-    setState(() {});
+  Future<bool> _getSchedulesForMonth() async {
+    await widget.appState.getScheduleForMonth();
     return true;
   }
 
   List<Schedule> _getEventForDay(DateTime day) {
-    return _scheduleCollection.getScheduleList(day);
+    return widget.appState.getScheduleForDay(day);
   }
 
   void _onPageChanged(DateTime day) {
     print('onPageChanged');
     widget.appState.targetCalendarMonth = day;
-    // todo: false -> userSetting
-    _getSchedulesForMonth(day, false);
-    widget.appState.targetCalendarMonth = day;
+    this._getSchedulesForMonth(day, false);
   }
 
   void _onDaySelected(DateTime newSelectedDay, DateTime focusedDay) {
@@ -68,7 +65,9 @@ class _SchedulePageState extends State<SchedulePage> {
   CalendarBuilders<Schedule> _getCalendarBuilder() {
     final res = CalendarBuilders<Schedule>(singleMarkerBuilder:
         (BuildContext context, DateTime date, Schedule event) {
-      Color _color = Colors.red;
+      Color _color = event.createdBy == widget.appState.user.uid
+          ? Colors.blue
+          : Colors.red;
       // todo: change color by event.createdBy;
       if (event.title == 'title') {
         _color = Colors.blue;

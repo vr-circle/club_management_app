@@ -4,6 +4,12 @@ import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
+import 'package:flutter_application_1/store/store_service.dart';
+import 'package:tuple/tuple.dart';
 
 class AppState extends ChangeNotifier {
   AppState()
@@ -15,20 +21,54 @@ class AppState extends ChangeNotifier {
         // shell
         _bottomNavigationIndex = HomePath.index,
         // schedule
+        _scheduleCollection = ScheduleCollection(),
         _targetCalendarMonth = DateTime.now(),
         _selectedDayForScheduleList = null,
         _selectedSchedule = null,
         _isOpenAddSchedulePage = false,
+        _isContainPublicSchedule = false,
         // todo
+        // _todoCollection = TodoCollection(),
         _targetTodoTabId = '',
         _targetOrganizationId = '',
         // search
         _searchingParam = '',
         _isOpenAddOrganizationPage = false,
         // setting
+        _participatingOrganization = [],
         _isDarkMode = false,
         _isOpenAccountView = false,
         _settingOrganizationId = '';
+
+  List<OrganizationInfo> _participatingOrganization;
+
+  bool _isContainPublicSchedule;
+  bool get isContainPublicSchedule => _isContainPublicSchedule;
+  set isContainPublicSchedule(bool value) {
+    _isContainPublicSchedule = value;
+    notifyListeners();
+  }
+
+  ScheduleCollection _scheduleCollection;
+  Future<void> getScheduleForMonth() async {
+    await dbService.getSchedulesForMonth(
+        _targetCalendarMonth, _isContainPublicSchedule);
+    notifyListeners();
+  }
+
+  List<Schedule> getScheduleForDay(DateTime day) {
+    return _scheduleCollection.getScheduleForDay(day);
+  }
+
+  Future<void> addSchedule(Schedule newSchedule, bool isPersonal) async {
+    await _scheduleCollection.addSchedule(newSchedule, isPersonal);
+    notifyListeners();
+  }
+
+  Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal) async {
+    await _scheduleCollection.deleteSchedule(targetSchedule, isPersonal);
+    notifyListeners();
+  }
 
   bool _isOpenSignUpPage;
   bool get isOpenSignUpPage => _isOpenSignUpPage;

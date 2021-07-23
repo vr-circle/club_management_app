@@ -9,7 +9,7 @@ class TodoCollection {
 
   get groupLength => taskMap.length;
 
-  Future<Map<String, List<Task>>> initTasks(String id) async {
+  Future<Map<String, List<Task>>> getTasks(String id) async {
     taskMap = await dbService.getTaskList(id);
     return taskMap;
   }

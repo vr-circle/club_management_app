@@ -70,7 +70,7 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<List<OrganizationInfo>> getOrganizationList() async {
-    // print('getOrganizationList');
+    print('getOrganizationList');
     final res = <OrganizationInfo>[];
     final data = await _store.collection(organizationCollectionName).get();
     data.docs.forEach((element) {
@@ -134,91 +134,49 @@ class FireStoreService extends DatabaseService {
   // users          /userId         /schedule/pub       /year/month/...
   // organizations  /organizationId /schedule/pub_or_pri/year/month/...
 
+  Map<DateTime, List<Schedule>> convertScheduleMap(
+      Map<String, dynamic> data, bool dataIsPublic, DateTime targetMonth) {
+    Map<DateTime, List<Schedule>> res = {};
+    if (data == null) {
+      return res;
+    }
+    data.forEach((key, value) {
+      try {
+        final _day = int.parse(key);
+        final DateTime _tmpDate =
+            DateTime(targetMonth.year, targetMonth.month, _day);
+        final _tmpList = <Schedule>[];
+        value.forEach((e) {
+          _tmpList.add(Schedule(
+            id: e['id'],
+            title: e['title'],
+            start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
+            end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
+            place: e['place'],
+            details: e['details'],
+            createdBy: e['createdBy'],
+            isPublic: dataIsPublic,
+          ));
+        });
+        res.addAll({_tmpDate: _tmpList});
+      } catch (e) {
+        print(e);
+      }
+    });
+    return res;
+  }
+
   @override
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
       DateTime targetMonth, bool isContainPublicSchedule) async {
-    print('getSchedules');
-    String _year = targetMonth.year.toString();
-    String _month = targetMonth.month.toString();
-    Map<DateTime, List<Schedule>> res = {};
-    if (isContainPublicSchedule) {
-      List<String> allOrganizatoinIds =
-          (await _store.collection(organizationCollectionName).get())
-              .docs
-              .map((e) => e.id)
-              .toList();
-      await Future.forEach(allOrganizatoinIds, (id) async {
-        final _publicData = (await _store
-                .collection(organizationCollectionName)
-                .doc(id)
-                .collection(scheduleCollectionName)
-                .doc(public)
-                .collection(_year)
-                .doc(_month)
-                .get())
-            .data();
-        _publicData.forEach((key, value) {
-          try {
-            final _day = int.parse(key);
-            final DateTime _tmpDate =
-                DateTime(targetMonth.year, targetMonth.month, _day);
-            final _tmpList = <Schedule>[];
-            value.forEach((e) {
-              _tmpList.add(Schedule(
-                id: e['id'],
-                title: e['title'],
-                start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-                end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-                place: e['place'],
-                details: e['details'],
-                createdBy: e['createdBy'],
-                isPublic: true,
-              ));
-            });
-            res.addAll({_tmpDate: _tmpList});
-          } catch (e) {
-            print(e);
-          }
-        });
-      });
-    }
-    final _personalData = (await _store
-            .collection(usersCollectionName)
-            .doc(userId)
-            .collection(scheduleCollectionName)
-            .doc(private)
-            .collection(_year)
-            .doc(_month)
-            .get())
-        .data();
-    if (_personalData != null) {
-      _personalData.forEach((key, value) {
-        try {
-          final _day = int.parse(key);
-          final DateTime tmpDate =
-              DateTime(targetMonth.year, targetMonth.month, _day);
-          final tmpList = <Schedule>[];
-          value.forEach((e) {
-            tmpList.add(Schedule(
-              id: e['id'],
-              createdBy: e['createdBy'],
-              isPublic: false,
-              title: e['title'],
-              place: e['place'],
-              details: e['details'],
-              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-            ));
-          });
-          res.addAll({tmpDate: tmpList});
-        } catch (e) {
-          print(e);
-        }
-      });
-    }
-    List<String> targetIdList =
+    print('getSchedulesForMonth');
+    final String _year = targetMonth.year.toString();
+    final String _month = targetMonth.month.toString();
+    final Map<DateTime, List<Schedule>> res = {};
+    final List<String> _participatingOrganizationIds =
         await dbService.getParticipatingOrganizationIdList();
-    await Future.forEach(targetIdList, (id) async {
+    // private perticipating organization
+    await Future.forEach(_participatingOrganizationIds, (id) async {
       final _data = (await _store
               .collection(organizationCollectionName)
               .doc(id)
@@ -228,34 +186,69 @@ class FireStoreService extends DatabaseService {
               .doc(_month)
               .get())
           .data();
-      if (_data == null) {
-        return res;
-      }
-      _data.forEach((key, value) {
-        try {
-          final _day = int.parse(key);
-          final DateTime tmpDate =
-              DateTime(targetMonth.year, targetMonth.month, _day);
-          final tmpList = <Schedule>[];
-          value.forEach((e) {
-            tmpList.add(Schedule(
-              id: e['id'],
-              createdBy: e['createdBy'],
-              isPublic: false,
-              title: e['title'],
-              place: e['place'],
-              details: e['details'],
-              start: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['start']),
-              end: DateFormat('yyyy-MM-dd HH:mm').parseStrict(e['end']),
-            ));
-          });
-          res.addAll({tmpDate: tmpList});
-        } catch (e) {
-          print(e);
-        }
-      });
+      res.addAll(convertScheduleMap(_data, false, targetMonth));
     });
-    // print('res == $res');
+    // all public organizations scheudle
+    if (isContainPublicSchedule) {
+      final List<String> _allOrganizationIdList =
+          (await _store.collection(organizationCollectionName).get())
+              .docs
+              .map((e) => e.id);
+      await Future.forEach(_allOrganizationIdList, (organizationId) async {
+        final _data = (await _store
+                .collection(organizationCollectionName)
+                .doc(organizationId)
+                .collection(scheduleCollectionName)
+                .doc(public)
+                .collection(_year)
+                .doc(_month)
+                .get())
+            .data();
+        final m = convertScheduleMap(_data, true, targetMonth);
+        m.forEach((key, value) {
+          if (res.containsKey(key))
+            res[key].addAll(value);
+          else
+            res.addAll({key: value});
+        });
+      });
+    } else {
+      await Future.forEach(_participatingOrganizationIds, (id) async {
+        final _data = (await _store
+                .collection(organizationCollectionName)
+                .doc(id)
+                .collection(scheduleCollectionName)
+                .doc(public)
+                .collection(_year)
+                .doc(_month)
+                .get())
+            .data();
+        final m = convertScheduleMap(_data, true, targetMonth);
+        m.forEach((key, value) {
+          if (res.containsKey(key))
+            res[key].addAll(value);
+          else
+            res.addAll({key: value});
+        });
+      });
+    }
+    // personal schedule
+    final _personalData = (await _store
+            .collection(usersCollectionName)
+            .doc(userId)
+            .collection(scheduleCollectionName)
+            .doc(private)
+            .collection(_year)
+            .doc(_month)
+            .get())
+        .data();
+    final m = convertScheduleMap(_personalData, false, targetMonth);
+    m.forEach((key, value) {
+      if (res.containsKey(key))
+        res[key].addAll(value);
+      else
+        res.addAll({key: value});
+    });
     return res;
   }
 
@@ -300,7 +293,7 @@ class FireStoreService extends DatabaseService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> deleteSchedule(
+  Future<void> removeSchedule(
       DocumentReference target, Schedule targetSchedule) async {
     final key = DateFormat('dd').format(targetSchedule.start);
     final start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
@@ -321,6 +314,14 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
+  Future<void> addSchedule(Schedule newSchedule, bool isPersonal) async {
+    if (isPersonal) {
+      addPersonalSchedule(newSchedule);
+    } else {
+      addOrganizationSchedule(newSchedule);
+    }
+  }
+
   Future<void> addPersonalSchedule(Schedule newSchedule) async {
     final target = _store
         .collection(usersCollectionName)
@@ -329,10 +330,10 @@ class FireStoreService extends DatabaseService {
         .doc(private)
         .collection(newSchedule.start.year.toString())
         .doc(newSchedule.start.month.toString());
+    newSchedule.createdBy = this.userId;
     await setNewSchedule(target, newSchedule);
   }
 
-  @override
   Future<void> addOrganizationSchedule(Schedule newSchedule) async {
     DocumentReference target;
     target = _store
@@ -346,6 +347,14 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
+  Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal) async {
+    if (isPersonal) {
+      deletePersonalSchedule(targetSchedule);
+    } else {
+      deleteOrganizationSchedule(targetSchedule);
+    }
+  }
+
   Future<void> deletePersonalSchedule(Schedule targetSchedule) async {
     final target = _store
         .collection(usersCollectionName)
@@ -354,10 +363,9 @@ class FireStoreService extends DatabaseService {
         .doc(private)
         .collection(targetSchedule.start.year.toString())
         .doc(targetSchedule.start.month.toString());
-    await deleteSchedule(target, targetSchedule);
+    await removeSchedule(target, targetSchedule);
   }
 
-  @override
   Future<void> deleteOrganizationSchedule(Schedule targetSchedule) async {
     if (targetSchedule.isPublic) {
       final target = _store
@@ -365,7 +373,7 @@ class FireStoreService extends DatabaseService {
           .doc(scheduleCollectionName)
           .collection(targetSchedule.start.year.toString())
           .doc(targetSchedule.start.month.toString());
-      await deleteSchedule(target, targetSchedule);
+      await removeSchedule(target, targetSchedule);
     }
     final target = _store
         .collection(organizationCollectionName)
@@ -374,7 +382,7 @@ class FireStoreService extends DatabaseService {
         .doc(private)
         .collection(targetSchedule.start.year.toString())
         .doc(targetSchedule.start.month.toString());
-    await deleteSchedule(target, targetSchedule);
+    await removeSchedule(target, targetSchedule);
   }
 
   // --------------------------- todo ------------------------------------------

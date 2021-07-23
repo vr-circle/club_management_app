@@ -5,9 +5,11 @@ import 'schedule.dart';
 import 'package:intl/intl.dart';
 
 class AddSchedulePage extends StatefulWidget {
-  AddSchedulePage(
-      {Key key, @required this.addSchedule, @required this.targetDate})
-      : super(key: key);
+  AddSchedulePage({
+    Key key,
+    @required this.addSchedule,
+    @required this.targetDate,
+  }) : super(key: key);
   final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
   final DateTime targetDate;
   @override
@@ -55,12 +57,12 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 }
 
 class AddScheduleField extends StatefulWidget {
-  AddScheduleField(
-      {Key key,
-      @required this.targetIdAndName,
-      @required this.targetDate,
-      @required this.addSchedule})
-      : super(key: key);
+  AddScheduleField({
+    Key key,
+    @required this.targetIdAndName,
+    @required this.targetDate,
+    @required this.addSchedule,
+  }) : super(key: key);
   final DateTime targetDate;
   final List<Tuple2<String, String>> targetIdAndName;
   final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
@@ -237,6 +239,9 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
                             ],
                           ))
                     ],
+                  ),
+                  const SizedBox(
+                    height: 32,
                   ),
                   TextField(
                     decoration: InputDecoration(
