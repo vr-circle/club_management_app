@@ -22,7 +22,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       return SignUpPath();
     } else if (_appState.user == null &&
         routeInformation.location == LoginPath.location) {
-      // print('return LoginPath');
       return LoginPath();
     } else if (_appState.user == null) {
       return LoginPath();
@@ -30,7 +29,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (uri.pathSegments.isEmpty) {
       return HomePath();
     }
-    // print('/' + uri.pathSegments.first + ' : ' + routeInformation.location);
     switch ('/' + uri.pathSegments.first) {
       case HomePath.location:
         return HomePath();
@@ -116,8 +114,6 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
       return RouteInformation(location: '${HomePath.location}');
     }
     if (path is SchedulePath) {
-      print('path is SchedulePath');
-      print(path.targetDate);
       return RouteInformation(
           location:
               '${SchedulePath.location}/view?year=${path.targetDate.year}&month=${path.targetDate.month}');
@@ -227,9 +223,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
           MaterialPage(child: AppShell(appState))
       ],
       onPopPage: (route, result) {
-        print('popPage');
         if (appState.isOpenSignUpPage) {
-          print('popPage: false -> isOpenSignUpPage');
           appState.isOpenSignUpPage = false;
           notifyListeners();
         }

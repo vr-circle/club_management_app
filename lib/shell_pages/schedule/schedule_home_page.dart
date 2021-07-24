@@ -1,49 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule_collection.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_app_state.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
 
-class SchedulePage extends StatefulWidget {
-  SchedulePage({Key key, this.appState}) : super(key: key);
+class ScheduleHomePage extends StatefulWidget {
+  ScheduleHomePage(
+      {Key key, @required this.appState, @required this.scheduleAppState})
+      : super(key: key);
   final AppState appState;
+  final ScheduleAppState scheduleAppState;
   @override
-  _SchedulePageState createState() => _SchedulePageState();
+  _ScheduleHomePageState createState() => _ScheduleHomePageState();
 }
 
-class _SchedulePageState extends State<SchedulePage> {
+class _ScheduleHomePageState extends State<ScheduleHomePage> {
   final DateTime _firstDay = DateTime.utc(DateTime.now().year - 4, 1, 1);
   final DateTime _lastDay = DateTime.utc(DateTime.now().year + 10, 1, 1);
   Future<bool> _future;
   DateTime _selectedDay;
-  ScheduleCollection _scheduleCollection;
 
   @override
   void initState() {
-    _scheduleCollection.addListener(() {
-      setState(() {});
-    });
-    print('initState in SchedulePage');
     this._selectedDay = DateTime.now();
-    widget.appState.getScheduleForMonth();
+    widget.scheduleAppState.getSchedulesForMonth(
+        widget.appState.targetCalendarMonth,
+        widget.appState.isContainPublicSchedule);
     this._future = _getSchedulesForMonth();
     super.initState();
   }
 
   Future<bool> _getSchedulesForMonth() async {
-    await widget.appState.getScheduleForMonth();
+    await widget.scheduleAppState.getSchedulesForMonth(
+        widget.appState.targetCalendarMonth,
+        widget.appState.isContainPublicSchedule);
     return true;
   }
 
   List<Schedule> _getEventForDay(DateTime day) {
-    return widget.appState.getScheduleForDay(day);
+    return widget.scheduleAppState.getScheduleForDay(day);
   }
 
   void _onPageChanged(DateTime day) {
-    print('onPageChanged');
     widget.appState.targetCalendarMonth = day;
-    this._getSchedulesForMonth(day, false);
+    this._getSchedulesForMonth();
   }
 
   void _onDaySelected(DateTime newSelectedDay, DateTime focusedDay) {
@@ -68,7 +69,6 @@ class _SchedulePageState extends State<SchedulePage> {
       Color _color = event.createdBy == widget.appState.user.uid
           ? Colors.blue
           : Colors.red;
-      // todo: change color by event.createdBy;
       if (event.title == 'title') {
         _color = Colors.blue;
       }

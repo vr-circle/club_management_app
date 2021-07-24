@@ -5,13 +5,15 @@ import 'schedule.dart';
 import 'package:intl/intl.dart';
 
 class AddSchedulePage extends StatefulWidget {
-  AddSchedulePage({
-    Key key,
-    @required this.addSchedule,
-    @required this.targetDate,
-  }) : super(key: key);
-  final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
+  AddSchedulePage(
+      {Key key,
+      @required this.targetDate,
+      @required this.addSchedule,
+      @required this.handleCloseAddPage})
+      : super(key: key);
   final DateTime targetDate;
+  final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
+  final void Function() handleCloseAddPage;
   @override
   _AddSchedulePageState createState() => _AddSchedulePageState();
 }
@@ -50,6 +52,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
           targetIdAndName: snapshot.data,
           targetDate: widget.targetDate,
           addSchedule: widget.addSchedule,
+          handleCloseAddPage: widget.handleCloseAddPage,
         );
       },
     ));
@@ -57,15 +60,17 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 }
 
 class AddScheduleField extends StatefulWidget {
-  AddScheduleField({
-    Key key,
-    @required this.targetIdAndName,
-    @required this.targetDate,
-    @required this.addSchedule,
-  }) : super(key: key);
+  AddScheduleField(
+      {Key key,
+      @required this.targetIdAndName,
+      @required this.targetDate,
+      @required this.addSchedule,
+      @required this.handleCloseAddPage})
+      : super(key: key);
   final DateTime targetDate;
   final List<Tuple2<String, String>> targetIdAndName;
   final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
+  final void Function() handleCloseAddPage;
   @override
   _AddScheduleFieldState createState() => _AddScheduleFieldState();
 }
@@ -124,7 +129,7 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
         appBar: AppBar(
           actions: [
             TextButton(
-                onPressed: () {
+                onPressed: () async {
                   final format = DateFormat('yyyy/MM/dd HH:mm');
                   newSchedule.start =
                       format.parseStrict(startTextFiledController.text);
@@ -143,9 +148,9 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
                   newSchedule.isPublic = this._selectedIsPublic;
                   newSchedule.createdBy =
                       _selectedTarget == 'private' ? null : _selectedTarget;
-                  widget.addSchedule(
+                  await widget.addSchedule(
                       this.newSchedule, _selectedTarget == 'private');
-                  setState(() {});
+                  widget.handleCloseAddPage();
                 },
                 child: const Text('Add'))
           ],

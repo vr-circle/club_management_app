@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_add.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_details.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_list_view_for_day.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule_page.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_home_page.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_app_state.dart';
 
 class ScheduleRouter extends StatefulWidget {
   ScheduleRouter(this._appState);
@@ -23,7 +25,15 @@ class _ScheduleRouterState extends State<ScheduleRouter> {
   }
 
   @override
-  Widget build(BuildContext context) {}
+  Widget build(BuildContext context) {
+    _childBackButtonDispatcher.takePriority();
+    return Scaffold(
+      body: Router(
+        routerDelegate: _scheduleRouterDelegate,
+        backButtonDispatcher: _childBackButtonDispatcher,
+      ),
+    );
+  }
 
   @override
   void didUpdateWidget(covariant ScheduleRouter oldWidget) {
@@ -43,14 +53,15 @@ class _ScheduleRouterState extends State<ScheduleRouter> {
 class ScheduleRouterDelegate extends RouterDelegate<RoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
   ScheduleRouterDelegate(this.appState)
-      : _schedulePageState = SchedulePageState() {
-    _schedulePageState.addListener(notifyListeners);
+      : _scheduleAppState = ScheduleAppState() {
+    _scheduleAppState.addListener(notifyListeners);
   }
+
   AppState appState;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  SchedulePageState _schedulePageState = SchedulePageState();
-  set schedulePageState(SchedulePageState schedulePageState) {
-    this._schedulePageState = schedulePageState;
+  ScheduleAppState _scheduleAppState = ScheduleAppState();
+  set scheduleAppState(ScheduleAppState scheduleAppState) {
+    this._scheduleAppState = scheduleAppState;
     notifyListeners();
   }
 
@@ -60,16 +71,66 @@ class ScheduleRouterDelegate extends RouterDelegate<RoutePath>
       key: this.navigatorKey,
       pages: [
         MaterialPage(
-            child: SchedulePage(
-                key: ValueKey('scheduleHome'), appState: appState)),
+            child: ScheduleHomePage(
+          key: ValueKey('ScheduleHomePage'),
+          appState: appState,
+          scheduleAppState: _scheduleAppState,
+        )),
         if (appState.selectedDayForScheduleList != null)
-          MaterialPage(child: ScheduleListViewForDay()),
-        if (appState.isOpenAddSchedulePage)
-          MaterialPage(child: AddSchedulePage()),
+          MaterialPage(
+              key: ValueKey('ScheduleListView'),
+              child: ScheduleListViewForDay(
+                targetDate: appState.selectedDayForScheduleList,
+                handleOpenAddPage: () {
+                  appState.isOpenAddSchedulePage = true;
+                },
+                handleChangeScheduleDetails: (Schedule schedule) {
+                  appState.selectedSchedule = schedule;
+                },
+              )),
+        if (appState.selectedDayForScheduleList != null &&
+            appState.isOpenAddSchedulePage)
+          MaterialPage(
+              // key: ValueKey('AddSchedulePage'),
+              child: AddSchedulePage(
+            targetDate: appState.selectedDayForScheduleList,
+            addSchedule: (Schedule newSchedule, bool isPersonal) async {
+              await _scheduleAppState.addSchedule(newSchedule, isPersonal);
+            },
+            handleCloseAddPage: () {
+              appState.isOpenAddSchedulePage = false;
+            },
+          )),
         if (appState.selectedSchedule != null)
-          MaterialPage(child: ScheduleDetails())
+          MaterialPage(
+              // key: ValueKey('ScheduleDetails'),
+              child: ScheduleDetails(
+            schedule: appState.selectedSchedule,
+            deleteSchedule: (Schedule targetSchedule, bool isPersonal) async {
+              await _scheduleAppState.deleteSchedule(
+                  targetSchedule, isPersonal);
+            },
+            handleCloseDetailsPage: () {
+              appState.selectedSchedule = null;
+            },
+          ))
       ],
       onPopPage: (route, result) {
+        if (appState.selectedDayForScheduleList != null) {
+          if (appState.isOpenAddSchedulePage) {
+            appState.isOpenAddSchedulePage = false;
+            appState.getScheduleForMonth();
+          }
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          } else {
+            appState.selectedDayForScheduleList = null;
+          }
+        } else {
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          }
+        }
         notifyListeners();
         return route.didPop(result);
       },
@@ -80,8 +141,4 @@ class ScheduleRouterDelegate extends RouterDelegate<RoutePath>
   Future<void> setNewRoutePath(RoutePath configuration) async {
     assert(false);
   }
-}
-
-class SchedulePageState extends ChangeNotifier {
-  // hogheoge
 }

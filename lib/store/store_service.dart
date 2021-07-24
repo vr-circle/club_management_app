@@ -254,7 +254,6 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<List<Schedule>> getSchedulesForDay(DateTime day, bool isAll) async {
-    print('getSchedulesForDay');
     final _data = LinkedHashMap<DateTime, List<Schedule>>(
         equals: isSameDay,
         hashCode: (DateTime key) {
@@ -267,7 +266,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<Schedule> getSchedule(
       String targetScheduleId, DateTime targetDay) async {
-    print('getSchedule');
     final _data = await getSchedulesForDay(targetDay, false);
     final res = _data.where((element) => element.id == targetScheduleId);
     return res.first ?? null;
