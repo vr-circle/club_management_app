@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/store/database_service.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -385,9 +386,9 @@ class FireStoreService extends DatabaseService {
 
   // --------------------------- todo ------------------------------------------
   @override
-  Future<Map<String, List<Task>>> getTaskList(String id) async {
+  Future<Map<String, TaskList>> getTaskList(String id) async {
     print('getTaskList');
-    Map<String, List<Task>> res = {};
+    Map<String, TaskList> res = {};
     final target = _store
         .collection(
             id.isEmpty ? usersCollectionName : organizationCollectionName)
@@ -401,7 +402,7 @@ class FireStoreService extends DatabaseService {
       }
       _data.forEach((key, value) {
         final _tmp = List<String>.from(value);
-        res[key] = _tmp.map((e) => Task(title: e)).toList();
+        res[key] = TaskList(_tmp.map((e) => Task(title: e)).toList());
       });
     } catch (e) {
       print(e);

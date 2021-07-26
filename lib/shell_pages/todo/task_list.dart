@@ -1,27 +1,37 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
-import 'package:flutter_application_1/shell_pages/todo/task_list_tile.dart';
 
 class TaskList {
   List<Task> _taskList;
-  TaskList([List<Task> initTaskList]) {
+  TaskList(List<Task> initTaskList) {
     _taskList = initTaskList;
   }
 
-  List<Widget> getListTiles(void Function(Task task) handleDeleteTask) {
-    return this._taskList.map((e) {
-      return TaskListTile(task: e, deleteTask: handleDeleteTask);
-    }).toList();
+  List<Widget> getTaskTileList(
+      Future<void> Function(Task targetTask) deleteTask) {
+    return _taskList
+        .map((e) => Card(
+            child: ListTile(
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    await deleteTask(e);
+                  },
+                ),
+                onLongPress: () async {},
+                title: Text(e.title))))
+        .toList();
   }
 
-  Future<void> addTask(Task task) async {
+  int get length => _taskList.length;
+
+  void addTask(Task task) {
     this._taskList.add(task);
-    await Future.delayed(Duration(seconds: 1));
   }
 
-  Future<void> deleteTask(Task target) async {
+  void deleteTask(Task target) {
     this._taskList =
         this._taskList.where((element) => element.id != target.id).toList();
-    await Future.delayed(Duration(seconds: 1));
   }
 }

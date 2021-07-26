@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 
 abstract class DatabaseService {
   // club
@@ -19,11 +20,9 @@ abstract class DatabaseService {
   Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay);
   Future<void> addSchedule(Schedule newSchedule, bool isPersonal);
   Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal);
-  // Future<void> deletePersonalSchedule(Schedule targetSchedule);
-  // Future<void> deleteOrganizationSchedule(Schedule targetSchedule);
 
   // todo
-  Future<Map<String, List<Task>>> getTaskList(String id);
+  Future<Map<String, TaskList>> getTaskList(String id);
   Future<void> addTaskGroup(String groupName, String targetOrganizationId);
   Future<void> deleteTaskGroup(String groupName, String targetOrganizationId);
   Future<void> addTask(

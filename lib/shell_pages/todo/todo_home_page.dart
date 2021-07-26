@@ -1,137 +1,138 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_expansion_tile.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_app_state.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
-import 'package:flutter_application_1/store/store_service.dart';
-import 'package:tuple/tuple.dart';
 
 class TodoHomePage extends StatefulWidget {
-  TodoHomePage({Key key, @required this.appState, @required this.idAndNameList})
-      : super(key: key);
+  TodoHomePage({Key key, @required this.appState}) : super(key: key);
   final AppState appState;
-  final List<Tuple2<String, String>> idAndNameList;
   _TodoHomePageState createState() => _TodoHomePageState();
 }
 
 class _TodoHomePageState extends State<TodoHomePage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
-  TodoAppState todoAppState;
-  Future<List<String>> _future;
+  TodoAppState _todoAppState;
+  Future<bool> _future;
 
   @override
   void initState() {
-    todoAppState = TodoAppState(widget.idAndNameList);
-    todoAppState.addListener(() {
+    _todoAppState = TodoAppState();
+    _todoAppState.addListener(() {
       setState(() {});
     });
-    _tabController =
-        TabController(length: widget.idAndNameList.length, vsync: this);
+    _future = _initTabInfo();
     super.initState();
   }
 
-  Future<List<String>> initTabInfo()async{
-    await todoAppState.initTabInfo();
+  Future<bool> _initTabInfo() async {
+    await _todoAppState.initTabInfo();
+    return true;
+  }
+
+  void _handleChangeTab() {
+    if (_tabController.indexIsChanging == false) {
+      print('_handleChangeTab');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _future,
-      builder: (BuildContext context, AsyncSnapshot<void> snapshot){
     return Scaffold(
         appBar: AppBar(
-          flexibleSpace: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TabBar(
-                  controller: _tabController,
-                  tabs: widget.tabs
-                      .map((e) => Tab(
-                            text: e.name,
-                          ))
-                      .toList())
-            ],
-          ),
-        ),
-        body: TabBarView(
-            controller: _tabController,
-            children: widget.tabs.map((e) => TaskListTab(e.id)).toList()));
-    });
+            title: Row(
+          children: [
+            const FlutterLogo(),
+            const Text('CMA'),
+          ],
+        )),
+        body: FutureBuilder(
+            future: _future,
+            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(
+                  child: const CircularProgressIndicator(),
+                );
+              }
+              _tabController =
+                  TabController(length: _todoAppState.tabLength, vsync: this);
+              _tabController.addListener(_handleChangeTab);
+              return Scaffold(
+                  appBar: AppBar(
+                    flexibleSpace: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TabBar(
+                          controller: _tabController,
+                          tabs: _todoAppState.getTabList(),
+                        )
+                      ],
+                    ),
+                  ),
+                  body: TabBarView(
+                      controller: _tabController,
+                      children: _todoAppState
+                          .getTodoCollectionList()
+                          .map((e) => TodoTabBarView(
+                                todoCollection: e,
+                              ))
+                          .toList()));
+            }));
   }
 }
 
-class TodoTabView extends StatefulWidget {
-  TodoTabView({@required this.todoCollection});
+class TodoTabBarView extends StatefulWidget {
+  TodoTabBarView({@required this.todoCollection});
   final TodoCollection todoCollection;
-  @override
-  _TodoTabViewState createState() => _TodoTabViewState();
+  _TodoTabBarViewState createState() => _TodoTabBarViewState();
 }
 
-class _TodoTabViewState extends State<TodoTabView> {
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(builder: (BuildContext context, AsyncSnapshot<void> snapshot){
-      if(snapshot.connectionState != ConnectionState.done){
-        return const Center(child: const CircularProgressIndicator(),);
-      }
-      return Scaffold(
-        body: ListView(
-            children: widget.todoCollection
-                .getSortedKey()
-                .map((e) => TaskExpansionTile(
-                    groupName: e,
-                    taskList: widget.todoCollection.taskMap[e],
-                    deleteGroup: () async {
-                    }))
-                .toList()),
-      );
-    });
-  }
-}
-
-class TaskExpansionTile extends StatefulWidget {
-  TaskExpansionTile({
-    Key key,
-    @required this.organizationId,
-    @required this.groupName,
-    @required this.taskList,
-    @required this.deleteGroup,
-  }) : super(key: key);
-  final String organizationId;
-  final String groupName;
-  final List<Task> taskList;
-  final Future<void> Function() deleteGroup;
-  TaskExpansionTileState createState() => TaskExpansionTileState();
-}
-
-class TaskExpansionTileState extends State<TaskExpansionTile> {
-  bool isOpenExpansion;
-  TaskList taskList;
+class _TodoTabBarViewState extends State<TodoTabBarView> {
   @override
   void initState() {
-    isOpenExpansion = false;
-    taskList = TaskList(widget.taskList);
+    widget.todoCollection.addListener(() {
+      setState(() {});
+    });
     super.initState();
   }
 
-  Future<void> addTask(Task task) async {
-    await dbService.addTask(task, widget.groupName, widget.organizationId);
-    setState(() {
-      taskList.addTask(task);
-    });
-  }
-
-  Future<void> deleteTask(Task targetTask) async {
-    await dbService.deleteTask(
-        targetTask, widget.groupName, widget.organizationId);
-    setState(() {
-      taskList.deleteTask(targetTask);
-    });
-  }
-
   @override
-  void dispose() {
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ListView(children: widget.todoCollection.getSortedTaskMapWidget()),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.library_add),
+        onPressed: () async {
+          String newName;
+          await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Add group'),
+                  content: TextField(
+                    onChanged: (value) {
+                      newName = value;
+                    },
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          widget.todoCollection.addGroup(newName);
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Add')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Cancel')),
+                  ],
+                );
+              });
+        },
+      ),
+    );
   }
+}

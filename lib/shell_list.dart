@@ -105,7 +105,10 @@ List<ShellState> shellList = <ShellState>[
       icon: const Icon(Icons.task),
       getPages: (appState) {
         return [
-          MaterialPage(child: TodoHomePage(appState:appState ,idAndNameList: appState.,)),
+          MaterialPage(
+              child: TodoHomePage(
+            appState: appState,
+          )),
         ];
       },
       getRoutePath: (appState) {
