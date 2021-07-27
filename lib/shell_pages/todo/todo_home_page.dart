@@ -33,7 +33,6 @@ class _TodoHomePageState extends State<TodoHomePage>
 
   void _handleChangeTab() {
     if (_tabController.indexIsChanging == false) {
-      print('_handleChangeTab');
       _todoAppState.handleChangeTabIndex(widget.appState, _tabController.index);
     }
   }

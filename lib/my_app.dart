@@ -15,7 +15,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   @override
   Future<RoutePath> parseRouteInformation(
       RouteInformation routeInformation) async {
-    print('parseRouteInformation in MyRouteInformationParser');
+    // print('parseRouteInformation in MyRouteInformationParser');
     final uri = Uri.parse(routeInformation.location);
     if (_appState.user == null &&
         routeInformation.location == SignUpPath.location) {
@@ -103,7 +103,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
-    print('restoreRouteInformation');
+    // print('restoreRouteInformation');
     if (path is LoginPath) {
       return RouteInformation(location: '${LoginPath.location}');
     }
@@ -181,7 +181,6 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   final AppState appState;
 
   RoutePath get currentConfiguration {
-    print('currentConfiguration');
     if (appState.loggedInState == LoggedInState.loggedOut &&
         appState.isOpenSignUpPage == false) {
       return LoginPath();
@@ -194,7 +193,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
-    print('build in MyRouterDelegate');
+    // print('build in MyRouterDelegate');
     return Navigator(
       key: navigatorKey,
       pages: [
@@ -238,7 +237,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
-    print('setNewRoutePath: new path is ${path.runtimeType}');
+    // print('setNewRoutePath: new path is ${path.runtimeType}');
     if (path is LoginPath) {
       appState.isOpenSignUpPage = false;
       return;
