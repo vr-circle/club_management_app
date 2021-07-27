@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/route_path.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/store/store_service.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, @required this.appState}) : super(key: key);
@@ -11,14 +13,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> participatingOrganizationIdList;
-  Future<List<String>> _getOrganizationIdList() async {
-    await Future.delayed(Duration(seconds: 1));
-    return await dbService.getParticipatingOrganizationIdList();
+  List<Schedule> _scheduleListInToday;
+  Future<bool> _future;
+
+  Future<bool> _getHomeState() async {
+    await _getScheduleForToday();
+    return true;
+  }
+
+  Future<List<Schedule>> _getScheduleForToday() async {
+    this._scheduleListInToday =
+        await dbService.getSchedulesForDay(DateTime.now(), false);
+    return this._scheduleListInToday;
   }
 
   @override
   void initState() {
+    _future = _getHomeState();
     super.initState();
   }
 
@@ -44,27 +55,30 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body: FutureBuilder(
-          future: _getOrganizationIdList(),
-          builder:
-              (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          future: _future,
+          builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(
                 child: const CircularProgressIndicator(),
               );
             }
-            if (snapshot.data.isEmpty) {
-              return Center(
-                child: TextButton(
-                  child: const Text('Join organizations'),
-                  onPressed: () {
-                    widget.appState.bottomNavigationIndex = SearchPath.index;
-                  },
+            return Column(children: [
+              const ListTile(
+                title: const Text('Schedule in today'),
+              ),
+              if (_scheduleListInToday.length == 0)
+                const ListTile(
+                  title: const Text('No schedule'),
                 ),
-              );
-            }
-            return const Center(
-              child: const Text('Dummy'),
-            );
+              ..._scheduleListInToday
+                  .map((e) => Card(
+                          child: ListTile(
+                        title: Text(e.title),
+                        trailing: Text(
+                            '${DateFormat('HH:mm').format(e.start)} ~ ${DateFormat('HH:mm').format(e.end)}'),
+                      )))
+                  .toList()
+            ]);
           },
         ));
   }

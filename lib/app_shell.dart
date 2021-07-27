@@ -19,6 +19,7 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     dbService = FireStoreService(userId: widget._appState.user.uid);
+    widget._appState.getParticipatingOrganizationInfoListFromDatabase();
     _innerRouterDelegate = InnerRouterDelegate(widget._appState);
   }
 

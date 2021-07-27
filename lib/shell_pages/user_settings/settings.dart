@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -13,16 +14,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  Future<List<OrganizationIdAndName>> getOrganizationName() async {
-    List<OrganizationIdAndName> res = [];
-    final ids = await dbService.getParticipatingOrganizationIdList();
-    await Future.forEach(ids, (id) async {
-      final _name = (await dbService.getOrganizationInfo(id)).name;
-      final _tmp = OrganizationIdAndName(id: id, name: _name);
-      res.add(_tmp);
-    });
-    return res;
-  }
+  Future<bool> _future;
+  List<OrganizationInfo> _participatingOrganizationInfoList;
 
   @override
   void initState() {
@@ -52,28 +45,17 @@ class _SettingsPageState extends State<SettingsPage> {
               },
               title: const Text('New Organization'),
             ),
-            FutureBuilder(
-                future: this.getOrganizationName(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<OrganizationIdAndName>> snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const ListTile(
-                      title: const Text('Loading...'),
-                    );
-                  }
-                  return Column(children: [
-                    ...snapshot.data
-                        .map((e) => ListTile(
-                              onTap: () {
-                                widget.appState.settingOrganizationId = e.id;
-                                // todo : e => id
-                              },
-                              leading: const Icon(Icons.people),
-                              title: Text(e.name),
-                            ))
-                        .toList(),
-                  ]);
-                }),
+            Column(children: [
+              ...widget.appState.participatingOrganizationList
+                  .map((e) => ListTile(
+                        onTap: () {
+                          widget.appState.settingOrganizationId = e.id;
+                        },
+                        leading: const Icon(Icons.people),
+                        title: Text(e.name),
+                      ))
+                  .toList(),
+            ]),
             const ListTile(
               title: const Text('Account'),
             ),
@@ -94,19 +76,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 widget.appState.logOut();
               },
             ),
-            // const Divider(),
-            // const ListTile(
-            //   title: const Text('Theme'),
-            // ),
-            // ListTile(
-            //   leading: const Icon(Icons.dark_mode),
-            //   title: const Text('Dark mode'),
-            //   trailing: Switch(
-            //     value: widget.appState.isDarkMode,
-            //     onChanged: (value) async {
-            //     },
-            //   ),
-            // ),
             const Divider(),
             const ListTile(title: const Text('Information')),
             const ListTile(
@@ -117,10 +86,4 @@ class _SettingsPageState extends State<SettingsPage> {
           ]),
         ));
   }
-}
-
-class OrganizationIdAndName {
-  OrganizationIdAndName({@required this.id, @required this.name});
-  String id;
-  String name;
 }

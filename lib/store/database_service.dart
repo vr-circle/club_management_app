@@ -9,8 +9,8 @@ abstract class DatabaseService {
   Future<List<String>> getParticipatingOrganizationIdList();
   Future<OrganizationInfo> getOrganizationInfo(String id);
   Future<void> createOrganization(OrganizationInfo newOrganization);
-  Future<void> requestJoinOrganization(OrganizationInfo targetOrganization);
-  Future<void> leaveOrganization(OrganizationInfo targetOrganization);
+  Future<void> joinOrganization(String targetOrganizationId);
+  Future<void> leaveOrganization(String targetOrganizationId);
 
   // schedule
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(

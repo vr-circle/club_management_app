@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
@@ -19,19 +20,17 @@ class TodoAppState extends ChangeNotifier {
 
   int get tabLength => _tabInfoList.length;
 
-  Future<void> initTabInfo() async {
+  Future<void> initTabInfo(List<OrganizationInfo> organizationInfoList) async {
     _tabInfoList = [];
     final personalTodoCollection = PersonalTodoCollection();
     personalTodoCollection.initTasksFromDatabase();
     _tabInfoList.add(TabInfo(
         id: '', name: 'personal', todoCollection: personalTodoCollection));
-    List<String> idList = await dbService.getParticipatingOrganizationIdList();
-    await Future.forEach(idList, (id) async {
-      final name = (await dbService.getOrganizationInfo(id)).name;
-      final todoCollection = OrganizationTodoCollection(id);
-      todoCollection.initTasksFromDatabase();
-      _tabInfoList
-          .add(TabInfo(id: id, name: name, todoCollection: todoCollection));
+    await Future.forEach(organizationInfoList, (info) async {
+      final todoCollection = OrganizationTodoCollection(info.id);
+      await todoCollection.initTasksFromDatabase();
+      _tabInfoList.add(TabInfo(
+          id: info.id, name: info.name, todoCollection: todoCollection));
     });
     notifyListeners();
   }

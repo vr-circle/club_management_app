@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
+import 'package:flutter_application_1/store/store_service.dart';
 
 class SettingAddOrganization extends StatefulWidget {
   SettingAddOrganization({Key key, this.appState}) : super(key: key);
@@ -32,13 +33,12 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                 padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
                 child: TextButton(
                     onPressed: () async {
-                      // widget.appState.
                       final newOrganization = OrganizationInfo(
                           name: name.text,
                           introduction: introduction.text,
                           tagList: tagList);
-                      // await dbService.createOrganization(newOrganization);
-                      // widget.appState.isOpenAddOrganizationPage = false;
+                      await dbService.createOrganization(newOrganization);
+                      widget.appState.isOpenAddOrganizationPage = false;
                     },
                     child: const Text('Create'))),
           ],

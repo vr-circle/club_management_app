@@ -42,19 +42,61 @@ class _SettingOrganizationState extends State<SettingOrganization> {
         return Scaffold(
             appBar: AppBar(
               title: Text(_organizationInfo.name),
+              actions: [
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                    child: TextButton(
+                        onPressed: () async {
+                          await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title:
+                                      Text('Leave ${_organizationInfo.name}?'),
+                                  content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            'You are about to leave ${_organizationInfo.name}.'),
+                                        const SizedBox(
+                                          height: 16,
+                                        ),
+                                        const Text('Are you sure?'),
+                                      ]),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () async {
+                                          await widget.appState
+                                              .leaveOrganization(
+                                                  _organizationInfo.id);
+                                          widget.appState
+                                              .settingOrganizationId = '';
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('Leave')),
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('Cancel')),
+                                  ],
+                                );
+                              });
+                        },
+                        child: const Text('Leave')))
+              ],
             ),
             body: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                // mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
                       height: 320,
                       width: MediaQuery.of(context).size.width,
-                      child:
-                          FittedBox(fit: BoxFit.contain, child: FlutterLogo())),
-                  // Container(child: Image.network(
-                  // ))
+                      child: const FittedBox(
+                          fit: BoxFit.contain, child: FlutterLogo())),
                   const ListTile(
                     title: const Text('Name'),
                   ),
@@ -82,13 +124,13 @@ class _SettingOrganizationState extends State<SettingOrganization> {
                     title: const Text('Introduction'),
                   ),
                   Padding(
-                      padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                       child: Text(_organizationInfo.introduction)),
                   const ListTile(
                     title: const Text('Member'),
                   ),
                   Padding(
-                      padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                       child: Text(_organizationInfo.memberNum.toString())),
                 ],
               ),

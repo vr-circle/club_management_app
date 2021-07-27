@@ -105,30 +105,31 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
-  Future<void> requestJoinOrganization(
-      OrganizationInfo targetOrganization) async {
-    // print('join organization ${targetOrganization.name}');
+  Future<void> joinOrganization(String targetOrganizationId) async {
+    print('join organization');
     await _store
         .collection(usersCollectionName)
         .doc(userId)
         .collection(settingsCollectionName)
         .doc(settingsOrganizationName)
         .set({
-      'ids': FieldValue.arrayUnion([targetOrganization.id])
+      'ids': FieldValue.arrayUnion([targetOrganizationId])
     });
+    // todo : add userId in organization members
   }
 
   @override
-  Future<void> leaveOrganization(OrganizationInfo targetOrganization) async {
-    // print('leaveOrganization');
+  Future<void> leaveOrganization(String targetOrganizationId) async {
+    print('leaveOrganization');
     await _store
         .collection(usersCollectionName)
         .doc(userId)
         .collection(settingsCollectionName)
         .doc(settingsOrganizationName)
         .set({
-      'ids': FieldValue.arrayRemove([targetOrganization.id])
+      'ids': FieldValue.arrayRemove([targetOrganizationId])
     });
+    // todo: remove userId in organization members
   }
 
   // --------------------------- schedule --------------------------------------
@@ -170,7 +171,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
       DateTime targetMonth, bool isContainPublicSchedule) async {
-    print('getSchedulesForMonth');
     final String _year = targetMonth.year.toString();
     final String _month = targetMonth.month.toString();
     final Map<DateTime, List<Schedule>> res = {};

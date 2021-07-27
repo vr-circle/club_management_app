@@ -26,7 +26,8 @@ class _TodoHomePageState extends State<TodoHomePage>
   }
 
   Future<bool> _initTabInfo() async {
-    await _todoAppState.initTabInfo();
+    await _todoAppState
+        .initTabInfo(widget.appState.participatingOrganizationList);
     return true;
   }
 

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/route_path.dart';
@@ -35,12 +36,36 @@ class AppState extends ChangeNotifier {
         _searchingParam = '',
         _isOpenAddOrganizationPage = false,
         // setting
-        _participatingOrganization = [],
+        _participatingOrganizationList = [],
         _isDarkMode = false,
         _isOpenAccountView = false,
         _settingOrganizationId = '';
 
-  List<OrganizationInfo> _participatingOrganization;
+  List<OrganizationInfo> _participatingOrganizationList;
+  List<OrganizationInfo> get participatingOrganizationList =>
+      _participatingOrganizationList;
+  Future<void> getParticipatingOrganizationInfoListFromDatabase() async {
+    final ids = await dbService.getParticipatingOrganizationIdList();
+    final res = <OrganizationInfo>[];
+    await Future.forEach(ids, (id) async {
+      res.add(await dbService.getOrganizationInfo(id));
+    });
+    _participatingOrganizationList = res;
+    notifyListeners();
+  }
+
+  Future<void> joinOrganization(OrganizationInfo info) async {
+    await dbService.joinOrganization(info.id);
+    _participatingOrganizationList.add(info);
+    notifyListeners();
+  }
+
+  Future<void> leaveOrganization(String id) async {
+    await dbService.leaveOrganization(id);
+    _participatingOrganizationList =
+        _participatingOrganizationList.where((info) => info.id != id).toList();
+    notifyListeners();
+  }
 
   bool _isContainPublicSchedule;
   bool get isContainPublicSchedule => _isContainPublicSchedule;
