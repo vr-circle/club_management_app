@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/shell_pages/todo/task_expansion_tile.dart';
-import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_app_state.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 
@@ -12,7 +10,7 @@ class TodoHomePage extends StatefulWidget {
 }
 
 class _TodoHomePageState extends State<TodoHomePage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   TabController _tabController;
   TodoAppState _todoAppState;
   Future<bool> _future;
@@ -35,6 +33,7 @@ class _TodoHomePageState extends State<TodoHomePage>
   void _handleChangeTab() {
     if (_tabController.indexIsChanging == false) {
       print('_handleChangeTab');
+      _todoAppState.handleChangeTabIndex(widget.appState, _tabController.index);
     }
   }
 
@@ -56,6 +55,7 @@ class _TodoHomePageState extends State<TodoHomePage>
                   child: const CircularProgressIndicator(),
                 );
               }
+              if (_tabController != null) _tabController.dispose();
               _tabController =
                   TabController(length: _todoAppState.tabLength, vsync: this);
               _tabController.addListener(_handleChangeTab);
@@ -99,6 +99,14 @@ class _TodoTabBarViewState extends State<TodoTabBarView> {
   }
 
   @override
+  void dispose() {
+    widget.todoCollection.removeListener(() {
+      setState(() {});
+    });
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView(children: widget.todoCollection.getSortedTaskMapWidget()),
@@ -118,8 +126,8 @@ class _TodoTabBarViewState extends State<TodoTabBarView> {
                   ),
                   actions: [
                     TextButton(
-                        onPressed: () {
-                          widget.todoCollection.addGroup(newName);
+                        onPressed: () async {
+                          await widget.todoCollection.addGroup(newName);
                           Navigator.pop(context);
                         },
                         child: const Text('Add')),

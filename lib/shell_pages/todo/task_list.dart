@@ -19,7 +19,6 @@ class TaskList {
                     await deleteTask(e);
                   },
                 ),
-                onLongPress: () async {},
                 title: Text(e.title))))
         .toList();
   }

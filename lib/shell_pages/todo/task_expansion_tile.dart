@@ -31,20 +31,68 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionTile(
-      onExpansionChanged: (value) {
-        setState(() {
-          _isOpenExpansion = value;
-        });
-      },
-      title: Text(widget.groupName),
-      children: widget.taskList.getTaskTileList(widget.deleteTask),
-      trailing: IconButton(
-        icon: const Icon(Icons.add),
-        onPressed: () {
-          print('Open adding task');
+    return GestureDetector(
+        onLongPress: () async {
+          await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Delete ${widget.groupName}?'),
+                  actions: [
+                    TextButton(
+                        onPressed: () async {
+                          await widget.deleteGroup(widget.groupName);
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Delete')),
+                    TextButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Cancel')),
+                  ],
+                );
+              });
         },
-      ),
-    );
+        child: ExpansionTile(
+          onExpansionChanged: (value) {
+            setState(() {
+              _isOpenExpansion = value;
+            });
+          },
+          title: Text(widget.groupName),
+          children: widget.taskList.getTaskTileList(widget.deleteTask),
+          trailing: IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              String newTaskName = '';
+              await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Add task'),
+                      content: TextField(
+                        onChanged: (value) {
+                          newTaskName = value;
+                        },
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () async {
+                              await widget.addTask(Task(title: newTaskName));
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Add')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancel')),
+                      ],
+                    );
+                  });
+            },
+          ),
+        ));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
@@ -33,6 +34,10 @@ class TodoAppState extends ChangeNotifier {
           .add(TabInfo(id: id, name: name, todoCollection: todoCollection));
     });
     notifyListeners();
+  }
+
+  void handleChangeTabIndex(AppState appState, int index) {
+    appState.targetTodoTabId = _tabInfoList[index].id;
   }
 
   List<Tab> getTabList() {
