@@ -297,19 +297,30 @@ class FireStoreService extends DatabaseService {
     final key = DateFormat('dd').format(targetSchedule.start);
     final start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
     final end = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.end);
-    await target.set({
-      key: FieldValue.arrayRemove([
-        {
-          'id': targetSchedule.id,
-          'title': targetSchedule.title,
-          'start': start,
-          'end': end,
-          'place': targetSchedule.place,
-          'details': targetSchedule.details,
-          'createdBy': targetSchedule.createdBy
-        }
-      ])
-    });
+    try {
+      print('id : ${targetSchedule.id}');
+      print('title : ${targetSchedule.title}');
+      print('start : ${start}');
+      print('end : ${end}');
+      print('place : ${targetSchedule.place}');
+      print('details : ${targetSchedule.details}');
+      print('createdBy : ${targetSchedule.createdBy}');
+      await target.update({
+        key: FieldValue.arrayRemove([
+          {
+            'id': targetSchedule.id,
+            'title': targetSchedule.title,
+            'start': start,
+            'end': end,
+            'place': targetSchedule.place,
+            'details': targetSchedule.details,
+            'createdBy': targetSchedule.createdBy
+          }
+        ])
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -366,19 +377,11 @@ class FireStoreService extends DatabaseService {
   }
 
   Future<void> deleteOrganizationSchedule(Schedule targetSchedule) async {
-    if (targetSchedule.isPublic) {
-      final target = _store
-          .collection(publicInfo)
-          .doc(scheduleCollectionName)
-          .collection(targetSchedule.start.year.toString())
-          .doc(targetSchedule.start.month.toString());
-      await removeSchedule(target, targetSchedule);
-    }
     final target = _store
         .collection(organizationCollectionName)
         .doc(targetSchedule.createdBy)
         .collection(scheduleCollectionName)
-        .doc(private)
+        .doc(targetSchedule.isPublic ? public : private)
         .collection(targetSchedule.start.year.toString())
         .doc(targetSchedule.start.month.toString());
     await removeSchedule(target, targetSchedule);

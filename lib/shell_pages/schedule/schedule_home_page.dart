@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_app_state.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
@@ -124,6 +125,8 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
                           .map((e) => Card(
                                   child: ListTile(
                                 title: Text(e.title),
+                                trailing: Text(
+                                    '${DateFormat('HH:mm').format(e.start)} ~ ${DateFormat('HH:mm').format(e.end)}'),
                                 onTap: () {
                                   widget.appState.selectedSchedule = e;
                                 },

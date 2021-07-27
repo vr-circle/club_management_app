@@ -9,8 +9,7 @@ class ScheduleDetails extends StatelessWidget {
     @required this.deleteSchedule,
     @required this.handleCloseDetailsPage,
   });
-  final Future<void> Function(Schedule schedule, bool isPersonal)
-      deleteSchedule;
+  final Future<void> Function(Schedule schedule) deleteSchedule;
   final void Function() handleCloseDetailsPage;
   final Schedule schedule;
   final _format = new DateFormat('yyyy/MM/dd(E) HH:mm');
@@ -85,8 +84,8 @@ class ScheduleDetails extends StatelessWidget {
             ),
             FloatingActionButton(
               onPressed: () async {
-                // await deleteSchedule(schedule);
-                // handleCloseDetailsPage();
+                await deleteSchedule(schedule);
+                handleCloseDetailsPage();
               },
               child: const Icon(Icons.delete),
               backgroundColor: Colors.red,

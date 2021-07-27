@@ -23,7 +23,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       _getParticipatingOrganizationIdAndNameList() async {
     List<Tuple2<String, String>> targetIdAndNameList = [];
     final _ids = await dbService.getParticipatingOrganizationIdList();
-    targetIdAndNameList.add(Tuple2('private', 'private'));
+    targetIdAndNameList.add(Tuple2('personal', 'personal'));
     await Future.forEach(_ids, (id) async {
       final _name = (await dbService.getOrganizationInfo(id)).name;
       targetIdAndNameList.add(Tuple2(id, _name));
@@ -147,9 +147,9 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
                   }
                   newSchedule.isPublic = this._selectedIsPublic;
                   newSchedule.createdBy =
-                      _selectedTarget == 'private' ? null : _selectedTarget;
+                      _selectedTarget == 'personal' ? null : _selectedTarget;
                   await widget.addSchedule(
-                      this.newSchedule, _selectedTarget == 'private');
+                      this.newSchedule, _selectedTarget == 'personal');
                   widget.handleCloseAddPage();
                 },
                 child: const Text('Add'))
@@ -201,7 +201,7 @@ class _AddScheduleFieldState extends State<AddScheduleField> {
                         );
                       }),
                       Visibility(
-                          visible: _selectedTarget != 'private',
+                          visible: _selectedTarget != 'personal',
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

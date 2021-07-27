@@ -78,7 +78,7 @@ class ScheduleRouterDelegate extends RouterDelegate<RoutePath>
         )),
         if (appState.selectedDayForScheduleList != null)
           MaterialPage(
-              key: ValueKey('ScheduleListView'),
+              key: ValueKey('ScheduleListViewPage'),
               child: ScheduleListViewForDay(
                 targetDate: appState.selectedDayForScheduleList,
                 handleOpenAddPage: () {
@@ -88,40 +88,41 @@ class ScheduleRouterDelegate extends RouterDelegate<RoutePath>
                   appState.selectedSchedule = schedule;
                 },
               )),
-        if (appState.selectedDayForScheduleList != null &&
-            appState.isOpenAddSchedulePage)
+        if (appState.isOpenAddSchedulePage)
           MaterialPage(
-              // key: ValueKey('AddSchedulePage'),
+              key: ValueKey('AddSchedulePage'),
               child: AddSchedulePage(
-            targetDate: appState.selectedDayForScheduleList,
-            addSchedule: (Schedule newSchedule, bool isPersonal) async {
-              await _scheduleAppState.addSchedule(newSchedule, isPersonal);
-            },
-            handleCloseAddPage: () {
-              appState.isOpenAddSchedulePage = false;
-            },
-          )),
+                targetDate: appState.selectedDayForScheduleList,
+                addSchedule: (Schedule newSchedule, bool isPersonal) async {
+                  await _scheduleAppState.addSchedule(newSchedule, isPersonal);
+                },
+                handleCloseAddPage: () {
+                  appState.isOpenAddSchedulePage = false;
+                },
+              )),
         if (appState.selectedSchedule != null)
           MaterialPage(
-              // key: ValueKey('ScheduleDetails'),
+              key: ValueKey('ScheduleDetailsPage'),
               child: ScheduleDetails(
-            schedule: appState.selectedSchedule,
-            deleteSchedule: (Schedule targetSchedule, bool isPersonal) async {
-              await _scheduleAppState.deleteSchedule(
-                  targetSchedule, isPersonal);
-            },
-            handleCloseDetailsPage: () {
-              appState.selectedSchedule = null;
-            },
-          ))
+                schedule: appState.selectedSchedule,
+                deleteSchedule: (Schedule targetSchedule) async {
+                  if (appState.user.uid == targetSchedule.createdBy)
+                    await _scheduleAppState.deleteSchedule(
+                        targetSchedule, true);
+                  else
+                    await _scheduleAppState.deleteSchedule(
+                        targetSchedule, false);
+                },
+                handleCloseDetailsPage: () {
+                  appState.selectedSchedule = null;
+                },
+              ))
       ],
       onPopPage: (route, result) {
         if (appState.selectedDayForScheduleList != null) {
           if (appState.isOpenAddSchedulePage) {
             appState.isOpenAddSchedulePage = false;
-            appState.getScheduleForMonth();
-          }
-          if (appState.selectedSchedule != null) {
+          } else if (appState.selectedSchedule != null) {
             appState.selectedSchedule = null;
           } else {
             appState.selectedDayForScheduleList = null;
