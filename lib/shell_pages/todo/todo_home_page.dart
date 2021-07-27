@@ -56,8 +56,11 @@ class _TodoHomePageState extends State<TodoHomePage>
                 );
               }
               if (_tabController != null) _tabController.dispose();
-              _tabController =
-                  TabController(length: _todoAppState.tabLength, vsync: this);
+              _tabController = TabController(
+                  length: _todoAppState.tabLength,
+                  vsync: this,
+                  initialIndex: _todoAppState
+                      .getTabIndex(widget.appState.targetTodoTabId));
               _tabController.addListener(_handleChangeTab);
               return Scaffold(
                   appBar: AppBar(

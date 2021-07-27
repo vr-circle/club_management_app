@@ -36,6 +36,15 @@ class TodoAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  int getTabIndex(String targetId) {
+    for (int i = 0; i < _tabInfoList.length; i++) {
+      if (_tabInfoList[i].id == targetId) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
   void handleChangeTabIndex(AppState appState, int index) {
     appState.targetTodoTabId = _tabInfoList[index].id;
   }
