@@ -5,9 +5,9 @@ import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/home/home.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_router.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_home_page.dart';
-import 'package:flutter_application_1/shell_pages/todo/todo_router.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/setting_add_organization.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/setting_organization.dart';
 import 'package:flutter_application_1/shell_pages/user_settings/settings.dart';
@@ -130,6 +130,12 @@ List<ShellState> shellList = <ShellState>[
           if (appState.targetOrganizationId.isNotEmpty)
             MaterialPage(
                 child: OrganizationDetailPage(
+                    handleCloseDetailPage: () {
+                      appState.targetOrganizationId = '';
+                    },
+                    handleJoinOrganization: (OrganizationInfo info) async {
+                      await appState.joinOrganization(info);
+                    },
                     organizationId: appState.targetOrganizationId)),
         ];
       },

@@ -56,7 +56,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> joinOrganization(OrganizationInfo info) async {
     await dbService.joinOrganization(info.id);
-    _participatingOrganizationList.add(info);
+    if (_participatingOrganizationList.contains(info) == false)
+      _participatingOrganizationList.add(info);
     notifyListeners();
   }
 

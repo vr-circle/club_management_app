@@ -9,66 +9,119 @@ class ScheduleDetails extends StatelessWidget {
     @required this.deleteSchedule,
     @required this.handleCloseDetailsPage,
   });
+  final Schedule schedule;
   final Future<void> Function(Schedule schedule) deleteSchedule;
   final void Function() handleCloseDetailsPage;
-  final Schedule schedule;
-  final _format = new DateFormat('yyyy/MM/dd(E) HH:mm');
+  final _format = DateFormat('HH:mm');
+  // new DateFormat('yyyy/MM/dd(E) HH:mm');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(),
-        body: Column(children: [
-          Expanded(
-              child: Padding(
-            padding: EdgeInsets.all(32),
+        body: Container(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Title'),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
-                  child: Text(
-                    schedule.title,
-                    style: const TextStyle(fontSize: 24),
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Expanded(
+                    flex: 1,
+                    child: const Text('Title'),
                   ),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                const Text('Start time'),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
-                  child: Text(_format.format(schedule.start)),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                const Text('End time'),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
-                  child: Text(_format.format(schedule.end)),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                const Text('Place'),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
-                  child: Text(schedule.place),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                const Text('Details'),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 0, 0),
-                  child: Text(schedule.details),
-                )
-              ],
+                  Expanded(
+                    flex: 2,
+                    child: Text(schedule.title),
+                  ),
+                ],
+              ),
             ),
-          )),
-        ]),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Expanded(
+                    flex: 1,
+                    child: const Text('Place'),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(schedule.place),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Expanded(
+                    flex: 1,
+                    child: const Text('Start Time'),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(_format.format(schedule.start)),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Expanded(
+                    flex: 1,
+                    child: const Text('End Time'),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(_format.format(schedule.end)),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Expanded(
+                    flex: 1,
+                    child: const Text('Details'),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(schedule.details),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Expanded(
+                    flex: 1,
+                    child: const Text('Public or Private'),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(schedule.isPublic ? 'Public' : 'Private'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        )),
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

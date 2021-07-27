@@ -4,9 +4,16 @@ import 'package:flutter_application_1/shell_pages/search/organization_info.dart'
 import 'package:flutter_application_1/store/store_service.dart';
 
 class OrganizationDetailPage extends StatefulWidget {
-  OrganizationDetailPage({Key key, @required this.organizationId})
+  OrganizationDetailPage(
+      {Key key,
+      @required this.organizationId,
+      @required this.handleJoinOrganization,
+      @required this.handleCloseDetailPage})
       : super(key: key);
   final String organizationId;
+  final Future<void> Function(OrganizationInfo targetOrganization)
+      handleJoinOrganization;
+  final void Function() handleCloseDetailPage;
   @override
   OrganizationDetailPageState createState() => OrganizationDetailPageState();
 }
@@ -42,10 +49,20 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
           return Scaffold(
               appBar: AppBar(
                 title: Text(targetOrganizationInfo.name),
+                actions: [
+                  TextButton(
+                      onPressed: () async {
+                        await widget
+                            .handleJoinOrganization(targetOrganizationInfo);
+                        widget.handleCloseDetailPage();
+                      },
+                      child: const Text('Join'))
+                ],
               ),
               body: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                         height: 320,
@@ -79,7 +96,10 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
                     const ListTile(
                       title: const Text('member'),
                     ),
-                    Text(targetOrganizationInfo.memberNum.toString()),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
+                      child: Text(targetOrganizationInfo.memberNum.toString()),
+                    )
                   ],
                 ),
               ));

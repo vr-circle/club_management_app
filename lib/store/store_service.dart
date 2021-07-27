@@ -87,13 +87,14 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> createOrganization(OrganizationInfo newOrganization) async {
-    await _store.collection(organizationCollectionName).doc().set({
+    final docRef = await _store.collection(organizationCollectionName).add({
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
       'tagList': newOrganization.tagList,
       'otherInfo': newOrganization.otherInfo,
       'memberNum': newOrganization.memberNum
     });
+    await joinOrganization(docRef.id);
   }
 
   @override
@@ -105,8 +106,15 @@ class FireStoreService extends DatabaseService {
         .doc(settingsOrganizationName)
         .set({
       'ids': FieldValue.arrayUnion([targetOrganizationId])
-    });
-    // todo : add userId in organization members
+    }, SetOptions(merge: true));
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .update({'memberNum': FieldValue.increment(1)});
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .set({'id': userId}, SetOptions(merge: true));
   }
 
   @override
@@ -116,10 +124,21 @@ class FireStoreService extends DatabaseService {
         .doc(userId)
         .collection(settingsCollectionName)
         .doc(settingsOrganizationName)
-        .set({
+        .update({
       'ids': FieldValue.arrayRemove([targetOrganizationId])
     });
-    // todo: remove userId in organization members
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .update({'memberNum': FieldValue.increment(-1)});
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationId)
+        .update({
+      'member': FieldValue.arrayRemove([
+        {'id': userId}
+      ])
+    });
   }
 
   // --------------------------- schedule --------------------------------------
@@ -406,7 +425,7 @@ class FireStoreService extends DatabaseService {
         .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
         .doc(taskGroupDocName)
-        .update({listName: []});
+        .set({listName: []}, SetOptions(merge: true));
   }
 
   @override
