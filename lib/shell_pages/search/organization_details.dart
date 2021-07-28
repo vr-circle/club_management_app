@@ -98,7 +98,8 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
                     ),
                     Padding(
                       padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
-                      child: Text(targetOrganizationInfo.memberNum.toString()),
+                      child: Text(
+                          targetOrganizationInfo.members.length.toString()),
                     )
                   ],
                 ),

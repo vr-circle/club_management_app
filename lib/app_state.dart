@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
-import 'package:flutter_application_1/shell_pages/todo/task.dart';
-import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
-import 'package:tuple/tuple.dart';
+import 'package:flutter_application_1/user_settings/user_settings.dart';
 
 class AppState extends ChangeNotifier {
   AppState()
@@ -39,7 +36,24 @@ class AppState extends ChangeNotifier {
         _participatingOrganizationList = [],
         _isDarkMode = false,
         _isOpenAccountView = false,
-        _settingOrganizationId = '';
+        _settingOrganizationId = '',
+        _userSettings = null;
+
+  UserSettings _userSettings;
+  ThemeData get generalTheme => _userSettings == null
+      ? null
+      : _userSettings.userThemeSettings.generalTheme;
+
+  Future<void> initUserSettings() async {
+    _userSettings = await dbService.initializeUserSettings();
+    final res = <OrganizationInfo>[];
+    await Future.forEach(_userSettings.participatingOrganizationIdList,
+        (id) async {
+      res.add(await dbService.getOrganizationInfo(id));
+    });
+    _participatingOrganizationList = res;
+    notifyListeners();
+  }
 
   List<OrganizationInfo> _participatingOrganizationList;
   List<OrganizationInfo> get participatingOrganizationList =>
@@ -56,13 +70,19 @@ class AppState extends ChangeNotifier {
 
   Future<void> joinOrganization(OrganizationInfo info) async {
     await dbService.joinOrganization(info.id);
-    if (_participatingOrganizationList.contains(info) == false)
-      _participatingOrganizationList.add(info);
+    if (_participatingOrganizationList
+        .where((element) => element.id == info.id)
+        .toList()
+        .isEmpty) _participatingOrganizationList.add(info);
     notifyListeners();
   }
 
   Future<void> leaveOrganization(String id) async {
-    await dbService.leaveOrganization(id);
+    final target = _participatingOrganizationList
+        .where((element) => element.id == id)
+        .toList()
+        .first;
+    await dbService.leaveOrganization(target);
     _participatingOrganizationList =
         _participatingOrganizationList.where((info) => info.id != id).toList();
     notifyListeners();

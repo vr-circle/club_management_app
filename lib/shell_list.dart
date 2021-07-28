@@ -7,11 +7,11 @@ import 'package:flutter_application_1/shell_pages/schedule/schedule_router.dart'
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
+import 'package:flutter_application_1/shell_pages/settings/setting_add_organization.dart';
+import 'package:flutter_application_1/shell_pages/settings/setting_organization.dart';
+import 'package:flutter_application_1/shell_pages/settings/settings.dart';
+import 'package:flutter_application_1/shell_pages/settings/user_account_view.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_home_page.dart';
-import 'package:flutter_application_1/shell_pages/user_settings/setting_add_organization.dart';
-import 'package:flutter_application_1/shell_pages/user_settings/setting_organization.dart';
-import 'package:flutter_application_1/shell_pages/user_settings/settings.dart';
-import 'package:flutter_application_1/shell_pages/user_settings/user_account_view.dart';
 
 class ShellState {
   ShellState(

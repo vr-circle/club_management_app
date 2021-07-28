@@ -48,8 +48,9 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp.router(
           title: 'OMA',
           debugShowCheckedModeBanner: false,
-          theme: SchedulerBinding.instance.window.platformBrightness ==
-                  Brightness.dark
+          theme: _appState.generalTheme ??
+                  SchedulerBinding.instance.window.platformBrightness ==
+                      Brightness.dark
               ? ThemeData.dark()
               : ThemeData.light(),
           routeInformationParser: _routeInformationParser,

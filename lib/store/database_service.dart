@@ -2,6 +2,7 @@ import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
+import 'package:flutter_application_1/user_settings/user_settings.dart';
 
 abstract class DatabaseService {
   // club
@@ -10,7 +11,8 @@ abstract class DatabaseService {
   Future<OrganizationInfo> getOrganizationInfo(String id);
   Future<void> createOrganization(OrganizationInfo newOrganization);
   Future<void> joinOrganization(String targetOrganizationId);
-  Future<void> leaveOrganization(String targetOrganizationId);
+  Future<void> leaveOrganization(OrganizationInfo targetOrganizationInfo);
+  Future<void> giveAuthority(String targetOrganizationId, String targetUserId);
 
   // schedule
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
@@ -31,6 +33,5 @@ abstract class DatabaseService {
       Task task, String targetGroupName, String targetOrganizationId);
 
   // settings
-  Future<bool> getUserGeneralTheme();
-  Future<void> setUserGeneralTheme(bool isDark);
+  Future<UserSettings> initializeUserSettings();
 }

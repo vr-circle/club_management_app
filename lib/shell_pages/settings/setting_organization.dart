@@ -127,11 +127,11 @@ class _SettingOrganizationState extends State<SettingOrganization> {
                       padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                       child: Text(_organizationInfo.introduction)),
                   const ListTile(
-                    title: const Text('Member'),
+                    title: const Text('Number of persons'),
                   ),
                   Padding(
                       padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                      child: Text(_organizationInfo.memberNum.toString())),
+                      child: Text(_organizationInfo.members.length.toString())),
                 ],
               ),
             ));

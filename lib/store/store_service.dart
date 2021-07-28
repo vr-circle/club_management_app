@@ -1,11 +1,14 @@
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/store/database_service.dart';
+import 'package:flutter_application_1/user_settings/user_settings.dart';
+import 'package:flutter_application_1/user_settings/user_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -24,7 +27,30 @@ class FireStoreService extends DatabaseService {
   final taskGroupDocName = 'group';
   final public = 'public';
   final private = 'private';
-  final publicInfo = 'publicInformations';
+
+  @override
+  Future<UserSettings> initializeUserSettings() async {
+    final x =
+        (await _store.collection(usersCollectionName).doc(userId).get()).data();
+    print(x);
+    UserThemeSettings userThemeSettings = UserThemeSettings();
+    try {
+      userThemeSettings.generalTheme = x['theme']['general'] == 'dark'
+          ? ThemeData.dark()
+          : ThemeData.light();
+      userThemeSettings.personalEventColor =
+          Color(x['theme']['event']['personal']);
+      userThemeSettings.organizationEventColor =
+          Color(x['theme']['event']['organization']);
+    } catch (e) {
+      print(e);
+    }
+    UserSettings res = UserSettings(
+        id: userId, name: x['name'], userThemeSettings: userThemeSettings);
+    res.participatingOrganizationIdList =
+        (await dbService.getParticipatingOrganizationIdList());
+    return res;
+  }
 
   // --------------------------- club ------------------------------------------
   @override
@@ -44,23 +70,35 @@ class FireStoreService extends DatabaseService {
     return [];
   }
 
+  List<UserInfo> convertToUserInfoListFromMapList(List<Map> data) {
+    final res = [];
+    data.forEach((element) {
+      res.add(UserInfo(
+          id: element['id'],
+          name: element['name'],
+          userAuthorities: convertToUserAuthorities(element['authority'])));
+    });
+    return res;
+  }
+
   @override
   Future<OrganizationInfo> getOrganizationInfo(String id) async {
     try {
-      final list =
-          await _store.collection(organizationCollectionName).doc(id).get();
+      final mapData =
+          (await _store.collection(organizationCollectionName).doc(id).get())
+              .data();
       final res = OrganizationInfo(
-        id: id,
-        name: list['name'],
-        memberNum: list['memberNum'],
-        introduction: list['introduction'],
-        tagList: List<String>.from(list['tagList']),
-        // otherInfo: list ?? []
-      );
+          id: id,
+          name: mapData['name'],
+          introduction: mapData['introduction'],
+          tagList: List<String>.from(mapData['tagList']),
+          members: convertToUserInfoListFromMapList(mapData['members']));
+      print(res);
       return res;
     } catch (e) {
       print(e);
     }
+    print('error in get organization info');
     return null;
   }
 
@@ -71,13 +109,11 @@ class FireStoreService extends DatabaseService {
     data.docs.forEach((element) {
       try {
         res.add(OrganizationInfo(
-          id: element.id,
-          memberNum: element['memberNum'],
-          tagList: List<String>.from(element['tagList']),
-          name: element['name'],
-          introduction: element['introduction'],
-          // otherInfo: element['otherInfo'],
-        ));
+            id: element.id,
+            tagList: List<String>.from(element['tagList']),
+            name: element['name'],
+            introduction: element['introduction'],
+            members: convertToUserInfoListFromMapList(element['members'])));
       } catch (e) {
         print(e);
       }
@@ -87,14 +123,31 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> createOrganization(OrganizationInfo newOrganization) async {
+    final List<Map<String, String>> members = newOrganization.members
+        .map((e) => {
+              'id': e.id,
+              'name': e.name,
+              'authority': e.userAuthorities.toString().split('.')[1]
+            })
+        .toList();
     final docRef = await _store.collection(organizationCollectionName).add({
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
       'tagList': newOrganization.tagList,
-      'otherInfo': newOrganization.otherInfo,
-      'memberNum': newOrganization.memberNum
+      'members': newOrganization.members
     });
-    await joinOrganization(docRef.id);
+    await _store
+        .collection(usersCollectionName)
+        .doc(userId)
+        .collection(settingsCollectionName)
+        .doc(settingsOrganizationName)
+        .set({
+      'ids': FieldValue.arrayUnion([docRef.id])
+    }, SetOptions(merge: true));
+    await _store
+        .collection(organizationCollectionName)
+        .doc(docRef.id)
+        .set({'id': userId}, SetOptions(merge: true));
   }
 
   @override
@@ -118,27 +171,39 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
-  Future<void> leaveOrganization(String targetOrganizationId) async {
+  Future<void> leaveOrganization(
+      OrganizationInfo targetOrganizationInfo) async {
     await _store
         .collection(usersCollectionName)
         .doc(userId)
         .collection(settingsCollectionName)
         .doc(settingsOrganizationName)
         .update({
-      'ids': FieldValue.arrayRemove([targetOrganizationId])
+      'ids': FieldValue.arrayRemove([targetOrganizationInfo.id])
     });
+    final targetUserInfo = targetOrganizationInfo.members
+        .where((element) => element.id == userId)
+        .first;
     await _store
         .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
-        .update({'memberNum': FieldValue.increment(-1)});
-    await _store
-        .collection(organizationCollectionName)
-        .doc(targetOrganizationId)
+        .doc(targetOrganizationInfo.id)
         .update({
       'member': FieldValue.arrayRemove([
-        {'id': userId}
+        {
+          'id': userId,
+          'name': targetUserInfo.name,
+          'authority': targetUserInfo.userAuthorities.toString().split('.')[1]
+        }
       ])
     });
+  }
+
+  @override
+  Future<void> giveAuthority(
+      String targetOrganizationId, String targetUserId) async {
+    // await _store.collection(organizationCollectionName).doc(targetOrganizationId).set({
+    //   'member': FieldValue.arrayUnion(elements)
+    // },SetOptions(merge: true))
   }
 
   // --------------------------- schedule --------------------------------------
@@ -476,22 +541,4 @@ class FireStoreService extends DatabaseService {
   }
 
   // --------------------------- settings --------------------------------------
-  @override
-  Future<bool> getUserGeneralTheme() async {
-    try {
-      return ((await _store.collection(usersCollectionName).doc(userId).get())
-              .data())['theme'] ==
-          'dark';
-    } catch (e) {
-      return false;
-    }
-  }
-
-  @override
-  Future<void> setUserGeneralTheme(bool isDark) async {
-    await _store
-        .collection(usersCollectionName)
-        .doc(userId)
-        .set({'theme': isDark ? 'dark' : 'light'});
-  }
 }
