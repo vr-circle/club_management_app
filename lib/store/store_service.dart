@@ -47,8 +47,7 @@ class FireStoreService extends DatabaseService {
     }
     UserSettings res = UserSettings(
         id: userId, name: x['name'], userThemeSettings: userThemeSettings);
-    res.participatingOrganizationIdList =
-        (await dbService.getParticipatingOrganizationIdList());
+    print(res);
     return res;
   }
 
@@ -56,13 +55,11 @@ class FireStoreService extends DatabaseService {
   @override
   Future<List<String>> getParticipatingOrganizationIdList() async {
     try {
-      final data = await _store
-          .collection(usersCollectionName)
-          .doc(userId)
-          .collection(settingsCollectionName)
-          .doc(settingsOrganizationName)
-          .get();
-      final res = <String>[...data['ids']];
+      final data =
+          (await _store.collection(usersCollectionName).doc(userId).get())
+              .data();
+      final res = List<String>.from(data['organizations']);
+      print(res);
       return res;
     } catch (e) {
       print(e);
@@ -134,7 +131,7 @@ class FireStoreService extends DatabaseService {
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
       'tagList': newOrganization.tagList,
-      'members': newOrganization.members
+      'members': members
     });
     await _store
         .collection(usersCollectionName)
@@ -200,11 +197,7 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> giveAuthority(
-      String targetOrganizationId, String targetUserId) async {
-    // await _store.collection(organizationCollectionName).doc(targetOrganizationId).set({
-    //   'member': FieldValue.arrayUnion(elements)
-    // },SetOptions(merge: true))
-  }
+      String targetOrganizationId, String targetUserId) async {}
 
   // --------------------------- schedule --------------------------------------
   // users          /userId         /schedule/pub       /year/month/...

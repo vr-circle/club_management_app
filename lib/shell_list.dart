@@ -7,9 +7,9 @@ import 'package:flutter_application_1/shell_pages/schedule/schedule_router.dart'
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
-import 'package:flutter_application_1/shell_pages/settings/setting_add_organization.dart';
+import 'package:flutter_application_1/shell_pages/settings/create_organization.dart';
 import 'package:flutter_application_1/shell_pages/settings/setting_organization.dart';
-import 'package:flutter_application_1/shell_pages/settings/settings.dart';
+import 'package:flutter_application_1/shell_pages/settings/settings_page.dart';
 import 'package:flutter_application_1/shell_pages/settings/user_account_view.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_home_page.dart';
 
@@ -107,6 +107,8 @@ List<ShellState> shellList = <ShellState>[
         return [
           MaterialPage(
               child: TodoHomePage(
+            participatingOrganizationList:
+                appState.participatingOrganizationList,
             appState: appState,
           )),
         ];
@@ -157,6 +159,8 @@ List<ShellState> shellList = <ShellState>[
               key: ValueKey('settings'),
               child: SettingsPage(
                 appState: appState,
+                participatingOrganizationInfoList:
+                    appState.participatingOrganizationList,
               )),
           if (appState.isOpenAccountView)
             MaterialPage(
@@ -171,7 +175,7 @@ List<ShellState> shellList = <ShellState>[
                 child: SettingOrganization(
                     id: appState.settingOrganizationId, appState: appState)),
           if (appState.isOpenAddOrganizationPage)
-            MaterialPage(child: SettingAddOrganization(appState: appState)),
+            MaterialPage(child: CreateOrganization(appState: appState)),
         ];
       },
       getRoutePath: (appState) {

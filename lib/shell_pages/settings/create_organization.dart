@@ -4,14 +4,14 @@ import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
-class SettingAddOrganization extends StatefulWidget {
-  SettingAddOrganization({Key key, this.appState}) : super(key: key);
+class CreateOrganization extends StatefulWidget {
+  CreateOrganization({Key key, this.appState}) : super(key: key);
   final AppState appState;
   @override
-  _SettingAddOrganizationState createState() => _SettingAddOrganizationState();
+  _CreateOrganizationState createState() => _CreateOrganizationState();
 }
 
-class _SettingAddOrganizationState extends State<SettingAddOrganization> {
+class _CreateOrganizationState extends State<CreateOrganization> {
   TextEditingController name, introduction, newTag;
   List<String> tagList = [];
   @override
@@ -35,6 +35,7 @@ class _SettingAddOrganizationState extends State<SettingAddOrganization> {
                     onPressed: () async {
                       final newOrganization = OrganizationInfo(
                           name: name.text,
+                          members: [],
                           introduction: introduction.text,
                           tagList: tagList);
                       await dbService.createOrganization(newOrganization);

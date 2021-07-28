@@ -46,12 +46,13 @@ class AppState extends ChangeNotifier {
 
   Future<void> initUserSettings() async {
     _userSettings = await dbService.initializeUserSettings();
+    final ids = await dbService.getParticipatingOrganizationIdList();
     final res = <OrganizationInfo>[];
-    await Future.forEach(_userSettings.participatingOrganizationIdList,
-        (id) async {
+    await Future.forEach(ids, (id) async {
       res.add(await dbService.getOrganizationInfo(id));
     });
     _participatingOrganizationList = res;
+    // print(_participatingOrganizationList);
     notifyListeners();
   }
 

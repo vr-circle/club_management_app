@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 
 abstract class RoutePath {}
 

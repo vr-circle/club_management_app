@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_app_state.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 
 class TodoHomePage extends StatefulWidget {
-  TodoHomePage({Key key, @required this.appState}) : super(key: key);
+  TodoHomePage(
+      {Key key,
+      @required this.appState,
+      @required this.participatingOrganizationList})
+      : super(key: key);
   final AppState appState;
+  final List<OrganizationInfo> participatingOrganizationList;
   _TodoHomePageState createState() => _TodoHomePageState();
 }
 
@@ -26,8 +32,7 @@ class _TodoHomePageState extends State<TodoHomePage>
   }
 
   Future<bool> _initTabInfo() async {
-    await _todoAppState
-        .initTabInfo(widget.appState.participatingOrganizationList);
+    await _todoAppState.initTabInfo(widget.participatingOrganizationList);
     return true;
   }
 

@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({
     Key key,
     @required this.appState,
+    @required this.participatingOrganizationInfoList,
   });
   final AppState appState;
+  final List<OrganizationInfo> participatingOrganizationInfoList;
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  Future<bool> _future;
-  List<OrganizationInfo> _participatingOrganizationInfoList;
-
   @override
   void initState() {
     super.initState();
@@ -46,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text('New Organization'),
             ),
             Column(children: [
-              ...widget.appState.participatingOrganizationList
+              ...widget.participatingOrganizationInfoList
                   .map((e) => ListTile(
                         onTap: () {
                           widget.appState.settingOrganizationId = e.id;
@@ -56,6 +54,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       ))
                   .toList(),
             ]),
+            const Divider(
+              height: 8,
+            ),
             const ListTile(
               title: const Text('Account'),
             ),
@@ -73,15 +74,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: const TextStyle(color: Colors.red),
               ),
               onTap: () async {
-                widget.appState.logOut();
+                await widget.appState.logOut();
               },
             ),
-            const Divider(),
+            const Divider(
+              height: 8,
+            ),
             const ListTile(title: const Text('Information')),
             const ListTile(
               leading: const Icon(Icons.info),
               title: const Text('Version'),
-              subtitle: const Text('0.1.0'),
+              subtitle: const Text('1.0.0'),
             ),
           ]),
         ));

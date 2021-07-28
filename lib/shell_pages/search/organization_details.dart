@@ -69,8 +69,6 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
                         width: MediaQuery.of(context).size.width,
                         child: FittedBox(
                             fit: BoxFit.contain, child: FlutterLogo())),
-                    // Container(child: Image.network(
-                    // ))
                     const ListTile(
                       title: const Text('categories'),
                     ),

@@ -21,7 +21,7 @@ class TaskExpansionTile extends StatefulWidget {
 }
 
 class _TaskExpansionTileState extends State<TaskExpansionTile> {
-  bool _isOpenExpansion;
+  bool _isOpenExpansion = false;
 
   @override
   void initState() {
