@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_application_1/user_settings/user_info.dart';
 
 class OrganizationInfo {
   OrganizationInfo({
@@ -13,34 +14,4 @@ class OrganizationInfo {
   String introduction;
   List<UserInfo> members;
   List<String> tagList;
-}
-
-enum UserAuthorities {
-  none,
-  read,
-  write,
-  admin,
-}
-
-UserAuthorities convertToUserAuthorities(String data) {
-  switch (data) {
-    case 'none':
-      return UserAuthorities.none;
-    case 'read':
-      return UserAuthorities.read;
-    case 'write':
-      return UserAuthorities.write;
-    case 'admin':
-      return UserAuthorities.admin;
-    default:
-      return UserAuthorities.read;
-  }
-}
-
-class UserInfo {
-  UserInfo(
-      {@required this.id, @required this.name, @required this.userAuthorities});
-  final String id;
-  String name;
-  UserAuthorities userAuthorities;
 }

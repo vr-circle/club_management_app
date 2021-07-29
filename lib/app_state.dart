@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_application_1/auth/auth_service.dart';
 import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/route_path.dart';
@@ -26,7 +27,6 @@ class AppState extends ChangeNotifier {
         _isOpenAddSchedulePage = false,
         _isContainPublicSchedule = false,
         // todo
-        // _todoCollection = TodoCollection(),
         _targetTodoTabId = '',
         _targetOrganizationId = '',
         // search
@@ -34,25 +34,33 @@ class AppState extends ChangeNotifier {
         _isOpenAddOrganizationPage = false,
         // setting
         _participatingOrganizationList = [],
-        _isDarkMode = false,
         _isOpenAccountView = false,
         _settingOrganizationId = '',
         _userSettings = null;
 
   UserSettings _userSettings;
   ThemeData get generalTheme => _userSettings == null
-      ? null
+      ? SchedulerBinding.instance.window.platformBrightness == Brightness.dark
+          ? ThemeData.dark()
+          : ThemeData.light()
       : _userSettings.userThemeSettings.generalTheme;
+  Color get personalEventColor =>
+      _userSettings == null ? Colors.red : _userSettings.personalEventColor;
+  Color get organizationEventColor => _userSettings == null
+      ? Colors.blue
+      : _userSettings.organizationEventColor;
 
   Future<void> initUserSettings() async {
+    print('initUserSettings in appState');
     _userSettings = await dbService.initializeUserSettings();
-    final ids = await dbService.getParticipatingOrganizationIdList();
     final res = <OrganizationInfo>[];
-    await Future.forEach(ids, (id) async {
+    await Future.forEach(_userSettings.participatingOrganizationIdList,
+        (id) async {
       res.add(await dbService.getOrganizationInfo(id));
     });
     _participatingOrganizationList = res;
-    // print(_participatingOrganizationList);
+    print(_participatingOrganizationList);
+    print('end initUserSettings in appState');
     notifyListeners();
   }
 
@@ -97,9 +105,11 @@ class AppState extends ChangeNotifier {
   }
 
   ScheduleCollection _scheduleCollection;
-  Future<void> getScheduleForMonth() async {
-    await dbService.getSchedulesForMonth(
-        _targetCalendarMonth, _isContainPublicSchedule);
+  Future<void> getSchedulesForMonth(DateTime targetMonth) async {
+    await _scheduleCollection.getSchedulesForMonth(
+        targetMonth,
+        _isContainPublicSchedule,
+        _userSettings.participatingOrganizationIdList);
     notifyListeners();
   }
 
@@ -184,13 +194,6 @@ class AppState extends ChangeNotifier {
   }
 
   // settings
-  bool _isDarkMode;
-  bool get isDarkMode => _isDarkMode;
-  set isDarkMode(bool value) {
-    _isDarkMode = value;
-    notifyListeners();
-  }
-
   bool _isOpenAccountView;
   bool get isOpenAccountView => _isOpenAccountView;
   set isOpenAccountView(bool value) {

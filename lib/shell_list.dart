@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/home/home.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule_router.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_add.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_details.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_home_page.dart';
+import 'package:flutter_application_1/shell_pages/schedule/schedule_list_view_for_day.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_details.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/search/search_page.dart';
@@ -51,7 +55,57 @@ List<ShellState> shellList = <ShellState>[
       getPages: (appState) {
         return [
           MaterialPage(
-              key: ValueKey('ScheduleRouter'), child: ScheduleRouter(appState))
+              child: ScheduleHomePage(
+            key: ValueKey('ScheduleHomePage'),
+            appState: appState,
+            participatingOrganizationIdList: appState
+                .participatingOrganizationList
+                .map((e) => e.id)
+                .toList(),
+            personalEventColor: appState.personalEventColor,
+            organizationEventColor: appState.organizationEventColor,
+          )),
+          if (appState.selectedDayForScheduleList != null)
+            MaterialPage(
+                key: ValueKey('ScheduleListViewPage'),
+                child: ScheduleListViewForDay(
+                  targetDate: appState.selectedDayForScheduleList,
+                  scheduleList: appState
+                      .getScheduleForDay(appState.selectedDayForScheduleList),
+                  handleOpenAddPage: () {
+                    appState.isOpenAddSchedulePage = true;
+                  },
+                  handleChangeScheduleDetails: (Schedule schedule) {
+                    appState.selectedSchedule = schedule;
+                  },
+                )),
+          if (appState.isOpenAddSchedulePage)
+            MaterialPage(
+                key: ValueKey('AddSchedulePage'),
+                child: AddSchedulePage(
+                  targetDate: appState.selectedDayForScheduleList,
+                  addSchedule: (Schedule newSchedule, bool isPersonal) async {
+                    await appState.addSchedule(newSchedule, isPersonal);
+                  },
+                  handleCloseAddPage: () {
+                    appState.isOpenAddSchedulePage = false;
+                  },
+                )),
+          if (appState.selectedSchedule != null)
+            MaterialPage(
+                key: ValueKey('ScheduleDetailsPage'),
+                child: ScheduleDetails(
+                  schedule: appState.selectedSchedule,
+                  deleteSchedule: (Schedule targetSchedule) async {
+                    if (appState.user.uid == targetSchedule.createdBy)
+                      await appState.deleteSchedule(targetSchedule, true);
+                    else
+                      await appState.deleteSchedule(targetSchedule, false);
+                  },
+                  handleCloseDetailsPage: () {
+                    appState.selectedSchedule = null;
+                  },
+                ))
         ];
       },
       getRoutePath: (appState) {
@@ -83,22 +137,21 @@ List<ShellState> shellList = <ShellState>[
         }
       },
       onPopPage: (appState) {
-        // if (appState.selectedDayForScheduleList != null) {
-        //   if (appState.isOpenAddSchedulePage) {
-        //     appState.isOpenAddSchedulePage = false;
-        //     appState.getScheduleForMonth();
-        //     return;
-        //   }
-        //   if (appState.selectedSchedule != null) {
-        //     appState.selectedSchedule = null;
-        //   } else {
-        //     appState.selectedDayForScheduleList = null;
-        //   }
-        // } else {
-        //   if (appState.selectedSchedule != null) {
-        //     appState.selectedSchedule = null;
-        //   }
-        // }
+        if (appState.selectedDayForScheduleList != null) {
+          if (appState.isOpenAddSchedulePage) {
+            appState.isOpenAddSchedulePage = false;
+            return;
+          }
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          } else {
+            appState.selectedDayForScheduleList = null;
+          }
+        } else {
+          if (appState.selectedSchedule != null) {
+            appState.selectedSchedule = null;
+          }
+        }
       }),
   ShellState(
       name: 'Todo',

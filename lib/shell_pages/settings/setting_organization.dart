@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 
 class SettingOrganization extends StatefulWidget {
   SettingOrganization({Key key, @required this.id, @required this.appState})
@@ -24,7 +23,9 @@ class _SettingOrganizationState extends State<SettingOrganization> {
   }
 
   Future<OrganizationInfo> _getOrganizationInfo() async {
-    _organizationInfo = await dbService.getOrganizationInfo(widget.id);
+    _organizationInfo = widget.appState.participatingOrganizationList
+        .where((element) => element.id == widget.id)
+        .first;
     return _organizationInfo;
   }
 

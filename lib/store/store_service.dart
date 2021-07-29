@@ -7,6 +7,7 @@ import 'package:flutter_application_1/shell_pages/search/organization_info.dart'
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/store/database_service.dart';
+import 'package:flutter_application_1/user_settings/user_info.dart';
 import 'package:flutter_application_1/user_settings/user_settings.dart';
 import 'package:flutter_application_1/user_settings/user_theme.dart';
 import 'package:intl/intl.dart';
@@ -30,6 +31,7 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<UserSettings> initializeUserSettings() async {
+    print('initializeUserSettings');
     final x =
         (await _store.collection(usersCollectionName).doc(userId).get()).data();
     print(x);
@@ -40,14 +42,21 @@ class FireStoreService extends DatabaseService {
           : ThemeData.light();
       userThemeSettings.personalEventColor =
           Color(x['theme']['event']['personal']);
+      print(userThemeSettings.personalEventColor);
       userThemeSettings.organizationEventColor =
           Color(x['theme']['event']['organization']);
+      print(userThemeSettings.organizationEventColor);
     } catch (e) {
+      print('catch in initializeUserSettings');
       print(e);
     }
     UserSettings res = UserSettings(
-        id: userId, name: x['name'], userThemeSettings: userThemeSettings);
-    print(res);
+        id: userId,
+        name: x['name'],
+        userThemeSettings: userThemeSettings,
+        participatingOrganizationIdList: List<String>.from(x['organizations']));
+    // print(res);
+    print('end initializeUserSettings');
     return res;
   }
 
@@ -67,13 +76,19 @@ class FireStoreService extends DatabaseService {
     return [];
   }
 
-  List<UserInfo> convertToUserInfoListFromMapList(List<Map> data) {
-    final res = [];
-    data.forEach((element) {
+  List<UserInfo> convertToUserInfoListFromMapList(Map<String, dynamic> data) {
+    List<UserInfo> res = [];
+    data['admin'].forEach((element) {
       res.add(UserInfo(
           id: element['id'],
           name: element['name'],
-          userAuthorities: convertToUserAuthorities(element['authority'])));
+          userAuthorities: UserAuthorities.admin));
+    });
+    data['readonly'].forEach((element) {
+      res.add(UserInfo(
+          id: element['id'],
+          name: element['name'],
+          userAuthorities: UserAuthorities.readonly));
     });
     return res;
   }
@@ -90,12 +105,10 @@ class FireStoreService extends DatabaseService {
           introduction: mapData['introduction'],
           tagList: List<String>.from(mapData['tagList']),
           members: convertToUserInfoListFromMapList(mapData['members']));
-      print(res);
       return res;
     } catch (e) {
       print(e);
     }
-    print('error in get organization info');
     return null;
   }
 
@@ -237,14 +250,14 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
-      DateTime targetMonth, bool isContainPublicSchedule) async {
+      DateTime targetMonth,
+      bool isContainPublicSchedule,
+      List<String> participatingOrganizationIdList) async {
     final String _year = targetMonth.year.toString();
     final String _month = targetMonth.month.toString();
     final Map<DateTime, List<Schedule>> res = {};
-    final List<String> _participatingOrganizationIds =
-        await dbService.getParticipatingOrganizationIdList();
     // private perticipating organization
-    await Future.forEach(_participatingOrganizationIds, (id) async {
+    await Future.forEach(participatingOrganizationIdList, (id) async {
       final _data = (await _store
               .collection(organizationCollectionName)
               .doc(id)
@@ -281,7 +294,7 @@ class FireStoreService extends DatabaseService {
         });
       });
     } else {
-      await Future.forEach(_participatingOrganizationIds, (id) async {
+      await Future.forEach(participatingOrganizationIdList, (id) async {
         final _data = (await _store
                 .collection(organizationCollectionName)
                 .doc(id)
@@ -321,20 +334,25 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
-  Future<List<Schedule>> getSchedulesForDay(DateTime day, bool isAll) async {
+  Future<List<Schedule>> getSchedulesForDay(
+      DateTime targetDay,
+      bool isContainPublicSchedule,
+      List<String> participatingOrganizationIdList) async {
     final _data = LinkedHashMap<DateTime, List<Schedule>>(
         equals: isSameDay,
         hashCode: (DateTime key) {
           return key.day * 1000000 + key.month * 10000 + key.year;
         })
-      ..addAll(await getSchedulesForMonth(day, isAll));
-    return _data[day] ?? [];
+      ..addAll(await getSchedulesForMonth(
+          targetDay, isContainPublicSchedule, participatingOrganizationIdList));
+    return _data[targetDay] ?? [];
   }
 
   @override
-  Future<Schedule> getSchedule(
-      String targetScheduleId, DateTime targetDay) async {
-    final _data = await getSchedulesForDay(targetDay, false);
+  Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay,
+      List<String> participatingOrganizationIdList) async {
+    final _data = await getSchedulesForDay(
+        targetDay, false, participatingOrganizationIdList);
     final res = _data.where((element) => element.id == targetScheduleId);
     return res.first ?? null;
   }

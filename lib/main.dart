@@ -44,13 +44,12 @@ class _MyAppState extends State<MyApp> {
         } else if (snapshot.hasError) {
           return const Center(child: const Text('Error'));
         }
-        _appState.user = snapshot.data;
+        if (snapshot.data != null) _appState.user = snapshot.data;
         return MaterialApp.router(
           title: 'OMA',
           debugShowCheckedModeBanner: false,
-          theme: _appState.generalTheme ??
-                  SchedulerBinding.instance.window.platformBrightness ==
-                      Brightness.dark
+          theme: SchedulerBinding.instance.window.platformBrightness ==
+                  Brightness.dark
               ? ThemeData.dark()
               : ThemeData.light(),
           routeInformationParser: _routeInformationParser,

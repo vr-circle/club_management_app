@@ -14,10 +14,10 @@ class ScheduleCollection {
             LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
   LinkedHashMap<DateTime, List<Schedule>> _schedules;
 
-  Future<void> getSchedulesForMonth(
-      DateTime targetMonth, bool isContainPublic) async {
-    final _data =
-        await dbService.getSchedulesForMonth(targetMonth, isContainPublic);
+  Future<void> getSchedulesForMonth(DateTime targetMonth, bool isContainPublic,
+      List<String> participatingOrganizationIdList) async {
+    final _data = await dbService.getSchedulesForMonth(
+        targetMonth, isContainPublic, participatingOrganizationIdList);
     this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
       ..addAll(_data);
   }

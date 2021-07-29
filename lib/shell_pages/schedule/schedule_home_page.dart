@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
-import 'package:flutter_application_1/shell_pages/schedule/schedule_app_state.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'schedule.dart';
 
 class ScheduleHomePage extends StatefulWidget {
-  ScheduleHomePage(
-      {Key key, @required this.appState, @required this.scheduleAppState})
-      : super(key: key);
+  ScheduleHomePage({
+    Key key,
+    @required this.appState,
+    @required this.participatingOrganizationIdList,
+    @required this.personalEventColor,
+    @required this.organizationEventColor,
+  }) : super(key: key);
   final AppState appState;
-  final ScheduleAppState scheduleAppState;
+  final List<String> participatingOrganizationIdList;
+  final Color personalEventColor;
+  final Color organizationEventColor;
   @override
   _ScheduleHomePageState createState() => _ScheduleHomePageState();
 }
@@ -24,23 +29,21 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
 
   @override
   void initState() {
+    print('initState in ScheduleHomePage');
     this._selectedDay = DateTime.now();
-    widget.scheduleAppState.getSchedulesForMonth(
-        widget.appState.targetCalendarMonth,
-        widget.appState.isContainPublicSchedule);
+    widget.appState.getSchedulesForMonth(widget.appState.targetCalendarMonth);
     this._future = _getSchedulesForMonth();
     super.initState();
   }
 
   Future<bool> _getSchedulesForMonth() async {
-    await widget.scheduleAppState.getSchedulesForMonth(
-        widget.appState.targetCalendarMonth,
-        widget.appState.isContainPublicSchedule);
+    await widget.appState
+        .getSchedulesForMonth(widget.appState.targetCalendarMonth);
     return true;
   }
 
   List<Schedule> _getEventForDay(DateTime day) {
-    return widget.scheduleAppState.getScheduleForDay(day);
+    return widget.appState.getScheduleForDay(day);
   }
 
   void _onPageChanged(DateTime day) {
@@ -68,11 +71,8 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
     final res = CalendarBuilders<Schedule>(singleMarkerBuilder:
         (BuildContext context, DateTime date, Schedule event) {
       Color _color = event.createdBy == widget.appState.user.uid
-          ? Colors.blue
-          : Colors.red;
-      if (event.title == 'title') {
-        _color = Colors.blue;
-      }
+          ? widget.personalEventColor
+          : widget.organizationEventColor;
       return Container(
         decoration: BoxDecoration(shape: BoxShape.circle, color: _color),
         width: 7,

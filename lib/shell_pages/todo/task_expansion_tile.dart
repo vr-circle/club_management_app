@@ -25,7 +25,7 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
 
   @override
   void initState() {
-    _isOpenExpansion = false;
+    _isOpenExpansion = true;
     super.initState();
   }
 
@@ -55,6 +55,7 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
               });
         },
         child: ExpansionTile(
+          initiallyExpanded: _isOpenExpansion,
           onExpansionChanged: (value) {
             setState(() {
               _isOpenExpansion = value;

@@ -16,10 +16,15 @@ abstract class DatabaseService {
 
   // schedule
   Future<Map<DateTime, List<Schedule>>> getSchedulesForMonth(
-      DateTime day, bool isContainPublicSchedule);
+      DateTime day,
+      bool isContainPublicSchedule,
+      List<String> participatingOrganizationIdList);
   Future<List<Schedule>> getSchedulesForDay(
-      DateTime day, bool isContainPublicSchedule);
-  Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay);
+      DateTime day,
+      bool isContainPublicSchedule,
+      List<String> participatingOrganizationIdList);
+  Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay,
+      List<String> participatingOrganizationIdList);
   Future<void> addSchedule(Schedule newSchedule, bool isPersonal);
   Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal);
 

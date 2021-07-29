@@ -6,7 +6,6 @@ import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/auth/signup_page.dart';
 import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_list.dart';
-import 'package:flutter_application_1/store/store_service.dart';
 import 'package:intl/intl.dart';
 
 class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
@@ -15,7 +14,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
   @override
   Future<RoutePath> parseRouteInformation(
       RouteInformation routeInformation) async {
-    // print('parseRouteInformation in MyRouteInformationParser');
+    print('parseRouteInformation in MyRouteInformationParser');
     final uri = Uri.parse(routeInformation.location);
     if (_appState.user == null &&
         routeInformation.location == SignUpPath.location) {
@@ -103,7 +102,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
-    // print('restoreRouteInformation');
+    print('restoreRouteInformation');
     if (path is LoginPath) {
       return RouteInformation(location: '${LoginPath.location}');
     }
@@ -193,7 +192,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
-    // print('build in MyRouterDelegate');
+    print('build in MyRouterDelegate');
     return Navigator(
       key: navigatorKey,
       pages: [
@@ -237,7 +236,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
-    // print('setNewRoutePath: new path is ${path.runtimeType}');
+    print('setNewRoutePath: new path is ${path.runtimeType}');
     if (path is LoginPath) {
       appState.isOpenSignUpPage = false;
       return;
@@ -260,10 +259,9 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.isOpenAddSchedulePage = false;
       appState.selectedSchedule = null;
     } else if (path is ScheduleDetailPath) {
-      appState.bottomNavigationIndex = SchedulePath.index;
-      // todo: create Schedule from path info
-      final _data = await dbService.getSchedule(path.scheduleId, path.day);
-      appState.selectedSchedule = _data;
+      // appState.bottomNavigationIndex = SchedulePath.index;
+      // final _data = await dbService.getSchedule(path.scheduleId, path.day);
+      // appState.selectedSchedule = _data;
     } else if (path is ScheduleAddPath) {
       appState.bottomNavigationIndex = SchedulePath.index;
       appState.selectedDayForScheduleList = path.day;
