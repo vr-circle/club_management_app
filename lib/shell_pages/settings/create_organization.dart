@@ -36,6 +36,7 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                       final newOrganization = OrganizationInfo(
                           name: name.text,
                           members: [],
+                          memberNum: 1,
                           introduction: introduction.text,
                           tagList: tagList);
                       await dbService.createOrganization(newOrganization);

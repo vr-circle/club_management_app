@@ -7,11 +7,13 @@ class OrganizationInfo {
     @required this.name,
     @required this.introduction,
     @required this.tagList,
-    @required this.members,
+    @required this.memberNum,
+    this.members,
   });
   String id;
   String name;
   String introduction;
-  List<UserInfo> members;
+  int memberNum;
+  List<MemberInfo> members;
   List<String> tagList;
 }

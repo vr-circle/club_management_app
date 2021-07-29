@@ -132,7 +132,7 @@ class _SettingOrganizationState extends State<SettingOrganization> {
                   ),
                   Padding(
                       padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                      child: Text(_organizationInfo.members.length.toString())),
+                      child: Text(_organizationInfo.memberNum.toString())),
                 ],
               ),
             ));

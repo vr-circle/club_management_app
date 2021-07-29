@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
@@ -16,8 +17,11 @@ import 'package:table_calendar/table_calendar.dart';
 DatabaseService dbService;
 
 class FireStoreService extends DatabaseService {
-  FireStoreService({this.userId});
-  final String userId;
+  FireStoreService({this.user}) {
+    userId = user.uid;
+  }
+  final User user;
+  String userId;
   final _store = FirebaseFirestore.instance;
   final organizationCollectionName = 'organizations';
   final usersCollectionName = 'users';
@@ -76,16 +80,16 @@ class FireStoreService extends DatabaseService {
     return [];
   }
 
-  List<UserInfo> convertToUserInfoListFromMapList(Map<String, dynamic> data) {
-    List<UserInfo> res = [];
+  List<MemberInfo> convertToUserInfoListFromMapList(Map<String, dynamic> data) {
+    List<MemberInfo> res = [];
     data['admin'].forEach((element) {
-      res.add(UserInfo(
+      res.add(MemberInfo(
           id: element['id'],
           name: element['name'],
           userAuthorities: UserAuthorities.admin));
     });
     data['readonly'].forEach((element) {
-      res.add(UserInfo(
+      res.add(MemberInfo(
           id: element['id'],
           name: element['name'],
           userAuthorities: UserAuthorities.readonly));
@@ -104,7 +108,7 @@ class FireStoreService extends DatabaseService {
           name: mapData['name'],
           introduction: mapData['introduction'],
           tagList: List<String>.from(mapData['tagList']),
-          members: convertToUserInfoListFromMapList(mapData['members']));
+          memberNum: mapData['memberNum']);
       return res;
     } catch (e) {
       print(e);
@@ -120,10 +124,10 @@ class FireStoreService extends DatabaseService {
       try {
         res.add(OrganizationInfo(
             id: element.id,
-            tagList: List<String>.from(element['tagList']),
             name: element['name'],
             introduction: element['introduction'],
-            members: convertToUserInfoListFromMapList(element['members'])));
+            tagList: List<String>.from(element['tagList']),
+            memberNum: element['memberNum']));
       } catch (e) {
         print(e);
       }
@@ -133,79 +137,56 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> createOrganization(OrganizationInfo newOrganization) async {
-    final List<Map<String, String>> members = newOrganization.members
-        .map((e) => {
-              'id': e.id,
-              'name': e.name,
-              'authority': e.userAuthorities.toString().split('.')[1]
-            })
-        .toList();
     final docRef = await _store.collection(organizationCollectionName).add({
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
       'tagList': newOrganization.tagList,
-      'members': members
+      'memberNum': 1
     });
-    await _store
-        .collection(usersCollectionName)
-        .doc(userId)
-        .collection(settingsCollectionName)
-        .doc(settingsOrganizationName)
-        .set({
-      'ids': FieldValue.arrayUnion([docRef.id])
+    await _store.collection(usersCollectionName).doc(userId).set({
+      'organizations': FieldValue.arrayUnion([docRef.id])
     }, SetOptions(merge: true));
     await _store
         .collection(organizationCollectionName)
         .doc(docRef.id)
-        .set({'id': userId}, SetOptions(merge: true));
+        .collection('members')
+        .doc(userId)
+        .set({'auth': 'admin', 'name': user.displayName});
   }
 
   @override
   Future<void> joinOrganization(String targetOrganizationId) async {
-    await _store
-        .collection(usersCollectionName)
-        .doc(userId)
-        .collection(settingsCollectionName)
-        .doc(settingsOrganizationName)
-        .set({
-      'ids': FieldValue.arrayUnion([targetOrganizationId])
+    await _store.collection(usersCollectionName).doc(userId).set({
+      'organizations': FieldValue.arrayUnion([targetOrganizationId])
     }, SetOptions(merge: true));
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationId)
-        .update({'memberNum': FieldValue.increment(1)});
+        .set({'memberNum': FieldValue.increment(1)});
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationId)
-        .set({'id': userId}, SetOptions(merge: true));
+        .collection('members')
+        .doc(userId)
+        .set({'auth': 'readonly', 'name': user.displayName});
   }
 
   @override
   Future<void> leaveOrganization(
       OrganizationInfo targetOrganizationInfo) async {
-    await _store
-        .collection(usersCollectionName)
-        .doc(userId)
-        .collection(settingsCollectionName)
-        .doc(settingsOrganizationName)
-        .update({
-      'ids': FieldValue.arrayRemove([targetOrganizationInfo.id])
+    await _store.collection(usersCollectionName).doc(userId).update({
+      'organizations': FieldValue.arrayRemove([targetOrganizationInfo.id])
     });
-    final targetUserInfo = targetOrganizationInfo.members
-        .where((element) => element.id == userId)
-        .first;
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationInfo.id)
-        .update({
-      'member': FieldValue.arrayRemove([
-        {
-          'id': userId,
-          'name': targetUserInfo.name,
-          'authority': targetUserInfo.userAuthorities.toString().split('.')[1]
-        }
-      ])
-    });
+        .set({'memberNum': FieldValue.increment(-1)});
+    await _store
+        .collection(organizationCollectionName)
+        .doc(targetOrganizationInfo.id)
+        .collection('members')
+        .doc(userId)
+        .delete();
   }
 
   @override

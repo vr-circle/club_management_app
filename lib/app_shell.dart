@@ -18,7 +18,7 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    dbService = FireStoreService(userId: widget._appState.user.uid);
+    dbService = FireStoreService(user: widget._appState.user);
     widget._appState.initUserSettings();
     _innerRouterDelegate = InnerRouterDelegate(widget._appState);
   }
