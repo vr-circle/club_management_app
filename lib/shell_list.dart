@@ -218,7 +218,7 @@ List<ShellState> shellList = <ShellState>[
                   appState.isOpenAccountView = true;
                 },
                 handleOpenCreateNewOrganization: () {
-                  appState.isOpenAddOrganizationPage = true;
+                  appState.isOpenCreateOrganizationPage = true;
                 },
                 logOut: () async {
                   await appState.logOut();
@@ -241,10 +241,22 @@ List<ShellState> shellList = <ShellState>[
           if (appState.selectedSettingOrganizationId.isNotEmpty)
             MaterialPage(
                 child: SettingOrganization(
-                    id: appState.selectedSettingOrganizationId,
-                    appState: appState)),
-          if (appState.isOpenAddOrganizationPage)
-            MaterialPage(child: CreateOrganization(appState: appState)),
+              selectedOrganizationId: appState.selectedSettingOrganizationId,
+              handleCloseSettingOrganization: () {
+                appState.selectedSettingOrganizationId = '';
+              },
+              leaveOrganization: (String targetId) async {
+                appState.leaveOrganization(targetId);
+              },
+              participatingOrganizationInfoList:
+                  appState.participatingOrganizationList,
+            )),
+          if (appState.isOpenCreateOrganizationPage)
+            MaterialPage(child: CreateOrganization(
+              handleCloseCreateOrganizationPage: () {
+                appState.isOpenCreateOrganizationPage = false;
+              },
+            )),
         ];
       },
       getRoutePath: (appState) {
@@ -252,7 +264,7 @@ List<ShellState> shellList = <ShellState>[
         if (appState.selectedSettingOrganizationId.isNotEmpty)
           return SettingOrganizationPath(
               appState.selectedSettingOrganizationId);
-        if (appState.isOpenAddOrganizationPage)
+        if (appState.isOpenCreateOrganizationPage)
           return SettingAddOrganizationPath();
         return SettingPath();
       },
@@ -260,7 +272,7 @@ List<ShellState> shellList = <ShellState>[
         if (appState.isOpenAccountView) appState.isOpenAccountView = false;
         if (appState.selectedSettingOrganizationId.isNotEmpty)
           appState.selectedSettingOrganizationId = '';
-        if (appState.isOpenAddOrganizationPage)
-          appState.isOpenAddOrganizationPage = false;
+        if (appState.isOpenCreateOrganizationPage)
+          appState.isOpenCreateOrganizationPage = false;
       }),
 ];

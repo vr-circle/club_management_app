@@ -31,7 +31,7 @@ class AppState extends ChangeNotifier {
         _targetOrganizationId = '',
         // search
         _searchingParam = '',
-        _isOpenAddOrganizationPage = false,
+        _isOpenCreateOrganizationPage = false,
         // setting
         _participatingOrganizationList = [],
         _isOpenAccountView = false,
@@ -243,10 +243,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _isOpenAddOrganizationPage;
-  bool get isOpenAddOrganizationPage => _isOpenAddOrganizationPage;
-  set isOpenAddOrganizationPage(bool value) {
-    _isOpenAddOrganizationPage = value;
+  bool _isOpenCreateOrganizationPage;
+  bool get isOpenCreateOrganizationPage => _isOpenCreateOrganizationPage;
+  set isOpenCreateOrganizationPage(bool value) {
+    _isOpenCreateOrganizationPage = value;
     notifyListeners();
   }
 

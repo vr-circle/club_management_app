@@ -292,7 +292,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
       appState.selectedSettingOrganizationId = '';
-      appState.isOpenAddOrganizationPage = false;
+      appState.isOpenCreateOrganizationPage = false;
     } else if (path is SettingOrganizationPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
@@ -300,7 +300,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     } else if (path is SettingAddOrganizationPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
-      appState.isOpenAddOrganizationPage = true;
+      appState.isOpenCreateOrganizationPage = true;
       appState.selectedSettingOrganizationId = '';
     } else if (path is UserSettingPath) {
       appState.isOpenAccountView = true;

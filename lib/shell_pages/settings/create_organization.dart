@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class CreateOrganization extends StatefulWidget {
-  CreateOrganization({Key key, this.appState}) : super(key: key);
-  final AppState appState;
+  CreateOrganization(
+      {Key key, @required this.handleCloseCreateOrganizationPage})
+      : super(key: key);
+  final void Function() handleCloseCreateOrganizationPage;
   @override
   _CreateOrganizationState createState() => _CreateOrganizationState();
 }
@@ -40,7 +41,7 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                           introduction: introduction.text,
                           tagList: tagList);
                       await dbService.createOrganization(newOrganization);
-                      widget.appState.isOpenAddOrganizationPage = false;
+                      widget.handleCloseCreateOrganizationPage();
                     },
                     child: const Text('Create'))),
           ],
@@ -55,8 +56,7 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
                 child: TextField(
                   decoration: InputDecoration(
-                    labelText: 'name',
-                    // icon: const Icon(Icons.people),
+                    hintText: 'organization name',
                   ),
                   controller: name,
                 ),
@@ -70,7 +70,7 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                 child: TextField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: InputDecoration(labelText: 'introduction'),
+                  decoration: InputDecoration(hintText: 'some introduction'),
                   controller: introduction,
                 ),
               ),
@@ -124,13 +124,13 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                   Flexible(
                     child: TextField(
                       decoration: const InputDecoration(
-                        labelText: 'Add a tag',
-                      ),
+                          hintText: 'a new tag (exsample: circle)'),
                       controller: newTag,
                       onSubmitted: (value) {
                         if (value.isEmpty) return;
+                        final tags = value.split(' ');
                         setState(() {
-                          tagList.add(value);
+                          tagList.addAll(tags);
                           newTag.text = '';
                         });
                       },
