@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_state.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -8,15 +7,27 @@ import 'schedule.dart';
 class ScheduleHomePage extends StatefulWidget {
   ScheduleHomePage({
     Key key,
-    @required this.appState,
+    @required this.userId,
     @required this.participatingOrganizationIdList,
     @required this.personalEventColor,
     @required this.organizationEventColor,
+    @required this.loadSchedulesForMonth,
+    @required this.targetCalendarMonth,
+    @required this.getEventsForDay,
+    @required this.handleChangeTargetCalendarMonth,
+    @required this.handleChangeDayForScheduleListView,
+    @required this.handleChangeSelectedSchedule,
   }) : super(key: key);
-  final AppState appState;
+  final String userId;
+  final Future<void> Function(DateTime targetMonth) loadSchedulesForMonth;
+  final List<Schedule> Function(DateTime day) getEventsForDay;
+  final DateTime targetCalendarMonth;
   final List<String> participatingOrganizationIdList;
   final Color personalEventColor;
   final Color organizationEventColor;
+  final void Function(DateTime day) handleChangeTargetCalendarMonth;
+  final void Function(DateTime day) handleChangeDayForScheduleListView;
+  final void Function(Schedule schedule) handleChangeSelectedSchedule;
   @override
   _ScheduleHomePageState createState() => _ScheduleHomePageState();
 }
@@ -31,23 +42,22 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
   void initState() {
     print('initState in ScheduleHomePage');
     this._selectedDay = DateTime.now();
-    widget.appState.loadSchedulesForMonth(widget.appState.targetCalendarMonth);
+    widget.loadSchedulesForMonth(widget.targetCalendarMonth);
     this._future = _getSchedulesForMonth();
     super.initState();
   }
 
   Future<bool> _getSchedulesForMonth() async {
-    await widget.appState
-        .loadSchedulesForMonth(widget.appState.targetCalendarMonth);
+    await widget.loadSchedulesForMonth(widget.targetCalendarMonth);
     return true;
   }
 
   List<Schedule> _getEventForDay(DateTime day) {
-    return widget.appState.getScheduleForDay(day);
+    return widget.getEventsForDay(day);
   }
 
   void _onPageChanged(DateTime day) {
-    widget.appState.targetCalendarMonth = day;
+    widget.handleChangeTargetCalendarMonth(day);
     this._getSchedulesForMonth();
   }
 
@@ -55,11 +65,10 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
     if (!isSameDay(_selectedDay, newSelectedDay)) {
       setState(() {
         this._selectedDay = newSelectedDay;
-        widget.appState.targetCalendarMonth = focusedDay;
+        widget.handleChangeTargetCalendarMonth(focusedDay);
       });
-    } else if (isSameDay(widget.appState.targetCalendarMonth, newSelectedDay)) {
-      widget.appState.selectedDayForScheduleList =
-          widget.appState.targetCalendarMonth;
+    } else if (isSameDay(widget.targetCalendarMonth, newSelectedDay)) {
+      widget.handleChangeDayForScheduleListView(widget.targetCalendarMonth);
     }
   }
 
@@ -70,7 +79,7 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
   CalendarBuilders<Schedule> _getCalendarBuilder() {
     final res = CalendarBuilders<Schedule>(singleMarkerBuilder:
         (BuildContext context, DateTime date, Schedule event) {
-      Color _color = event.createdBy == widget.appState.user.uid
+      Color _color = event.createdBy == widget.userId
           ? widget.personalEventColor
           : widget.organizationEventColor;
       return Container(
@@ -108,7 +117,7 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
                   calendarFormat: CalendarFormat.month,
                   firstDay: _firstDay,
                   lastDay: _lastDay,
-                  focusedDay: widget.appState.targetCalendarMonth,
+                  focusedDay: widget.targetCalendarMonth,
                   calendarBuilders: _getCalendarBuilder(),
                   onPageChanged: _onPageChanged,
                   headerStyle: HeaderStyle(
@@ -128,7 +137,7 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
                                 trailing: Text(
                                     '${DateFormat('HH:mm').format(e.start)} ~ ${DateFormat('HH:mm').format(e.end)}'),
                                 onTap: () {
-                                  widget.appState.selectedSchedule = e;
+                                  widget.handleChangeSelectedSchedule(e);
                                 },
                               )))
                           .toList()),

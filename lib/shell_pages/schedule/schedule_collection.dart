@@ -22,7 +22,7 @@ class ScheduleCollection {
 
   Future<void> loadSchedulesForMonth(DateTime targetMonth, bool isContainPublic,
       List<String> participatingOrganizationIdList) async {
-    if (_loadTable[targetMonth] == false) {
+    if (_loadTable.containsKey(targetMonth) == false) {
       _loadTable[targetMonth] = true;
       final _data = await dbService.getSchedulesForMonth(
           targetMonth, isContainPublic, participatingOrganizationIdList);

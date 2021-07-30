@@ -58,7 +58,23 @@ List<ShellState> shellList = <ShellState>[
           MaterialPage(
               child: ScheduleHomePage(
             key: ValueKey('ScheduleHomePage'),
-            appState: appState,
+            getEventsForDay: (DateTime day) {
+              return appState.getScheduleForDay(day);
+            },
+            handleChangeDayForScheduleListView: (DateTime target) {
+              appState.selectedDayForScheduleList = target;
+            },
+            handleChangeSelectedSchedule: (Schedule schedule) {
+              appState.selectedSchedule = schedule;
+            },
+            handleChangeTargetCalendarMonth: (DateTime targetMonth) {
+              appState.targetCalendarMonth = targetMonth;
+            },
+            loadSchedulesForMonth: (DateTime targetMonth) async {
+              await appState.loadSchedulesForMonth(targetMonth);
+            },
+            userId: appState.user.uid,
+            targetCalendarMonth: appState.targetCalendarMonth,
             participatingOrganizationIdList: appState
                 .participatingOrganizationList
                 .map((e) => e.id)
