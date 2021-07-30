@@ -4,16 +4,18 @@ import 'package:flutter_application_1/shell_pages/search/organization_info.dart'
 import 'package:flutter_application_1/store/store_service.dart';
 
 class OrganizationDetailPage extends StatefulWidget {
-  OrganizationDetailPage(
-      {Key key,
-      @required this.organizationId,
-      @required this.handleJoinOrganization,
-      @required this.handleCloseDetailPage})
-      : super(key: key);
+  OrganizationDetailPage({
+    Key key,
+    @required this.organizationId,
+    @required this.handleJoinOrganization,
+    @required this.handleCloseDetailPage,
+    @required this.participatingOrganizationInfoList,
+  }) : super(key: key);
   final String organizationId;
   final Future<void> Function(OrganizationInfo targetOrganization)
       handleJoinOrganization;
   final void Function() handleCloseDetailPage;
+  final List<OrganizationInfo> participatingOrganizationInfoList;
   @override
   OrganizationDetailPageState createState() => OrganizationDetailPageState();
 }
@@ -21,6 +23,7 @@ class OrganizationDetailPage extends StatefulWidget {
 class OrganizationDetailPageState extends State<OrganizationDetailPage> {
   Future<OrganizationInfo> _future;
   OrganizationInfo _organizationInfo;
+  bool _isParticipating;
 
   Future<OrganizationInfo> getOrganizationInfo() async {
     _organizationInfo =
@@ -46,17 +49,25 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
             );
           }
           final targetOrganizationInfo = snapshot.data;
+          this._isParticipating = widget.participatingOrganizationInfoList
+              .where((element) => element.id == widget.organizationId)
+              .toList()
+              .isNotEmpty;
           return Scaffold(
               appBar: AppBar(
                 title: Text(targetOrganizationInfo.name),
                 actions: [
                   TextButton(
                       onPressed: () async {
+                        if (_isParticipating) return;
                         await widget
                             .handleJoinOrganization(targetOrganizationInfo);
                         widget.handleCloseDetailPage();
                       },
-                      child: const Text('Join'))
+                      child: Text('Join',
+                          style: TextStyle(
+                            color: _isParticipating ? Colors.grey : Colors.blue,
+                          )))
                 ],
               ),
               body: SingleChildScrollView(
@@ -67,37 +78,36 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
                     Container(
                         height: 320,
                         width: MediaQuery.of(context).size.width,
-                        child: FittedBox(
-                            fit: BoxFit.contain, child: FlutterLogo())),
+                        child: const FittedBox(
+                            fit: BoxFit.contain, child: const FlutterLogo())),
                     const ListTile(
-                      title: const Text('categories'),
+                      title: const Text('Tags'),
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                       child: Wrap(
                         children: targetOrganizationInfo.tagList
                             .map((e) => (Card(
                                 child: FittedBox(
                                     fit: BoxFit.contain,
                                     child: Padding(
-                                        padding: EdgeInsets.all(4),
+                                        padding: const EdgeInsets.all(4),
                                         child: Text(e))))))
                             .toList(),
                       ),
                     ),
                     const ListTile(
-                      title: const Text('introduction'),
+                      title: const Text('Introduction'),
                     ),
                     Padding(
-                        padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
+                        padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                         child: Text(targetOrganizationInfo.introduction)),
                     const ListTile(
-                      title: const Text('member'),
+                      title: const Text('Number of member'),
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
-                      child: Text(
-                          targetOrganizationInfo.members.length.toString()),
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                      child: Text(targetOrganizationInfo.memberNum.toString()),
                     )
                   ],
                 ),

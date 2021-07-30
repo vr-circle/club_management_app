@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 
 class SearchPage extends StatefulWidget {
-  SearchPage({Key key, @required this.appState}) : super(key: key);
-  final AppState appState;
+  SearchPage({
+    Key key,
+    @required this.searchingParam,
+    @required this.updateSearchingParam,
+    @required this.handleChangeSearchingOrganizationId,
+  }) : super(key: key);
+  final String searchingParam;
+  final void Function(String newParam) updateSearchingParam;
+  final void Function(String searchingOrganizationId)
+      handleChangeSearchingOrganizationId;
   @override
   SearchPageState createState() => SearchPageState();
 }
@@ -25,13 +32,12 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   void initState() {
-    this._controller =
-        TextEditingController(text: widget.appState.searchingParam);
+    this._controller = TextEditingController(text: widget.searchingParam);
     super.initState();
   }
 
   List<OrganizationInfo> _search() {
-    final String _param = widget.appState.searchingParam;
+    final String _param = widget.searchingParam;
     if (_param.isEmpty) {
       return allOrganizationList;
     }
@@ -70,7 +76,7 @@ class SearchPageState extends State<SearchPage> {
                       icon: Icon(Icons.search),
                       labelText: 'Search by name or category'),
                   onSubmitted: (value) {
-                    widget.appState.searchingParam = value;
+                    widget.updateSearchingParam(value);
                     setState(() {
                       this.searchResultList = _search();
                     });
@@ -92,7 +98,7 @@ class SearchPageState extends State<SearchPage> {
                 return OrganizationListView(
                   clubList: this.searchResultList,
                   handleChangeOrganizationId: (String targetId) {
-                    widget.appState.targetOrganizationId = targetId;
+                    widget.handleChangeSearchingOrganizationId(targetId);
                   },
                 );
               },

@@ -285,9 +285,9 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.targetTodoTabId = path.targetId;
     } else if (path is SearchPath) {
       appState.bottomNavigationIndex = SearchPath.index;
-      appState.targetOrganizationId = '';
+      appState.searchingOrganizationId = '';
     } else if (path is OrganizationDetailPath) {
-      appState.targetOrganizationId = path.id;
+      appState.searchingOrganizationId = path.id;
     } else if (path is SettingPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;

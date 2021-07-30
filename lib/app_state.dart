@@ -28,7 +28,7 @@ class AppState extends ChangeNotifier {
         _isContainPublicSchedule = false,
         // todo
         _targetTodoTabId = '',
-        _targetOrganizationId = '',
+        _searchingOrganizationId = '',
         // search
         _searchingParam = '',
         _isOpenCreateOrganizationPage = false,
@@ -221,10 +221,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _targetOrganizationId;
-  String get targetOrganizationId => _targetOrganizationId;
-  set targetOrganizationId(String value) {
-    _targetOrganizationId = value;
+  String _searchingOrganizationId;
+  String get searchingOrganizationId => _searchingOrganizationId;
+  set searchingOrganizationId(String value) {
+    _searchingOrganizationId = value;
     notifyListeners();
   }
 

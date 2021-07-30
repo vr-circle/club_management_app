@@ -180,28 +180,36 @@ List<ShellState> shellList = <ShellState>[
           MaterialPage(
               child: SearchPage(
             key: ValueKey('search'),
-            appState: appState,
+            updateSearchingParam: (String newParam) {
+              appState.searchingParam = newParam;
+            },
+            handleChangeSearchingOrganizationId: (String targetId) {
+              appState.searchingOrganizationId = targetId;
+            },
+            searchingParam: appState.searchingParam,
           )),
-          if (appState.targetOrganizationId.isNotEmpty)
+          if (appState.searchingOrganizationId.isNotEmpty)
             MaterialPage(
                 child: OrganizationDetailPage(
+                    participatingOrganizationInfoList:
+                        appState.participatingOrganizationList,
                     handleCloseDetailPage: () {
-                      appState.targetOrganizationId = '';
+                      appState.searchingOrganizationId = '';
                     },
                     handleJoinOrganization: (OrganizationInfo info) async {
                       await appState.joinOrganization(info);
                     },
-                    organizationId: appState.targetOrganizationId)),
+                    organizationId: appState.searchingOrganizationId)),
         ];
       },
       getRoutePath: (appState) {
-        if (appState.targetOrganizationId.isEmpty)
+        if (appState.searchingOrganizationId.isEmpty)
           return SearchPath(searchingParam: appState.searchingParam);
-        return OrganizationDetailPath(appState.targetOrganizationId);
+        return OrganizationDetailPath(appState.searchingOrganizationId);
       },
       onPopPage: (appState) {
         appState.searchingParam = '';
-        appState.targetOrganizationId = '';
+        appState.searchingOrganizationId = '';
       }),
   ShellState(
       name: 'Setting',
