@@ -11,18 +11,33 @@ int _getHashCode(DateTime key) {
 class ScheduleCollection {
   ScheduleCollection()
       : this._schedules =
-            LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
+            LinkedHashMap(equals: isSameDay, hashCode: _getHashCode),
+        this._loadTable = LinkedHashMap(
+            equals: (DateTime a, DateTime b) =>
+                a.year == b.year && a.month == b.month,
+            hashCode: (DateTime key) => key.year + key.month * 10000);
   LinkedHashMap<DateTime, List<Schedule>> _schedules;
 
-  Future<void> getSchedulesForMonth(DateTime targetMonth, bool isContainPublic,
+  LinkedHashMap<DateTime, bool> _loadTable;
+
+  Future<void> loadSchedulesForMonth(DateTime targetMonth, bool isContainPublic,
       List<String> participatingOrganizationIdList) async {
-    final _data = await dbService.getSchedulesForMonth(
-        targetMonth, isContainPublic, participatingOrganizationIdList);
-    this._schedules = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode)
-      ..addAll(_data);
+    if (_loadTable[targetMonth] == false) {
+      _loadTable[targetMonth] = true;
+      final _data = await dbService.getSchedulesForMonth(
+          targetMonth, isContainPublic, participatingOrganizationIdList);
+      this._schedules.addAll(_data);
+    }
   }
 
-  List<Schedule> getScheduleForDay(DateTime day) {
+  List<Schedule> getSchedulesForDay(DateTime day) {
+    return this._schedules[day] ?? [];
+  }
+
+  Future<List<Schedule>> loadScheduleForDay(DateTime day, bool isContainPublic,
+      List<String> participatingOrganizationIdList) async {
+    await loadSchedulesForMonth(
+        day, isContainPublic, participatingOrganizationIdList);
     return this._schedules[day] ?? [];
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app_state.dart';
@@ -15,11 +17,12 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   InnerRouterDelegate _innerRouterDelegate;
   ChildBackButtonDispatcher _childBackButtonDispatcher;
+  Future<bool> _future;
   @override
   void initState() {
     super.initState();
     dbService = FireStoreService(user: widget._appState.user);
-    widget._appState.initUserSettings();
+    _future = widget._appState.initUserSettings();
     _innerRouterDelegate = InnerRouterDelegate(widget._appState);
   }
 
@@ -39,25 +42,36 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = widget._appState;
+    print('build in AppSchell');
+    // final appState = widget._appState;
     _childBackButtonDispatcher.takePriority();
-    return Scaffold(
-      body: Router(
-        routerDelegate: _innerRouterDelegate,
-        backButtonDispatcher: _childBackButtonDispatcher,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedFontSize: 12,
-        items: shellList
-            .map((e) => BottomNavigationBarItem(icon: e.icon, label: e.name))
-            .toList(),
-        currentIndex: appState.bottomNavigationIndex,
-        onTap: (newIndex) {
-          appState.bottomNavigationIndex = newIndex;
-        },
-      ),
-    );
+    return FutureBuilder(
+        future: _future,
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(
+              child: const CircularProgressIndicator(),
+            );
+          }
+          return Scaffold(
+            body: Router(
+              routerDelegate: _innerRouterDelegate,
+              backButtonDispatcher: _childBackButtonDispatcher,
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              selectedFontSize: 12,
+              items: shellList
+                  .map((e) =>
+                      BottomNavigationBarItem(icon: e.icon, label: e.name))
+                  .toList(),
+              currentIndex: widget._appState.bottomNavigationIndex,
+              onTap: (newIndex) {
+                widget._appState.bottomNavigationIndex = newIndex;
+              },
+            ),
+          );
+        });
   }
 }
 
@@ -77,6 +91,7 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
+    print('build in InnerRouterDelegate');
     return Navigator(
       key: this.navigatorKey,
       pages:

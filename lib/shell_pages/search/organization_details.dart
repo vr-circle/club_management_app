@@ -24,7 +24,7 @@ class OrganizationDetailPageState extends State<OrganizationDetailPage> {
 
   Future<OrganizationInfo> getOrganizationInfo() async {
     _organizationInfo =
-        await dbService.getOrganizationInfo(widget.organizationId);
+        await dbService.getOrganizationInfo(widget.organizationId, false);
     return _organizationInfo;
   }
 

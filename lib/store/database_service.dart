@@ -3,13 +3,16 @@ import 'package:flutter_application_1/shell_pages/search/organization_info.dart'
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
 import 'package:flutter_application_1/user_settings/user_settings.dart';
+import 'package:flutter_application_1/user_settings/user_theme.dart';
 
 abstract class DatabaseService {
   // club
   Future<List<OrganizationInfo>> getOrganizationList();
   Future<List<String>> getParticipatingOrganizationIdList();
-  Future<OrganizationInfo> getOrganizationInfo(String id);
-  Future<void> createOrganization(OrganizationInfo newOrganization);
+  Future<OrganizationInfo> getOrganizationInfo(
+      String id, bool isContainMemberDetail);
+  Future<OrganizationInfo> createOrganization(OrganizationInfo newOrganization);
+  Future<void> deleteOrganization(String targetOrganizationId);
   Future<void> joinOrganization(String targetOrganizationId);
   Future<void> leaveOrganization(OrganizationInfo targetOrganizationInfo);
   Future<void> giveAuthority(String targetOrganizationId, String targetUserId);
@@ -39,4 +42,5 @@ abstract class DatabaseService {
 
   // settings
   Future<UserSettings> initializeUserSettings();
+  Future<void> updateUserTheme(UserThemeSettings userTheme);
 }

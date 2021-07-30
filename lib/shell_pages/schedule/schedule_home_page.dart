@@ -31,14 +31,14 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
   void initState() {
     print('initState in ScheduleHomePage');
     this._selectedDay = DateTime.now();
-    widget.appState.getSchedulesForMonth(widget.appState.targetCalendarMonth);
+    widget.appState.loadSchedulesForMonth(widget.appState.targetCalendarMonth);
     this._future = _getSchedulesForMonth();
     super.initState();
   }
 
   Future<bool> _getSchedulesForMonth() async {
     await widget.appState
-        .getSchedulesForMonth(widget.appState.targetCalendarMonth);
+        .loadSchedulesForMonth(widget.appState.targetCalendarMonth);
     return true;
   }
 

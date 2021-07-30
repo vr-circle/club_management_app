@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/store/store_service.dart';
+import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:tuple/tuple.dart';
 import 'schedule.dart';
 import 'package:intl/intl.dart';
@@ -9,9 +9,11 @@ class AddSchedulePage extends StatefulWidget {
       {Key key,
       @required this.targetDate,
       @required this.addSchedule,
+      @required this.organizationInfoList,
       @required this.handleCloseAddPage})
       : super(key: key);
   final DateTime targetDate;
+  final List<OrganizationInfo> organizationInfoList;
   final Future<void> Function(Schedule schedule, bool isPersonal) addSchedule;
   final void Function() handleCloseAddPage;
   @override
@@ -19,42 +21,26 @@ class AddSchedulePage extends StatefulWidget {
 }
 
 class _AddSchedulePageState extends State<AddSchedulePage> {
-  Future<List<Tuple2<String, String>>>
-      _getParticipatingOrganizationIdAndNameList() async {
-    List<Tuple2<String, String>> targetIdAndNameList = [];
-    final _ids = await dbService.getParticipatingOrganizationIdList();
-    targetIdAndNameList.add(Tuple2('personal', 'personal'));
-    await Future.forEach(_ids, (id) async {
-      final _name = (await dbService.getOrganizationInfo(id)).name;
-      targetIdAndNameList.add(Tuple2(id, _name));
-    });
-    return targetIdAndNameList;
-  }
+  List<Tuple2<String, String>> _targetIdAndNameList;
 
   @override
   void initState() {
+    _targetIdAndNameList = [];
+    _targetIdAndNameList.add(Tuple2('personal', 'personal'));
+    widget.organizationInfoList.forEach((element) {
+      _targetIdAndNameList.add(Tuple2(element.id, element.name));
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: FutureBuilder(
-      future: _getParticipatingOrganizationIdAndNameList(),
-      builder: (BuildContext context,
-          AsyncSnapshot<List<Tuple2<String, String>>> snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(
-            child: const CircularProgressIndicator(),
-          );
-        }
-        return AddScheduleField(
-          targetIdAndName: snapshot.data,
-          targetDate: widget.targetDate,
-          addSchedule: widget.addSchedule,
-          handleCloseAddPage: widget.handleCloseAddPage,
-        );
-      },
+        body: AddScheduleField(
+      targetIdAndName: _targetIdAndNameList,
+      targetDate: widget.targetDate,
+      addSchedule: widget.addSchedule,
+      handleCloseAddPage: widget.handleCloseAddPage,
     ));
   }
 }

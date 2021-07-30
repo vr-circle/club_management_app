@@ -9,12 +9,15 @@ import 'package:flutter_application_1/shell_list.dart';
 import 'package:intl/intl.dart';
 
 class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
-  MyRouteInformationParser(this._appState);
+  MyRouteInformationParser(this._appState) {
+    print('constructor in MyRouterInformationParser');
+  }
   final AppState _appState;
   @override
   Future<RoutePath> parseRouteInformation(
       RouteInformation routeInformation) async {
     print('parseRouteInformation in MyRouteInformationParser');
+    print(routeInformation.location);
     final uri = Uri.parse(routeInformation.location);
     if (_appState.user == null &&
         routeInformation.location == SignUpPath.location) {
@@ -96,13 +99,13 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
         }
         return SettingPath();
       default:
-        return null;
+        return HomePath();
     }
   }
 
   @override
   RouteInformation restoreRouteInformation(RoutePath path) {
-    print('restoreRouteInformation');
+    print('restoreRouteInformation: path is ${path.runtimeType}');
     if (path is LoginPath) {
       return RouteInformation(location: '${LoginPath.location}');
     }
@@ -167,6 +170,7 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path is UserSettingPath) {
       return RouteInformation(location: '${UserSettingPath.location}');
     }
+    print('return null');
     return null;
   }
 }
@@ -174,12 +178,14 @@ class MyRouteInformationParser extends RouteInformationParser<RoutePath> {
 class MyRouterDelegate extends RouterDelegate<RoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePath> {
   MyRouterDelegate(this.appState) : navigatorKey = GlobalKey<NavigatorState>() {
+    print('constructor MyRouterDelegate');
     appState.addListener(notifyListeners);
   }
   final GlobalKey<NavigatorState> navigatorKey;
   final AppState appState;
 
   RoutePath get currentConfiguration {
+    print('currentConfiguration in MyRouterDelegate');
     if (appState.loggedInState == LoggedInState.loggedOut &&
         appState.isOpenSignUpPage == false) {
       return LoginPath();
@@ -221,6 +227,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
           MaterialPage(child: AppShell(appState))
       ],
       onPopPage: (route, result) {
+        print('onPopPage in MyRouterDelegate');
         if (appState.isOpenSignUpPage) {
           appState.isOpenSignUpPage = false;
           notifyListeners();
@@ -237,6 +244,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
   @override
   Future<void> setNewRoutePath(RoutePath path) async {
     print('setNewRoutePath: new path is ${path.runtimeType}');
+    // await appState.initUserSettings();
     if (path is LoginPath) {
       appState.isOpenSignUpPage = false;
       return;
@@ -244,7 +252,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.isOpenSignUpPage = true;
       return;
     } else if (path is HomePath) {
-      appState.bottomNavigationIndex = HomePath.index;
+      // appState.bottomNavigationIndex = HomePath.index;
     } else if (path is SchedulePath) {
       // todo: scheduleCollection -> in appState
       //        appState.scheduleCollection.getSchedulesForMonth()
@@ -254,14 +262,19 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.isOpenAddSchedulePage = false;
       appState.selectedSchedule = null;
     } else if (path is ScheduleListViewPath) {
+      await appState.getScheduleForDay(path.day);
       appState.bottomNavigationIndex = SchedulePath.index;
       appState.selectedDayForScheduleList = path.day;
       appState.isOpenAddSchedulePage = false;
       appState.selectedSchedule = null;
     } else if (path is ScheduleDetailPath) {
-      // appState.bottomNavigationIndex = SchedulePath.index;
-      // final _data = await dbService.getSchedule(path.scheduleId, path.day);
-      // appState.selectedSchedule = _data;
+      appState.bottomNavigationIndex = SchedulePath.index;
+      final _data = (await appState.getScheduleForDay(path.day))
+              .where((element) => element.id == path.scheduleId)
+              .toList()
+              .first ??
+          null;
+      appState.selectedSchedule = _data;
     } else if (path is ScheduleAddPath) {
       appState.bottomNavigationIndex = SchedulePath.index;
       appState.selectedDayForScheduleList = path.day;
@@ -278,17 +291,17 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
     } else if (path is SettingPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
-      appState.settingOrganizationId = '';
+      appState.selectedSettingOrganizationId = '';
       appState.isOpenAddOrganizationPage = false;
     } else if (path is SettingOrganizationPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
-      appState.settingOrganizationId = path.id;
+      appState.selectedSettingOrganizationId = path.id;
     } else if (path is SettingAddOrganizationPath) {
       appState.bottomNavigationIndex = SettingPath.index;
       appState.isOpenAccountView = false;
       appState.isOpenAddOrganizationPage = true;
-      appState.settingOrganizationId = '';
+      appState.selectedSettingOrganizationId = '';
     } else if (path is UserSettingPath) {
       appState.isOpenAccountView = true;
     }

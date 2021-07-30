@@ -16,6 +16,7 @@ import 'package:flutter_application_1/shell_pages/settings/setting_organization.
 import 'package:flutter_application_1/shell_pages/settings/settings_page.dart';
 import 'package:flutter_application_1/shell_pages/settings/user_account_view.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_home_page.dart';
+import 'package:flutter_application_1/user_settings/user_theme.dart';
 
 class ShellState {
   ShellState(
@@ -84,6 +85,7 @@ List<ShellState> shellList = <ShellState>[
                 key: ValueKey('AddSchedulePage'),
                 child: AddSchedulePage(
                   targetDate: appState.selectedDayForScheduleList,
+                  organizationInfoList: appState.participatingOrganizationList,
                   addSchedule: (Schedule newSchedule, bool isPersonal) async {
                     await appState.addSchedule(newSchedule, isPersonal);
                   },
@@ -97,10 +99,8 @@ List<ShellState> shellList = <ShellState>[
                 child: ScheduleDetails(
                   schedule: appState.selectedSchedule,
                   deleteSchedule: (Schedule targetSchedule) async {
-                    if (appState.user.uid == targetSchedule.createdBy)
-                      await appState.deleteSchedule(targetSchedule, true);
-                    else
-                      await appState.deleteSchedule(targetSchedule, false);
+                    await appState.deleteSchedule(targetSchedule,
+                        appState.user.uid == targetSchedule.createdBy);
                   },
                   handleCloseDetailsPage: () {
                     appState.selectedSchedule = null;
@@ -211,7 +211,22 @@ List<ShellState> shellList = <ShellState>[
           MaterialPage(
               key: ValueKey('settings'),
               child: SettingsPage(
-                appState: appState,
+                handleChangeSelectedSettingOrganizationId: (String value) {
+                  appState.selectedSettingOrganizationId = value;
+                },
+                handleOpenAccountView: () {
+                  appState.isOpenAccountView = true;
+                },
+                handleOpenCreateNewOrganization: () {
+                  appState.isOpenAddOrganizationPage = true;
+                },
+                logOut: () async {
+                  await appState.logOut();
+                },
+                userThemeSettings: appState.userThemeSettings,
+                updateUserTheme: (UserThemeSettings userTheme) async {
+                  appState.updateUserTheme(userTheme);
+                },
                 participatingOrganizationInfoList:
                     appState.participatingOrganizationList,
               )),
@@ -223,26 +238,28 @@ List<ShellState> shellList = <ShellState>[
               },
               user: appState.user,
             )),
-          if (appState.settingOrganizationId.isNotEmpty)
+          if (appState.selectedSettingOrganizationId.isNotEmpty)
             MaterialPage(
                 child: SettingOrganization(
-                    id: appState.settingOrganizationId, appState: appState)),
+                    id: appState.selectedSettingOrganizationId,
+                    appState: appState)),
           if (appState.isOpenAddOrganizationPage)
             MaterialPage(child: CreateOrganization(appState: appState)),
         ];
       },
       getRoutePath: (appState) {
         if (appState.isOpenAccountView) return UserSettingPath();
-        if (appState.settingOrganizationId.isNotEmpty)
-          return SettingOrganizationPath(appState.settingOrganizationId);
+        if (appState.selectedSettingOrganizationId.isNotEmpty)
+          return SettingOrganizationPath(
+              appState.selectedSettingOrganizationId);
         if (appState.isOpenAddOrganizationPage)
           return SettingAddOrganizationPath();
         return SettingPath();
       },
       onPopPage: (appState) {
         if (appState.isOpenAccountView) appState.isOpenAccountView = false;
-        if (appState.settingOrganizationId.isNotEmpty)
-          appState.settingOrganizationId = '';
+        if (appState.selectedSettingOrganizationId.isNotEmpty)
+          appState.selectedSettingOrganizationId = '';
         if (appState.isOpenAddOrganizationPage)
           appState.isOpenAddOrganizationPage = false;
       }),

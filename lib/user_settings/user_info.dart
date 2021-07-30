@@ -1,23 +1,38 @@
+class UserAuthUtils {
+  static String name(value) {
+    var sp = value?.toString()?.split('.');
+    if (sp == null || sp.length != 2) {
+      return null;
+    }
+    return sp[1];
+  }
+
+  static T valueOf<T>(List<T> values, String value) {
+    if (value == null || values == null) {
+      return null;
+    }
+    return values.firstWhere((element) => UserAuthUtils.name(element) == value,
+        orElse: () => null);
+  }
+
+  static UserAuthorities fromString(String target) {
+    switch (target) {
+      case 'admin':
+        return UserAuthorities.admin;
+      case 'write':
+        return UserAuthorities.write;
+      case 'readonly':
+        return UserAuthorities.readonly;
+      default:
+        return UserAuthorities.readonly;
+    }
+  }
+}
+
 enum UserAuthorities {
-  none,
   readonly,
   write,
   admin,
-}
-
-UserAuthorities convertToUserAuthorities(String data) {
-  switch (data) {
-    case 'none':
-      return UserAuthorities.none;
-    case 'readonly':
-      return UserAuthorities.readonly;
-    case 'write':
-      return UserAuthorities.write;
-    case 'admin':
-      return UserAuthorities.admin;
-    default:
-      return UserAuthorities.readonly;
-  }
 }
 
 class MemberInfo {

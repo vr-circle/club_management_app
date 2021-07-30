@@ -4,14 +4,25 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_application_1/app_state.dart';
 import 'package:flutter_application_1/my_app.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
+  print('start main');
   setPathUrlStrategy();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
+
+// class ThemeController extends StateNotifier<bool> {
+//   ThemeController() : super(false);
+//   void changeTheme(bool isDark) {
+//     state = isDark;
+//   }
+// }
+
+// final themeProvider = StateNotifierProvider((ref) => ThemeController());
 
 class MyApp extends StatefulWidget {
   @override
@@ -33,6 +44,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    print('MyApp');
     return StreamBuilder(
       stream: _appState.authStateChange()(),
       builder: (context, AsyncSnapshot<User> snapshot) {
@@ -45,13 +57,16 @@ class _MyAppState extends State<MyApp> {
           return const Center(child: const Text('Error'));
         }
         if (snapshot.data != null) _appState.user = snapshot.data;
+        print('MaterialApp.router');
         return MaterialApp.router(
           title: 'OMA',
           debugShowCheckedModeBanner: false,
-          theme: SchedulerBinding.instance.window.platformBrightness ==
-                  Brightness.dark
-              ? ThemeData.dark()
-              : ThemeData.light(),
+          theme:
+              // context.read(themeProvider)
+              SchedulerBinding.instance.window.platformBrightness ==
+                      Brightness.dark
+                  ? ThemeData.dark()
+                  : ThemeData.light(),
           routeInformationParser: _routeInformationParser,
           routerDelegate: _routerDelegate,
         );

@@ -38,6 +38,7 @@ dependencies:
     flutter_speed_dial: ^4.1.0
     tuple: ^2.0.0
     routemaster: ^0.9.5
+    flutter_colorpicker: ^0.4.0
 
 dev_dependencies:
     flutter_test:

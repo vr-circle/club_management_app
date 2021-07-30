@@ -73,7 +73,7 @@ class _SettingOrganizationState extends State<SettingOrganization> {
                                               .leaveOrganization(
                                                   _organizationInfo.id);
                                           widget.appState
-                                              .settingOrganizationId = '';
+                                              .selectedSettingOrganizationId = '';
                                           Navigator.pop(context);
                                         },
                                         child: const Text('Leave')),

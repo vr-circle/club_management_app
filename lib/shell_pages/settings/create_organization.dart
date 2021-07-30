@@ -135,17 +135,23 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                         });
                       },
                     ),
-                    flex: 4,
+                    flex: 6,
                   ),
-                  IconButton(
-                      onPressed: () {
-                        if (newTag.text.isEmpty) return;
-                        setState(() {
-                          tagList.add(newTag.text);
-                          newTag.text = '';
-                        });
-                      },
-                      icon: const Icon(Icons.add_box_outlined)),
+                  Flexible(
+                      child: InkWell(
+                        onTap: () {
+                          if (newTag.text.isEmpty) return;
+                          setState(() {
+                            tagList.add(newTag.text);
+                            newTag.text = '';
+                          });
+                        },
+                        child: FittedBox(
+                          child: const Icon(Icons.add),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      flex: 1)
                 ]),
               ),
             ],
