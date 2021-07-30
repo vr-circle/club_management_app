@@ -126,6 +126,9 @@ class AppState extends ChangeNotifier {
         .where((element) => element.id == id)
         .toList()
         .first;
+    // if (target.memberNum <= 1) {
+    //   return;
+    // }
     await dbService.leaveOrganization(target);
     _participatingOrganizationList =
         _participatingOrganizationList.where((info) => info.id != id).toList();

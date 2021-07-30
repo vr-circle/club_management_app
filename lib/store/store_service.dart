@@ -153,10 +153,10 @@ class FireStoreService extends DatabaseService {
       try {
         res.add(OrganizationInfo(
             id: element.id,
-            name: element['name'],
-            introduction: element['introduction'],
-            tagList: List<String>.from(element['tagList']),
-            memberNum: element['memberNum']));
+            name: element.data()['name'],
+            introduction: element.data()['introduction'],
+            tagList: List<String>.from(element.data()['tagList']),
+            memberNum: element.data()['memberNum']));
       } catch (e) {
         print(e);
       }
@@ -183,6 +183,9 @@ class FireStoreService extends DatabaseService {
         .collection('members')
         .doc(userId)
         .set({'auth': 'admin', 'name': user.displayName});
+    await _store.collection(usersCollectionName).doc(userId).set({
+      'organizations': FieldValue.arrayUnion([docRef.id])
+    }, SetOptions(merge: true));
     newOrganization.id = docRef.id;
     newOrganization.members = [];
     newOrganization.members.add(MemberInfo(
@@ -209,7 +212,7 @@ class FireStoreService extends DatabaseService {
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationId)
-        .set({'memberNum': FieldValue.increment(1)});
+        .update({'memberNum': FieldValue.increment(1)});
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationId)
@@ -225,10 +228,15 @@ class FireStoreService extends DatabaseService {
     await _store.collection(usersCollectionName).doc(userId).update({
       'organizations': FieldValue.arrayRemove([targetOrganizationInfo.id])
     });
+    // This is not work. increment(-1) makes memberNum(1) change to memberNum(-1)
+    // await _store
+    //     .collection(organizationCollectionName)
+    //     .doc(targetOrganizationInfo.id)
+    //     .update({'memberNum': FieldValue.increment(-1)},SetOptions(merge: true));
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationInfo.id)
-        .set({'memberNum': FieldValue.increment(-1)});
+        .update({'memberNum': targetOrganizationInfo.memberNum - 1});
     await _store
         .collection(organizationCollectionName)
         .doc(targetOrganizationInfo.id)

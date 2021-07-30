@@ -276,7 +276,11 @@ List<ShellState> shellList = <ShellState>[
                   appState.participatingOrganizationList,
             )),
           if (appState.isOpenCreateOrganizationPage)
-            MaterialPage(child: CreateOrganization(
+            MaterialPage(
+                child: CreateOrganization(
+              joinOrganization: (OrganizationInfo newOrganization) {
+                appState.participatingOrganizationList.add(newOrganization);
+              },
               handleCloseCreateOrganizationPage: () {
                 appState.isOpenCreateOrganizationPage = false;
               },

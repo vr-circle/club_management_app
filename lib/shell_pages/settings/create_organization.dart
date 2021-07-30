@@ -5,9 +5,12 @@ import 'package:flutter_application_1/store/store_service.dart';
 
 class CreateOrganization extends StatefulWidget {
   CreateOrganization(
-      {Key key, @required this.handleCloseCreateOrganizationPage})
+      {Key key,
+      @required this.handleCloseCreateOrganizationPage,
+      @required this.joinOrganization})
       : super(key: key);
   final void Function() handleCloseCreateOrganizationPage;
+  final void Function(OrganizationInfo newOrganizationInfo) joinOrganization;
   @override
   _CreateOrganizationState createState() => _CreateOrganizationState();
 }
@@ -40,7 +43,9 @@ class _CreateOrganizationState extends State<CreateOrganization> {
                           memberNum: 1,
                           introduction: introduction.text,
                           tagList: tagList);
-                      await dbService.createOrganization(newOrganization);
+                      final tmp =
+                          await dbService.createOrganization(newOrganization);
+                      widget.joinOrganization(tmp);
                       widget.handleCloseCreateOrganizationPage();
                     },
                     child: const Text('Create'))),
