@@ -5,24 +5,27 @@ import 'package:flutter_application_1/shell_pages/todo/task_expansion_tile.dart'
 import 'package:flutter_application_1/shell_pages/todo/task_group.dart';
 
 class TodoPage extends StatefulWidget {
-  TodoPage({
-    Key key,
-    @required this.initTodoCollection,
-    @required this.participatingOrganizationInfoList,
-    @required this.loadTasks,
-    @required this.addGroup,
-    @required this.deleteGroup,
-    @required this.addTask,
-    @required this.deleteTask,
-    @required this.getTaskGroupList,
-  });
+  TodoPage(
+      {Key key,
+      @required this.initTodoCollection,
+      @required this.participatingOrganizationInfoList,
+      @required this.loadTasks,
+      @required this.addGroup,
+      @required this.deleteGroup,
+      @required this.addTask,
+      @required this.deleteTask,
+      @required this.getTaskGroupList,
+      @required this.targetIndexId,
+      @required this.handleChangeTab});
+  final String targetIndexId;
+  final void Function(String value) handleChangeTab;
   final void Function() initTodoCollection;
   final List<OrganizationInfo> participatingOrganizationInfoList;
   final Future<void> Function([String targetOrganizationId]) loadTasks;
-  final Future<void> Function(Task newTask,
-      [String targetGroupId, String targetOrganizationId]) addTask;
-  final Future<void> Function(Task targetTask,
-      [String targetGroupId, String targetOrganizationId]) deleteTask;
+  final Future<void> Function(Task newTask, String targetGroupId,
+      [String targetOrganizationId]) addTask;
+  final Future<void> Function(Task targetTask, String targetGroupId,
+      [String targetOrganizationId]) deleteTask;
   final Future<void> Function(String newGroupName,
       [String targetOrganizationId]) addGroup;
   final Future<void> Function(String groupId, [String targetOrganizationId])
@@ -36,13 +39,34 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
   TabController _tabController;
   @override
   void initState() {
-    print('start initState in _TodoPageState');
+    print('initState in _TodoPageState');
+    int res = 0;
+    final x = widget.participatingOrganizationInfoList
+      ..sort((a, b) => a.name.compareTo(b.name));
+    for (int i = 0; i < x.length; i++) {
+      if (x[i].id == widget.targetIndexId) {
+        res = i + 1;
+        break;
+      }
+    }
     _tabController = TabController(
+        initialIndex: res,
         length: widget.participatingOrganizationInfoList.length + 1,
         vsync: this);
+    _tabController.addListener(_handleChangeTab);
     widget.initTodoCollection();
     super.initState();
-    print('end initState in _TodoPageState');
+  }
+
+  void _handleChangeTab() {
+    if (_tabController.index == 0) {
+      widget.handleChangeTab('');
+    } else {
+      widget.handleChangeTab((widget.participatingOrganizationInfoList
+            ..sort(
+                (a, b) => a.name.compareTo(b.name)))[_tabController.index - 1]
+          .id);
+    }
   }
 
   @override
@@ -53,7 +77,16 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    print('build in _TodoPageState');
+    int res = 0;
+    final x = widget.participatingOrganizationInfoList
+      ..sort((a, b) => a.name.compareTo(b.name));
+    for (int i = 0; i < x.length; i++) {
+      if (x[i].id == widget.targetIndexId) {
+        res = i + 1;
+        break;
+      }
+    }
+    _tabController.index = res;
     return Scaffold(
         appBar: AppBar(
             title: Row(
@@ -93,7 +126,6 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
               await widget.deleteTask(targetTask, targetGroupId);
             },
             loadTasks: () async {
-              await Future.delayed(Duration(seconds: 2));
               await widget.loadTasks();
               return true;
             },
@@ -116,8 +148,6 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
                       await widget.deleteTask(targetTask, targetGroupId, e.id);
                     },
                     loadTasks: () async {
-                      await Future.delayed(Duration(seconds: 2));
-                      print('loadTask hogehogehgoehgoehgoeh');
                       await widget.loadTasks(e.id);
                       return true;
                     },
@@ -150,7 +180,6 @@ class _TodoTabBarViewState extends State<TodoTabBarView> {
   Future<bool> _future;
   @override
   void initState() {
-    print('initState in TodoTabBarViewState');
     _future = widget.loadTasks();
     super.initState();
   }
@@ -175,7 +204,7 @@ class _TodoTabBarViewState extends State<TodoTabBarView> {
                         addTask: (Task newTask) async {
                           await widget.addTask(newTask, e.id);
                         },
-                        deleteTask: (targetTask) async {
+                        deleteTask: (Task targetTask) async {
                           await widget.deleteTask(targetTask, e.id);
                         },
                         deleteGroup: () async {

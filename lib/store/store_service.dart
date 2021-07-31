@@ -558,8 +558,6 @@ class FireStoreService extends DatabaseService {
   Future<void> deleteTaskGroup(String targetGroupId,
       [String targetOrganizationId]) async {
     print('deleteTaskGroup');
-    print('targetGroupId: $targetGroupId');
-    print('targetOrganizationId: $targetOrganizationId');
     bool isPersonal = targetOrganizationId == null;
     await _store
         .collection(
@@ -571,17 +569,16 @@ class FireStoreService extends DatabaseService {
   }
 
   @override
-  Future<void> addTask(Task task,
-      [String targetGroupId, String targetOrganizationId]) async {
+  Future<void> addTask(Task task, String targetGroupId,
+      [String targetOrganizationId]) async {
     print('addTask');
     bool isPersonal = targetOrganizationId == null;
-    bool isRaw = targetGroupId == null;
     await _store
         .collection(
             isPersonal ? usersCollectionName : organizationCollectionName)
         .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
-        .doc(isRaw ? 'raw' : targetGroupId)
+        .doc(targetGroupId)
         .update({
       'tasks': FieldValue.arrayUnion([
         {'id': task.id, 'title': task.title},

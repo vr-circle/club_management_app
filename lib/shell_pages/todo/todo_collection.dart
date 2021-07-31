@@ -13,17 +13,16 @@ class TodoCollection {
 
   void initCollection(
       List<OrganizationInfo> participatingOrganizationInfoList) {
-    print('start initCollection in TodoCollection');
     _todoCollection[''] = TodoTabInfo(id: '', name: 'personal');
     participatingOrganizationInfoList.forEach((element) {
       _todoCollection[element.id] =
           TodoTabInfo(id: element.id, name: element.name);
     });
-    print('end initCollection in TodoCollection');
   }
 
   Future<void> loadTask([String organizationId]) async {
     if (_loadTable.containsKey(organizationId ?? '')) {
+      print('loadTask is ended');
       return;
     }
     _loadTable[organizationId ?? ''] = true;
@@ -44,7 +43,7 @@ class TodoCollection {
       [String targetOrganizationId]) async {
     _todoCollection[targetOrganizationId ?? '']
         .deleteTask(targetTask, targetGroupId);
-    await dbService.addTask(targetTask, targetGroupId, targetOrganizationId);
+    await dbService.deleteTask(targetTask, targetGroupId, targetOrganizationId);
   }
 
   Future<void> addGroup(String newGroupName,

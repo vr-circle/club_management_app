@@ -25,14 +25,12 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
 
   @override
   void initState() {
-    print('initState in _TaskExpansionTileState');
     _isOpenExpansion = true;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build in _TaskExpansionTileState');
     return GestureDetector(
         onLongPress: () async {
           await showDialog(

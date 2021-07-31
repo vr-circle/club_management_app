@@ -15,6 +15,7 @@ import 'package:flutter_application_1/shell_pages/settings/create_organization.d
 import 'package:flutter_application_1/shell_pages/settings/setting_organization.dart';
 import 'package:flutter_application_1/shell_pages/settings/settings_page.dart';
 import 'package:flutter_application_1/shell_pages/settings/user_account_view.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
 import 'package:flutter_application_1/shell_pages/todo/todo_home_page.dart';
 import 'package:flutter_application_1/user_settings/user_theme.dart';
 
@@ -169,28 +170,49 @@ List<ShellState> shellList = <ShellState>[
       name: 'Todo',
       icon: const Icon(Icons.task),
       getPages: (appState) {
-        // appState.initTodoCollection();
         return [
           MaterialPage(
               child: TodoPage(
+            handleChangeTab: (String v) {
+              appState.todoTargetTabIndexId = v;
+            },
+            targetIndexId: appState.todoTargetTabIndexId,
             initTodoCollection: appState.initTodoCollection,
             key: ValueKey('TodoPage'),
             participatingOrganizationInfoList:
                 appState.participatingOrganizationList,
-            addGroup: appState.addGroup,
-            deleteGroup: appState.deleteGroup,
-            addTask: appState.addTask,
-            deleteTask: appState.deleteTask,
-            loadTasks: appState.loadTasks,
-            getTaskGroupList: appState.getTaskGroupList,
+            addGroup: (String newGroupName,
+                [String targetOrganizationId]) async {
+              await appState.addGroup(newGroupName, targetOrganizationId);
+            },
+            deleteGroup: (String targetGroupId,
+                [String targetOrganizationId]) async {
+              await appState.deleteGroup(targetGroupId, targetOrganizationId);
+            },
+            addTask: (Task newTask, String targetGroupId,
+                [String targetOrganizationId]) async {
+              await appState.addTask(
+                  newTask, targetGroupId, targetOrganizationId);
+            },
+            deleteTask: (Task targetTask, String targetGroupId,
+                [String targetOrganizationId]) async {
+              await appState.deleteTask(
+                  targetTask, targetGroupId, targetOrganizationId);
+            },
+            loadTasks: ([String targetOrganizationId]) async {
+              await appState.loadTasks(targetOrganizationId);
+            },
+            getTaskGroupList: ([String tragetOrganizationId]) {
+              return appState.getTaskGroupList(tragetOrganizationId);
+            },
           )),
         ];
       },
       getRoutePath: (appState) {
-        return TodoPath(targetId: appState.targetTodoTabId);
+        return TodoPath(targetId: appState.todoTargetTabIndexId);
       },
       onPopPage: (appState) {
-        appState.targetTodoTabId = '';
+        appState.todoTargetTabIndexId = '';
       }),
   ShellState(
       name: 'Search',

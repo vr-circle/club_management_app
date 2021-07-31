@@ -37,8 +37,8 @@ abstract class DatabaseService {
       [String targetOrganizationId]);
   Future<void> deleteTaskGroup(String targetGroupId,
       [String targetOrganizationId]);
-  Future<void> addTask(Task task,
-      [String targetGroupName, String targetOrganizationId]);
+  Future<void> addTask(Task task, String targetGroupName,
+      [String targetOrganizationId]);
   Future<void> deleteTask(Task task, String targetGroupName,
       [String targetOrganizationId]);
 

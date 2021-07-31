@@ -252,7 +252,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.isOpenSignUpPage = true;
       return;
     } else if (path is HomePath) {
-      // appState.bottomNavigationIndex = HomePath.index;
+      appState.bottomNavigationIndex = HomePath.index;
     } else if (path is SchedulePath) {
       // todo: scheduleCollection -> in appState
       //        appState.scheduleCollection.getSchedulesForMonth()
@@ -282,7 +282,7 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
       appState.selectedSchedule = null;
     } else if (path is TodoPath) {
       appState.bottomNavigationIndex = TodoPath.index;
-      appState.targetTodoTabId = path.targetId;
+      appState.todoTargetTabIndexId = path.targetId;
     } else if (path is SearchPath) {
       appState.bottomNavigationIndex = SearchPath.index;
       appState.searchingOrganizationId = '';

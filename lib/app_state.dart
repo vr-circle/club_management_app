@@ -31,10 +31,10 @@ class AppState extends ChangeNotifier {
         _isContainPublicSchedule = false,
         // todo
         _todoCollection = TodoCollection(),
-        _targetTodoTabId = '',
-        _searchingOrganizationId = '',
+        _todoTargetTabIndexId = '',
         // search
         _searchingParam = '',
+        _searchingOrganizationId = '',
         _isOpenCreateOrganizationPage = false,
         // setting
         _participatingOrganizationList = [],
@@ -44,10 +44,15 @@ class AppState extends ChangeNotifier {
 
   TodoCollection _todoCollection;
 
+  String _todoTargetTabIndexId;
+  String get todoTargetTabIndexId => _todoTargetTabIndexId;
+  set todoTargetTabIndexId(String v) {
+    _todoTargetTabIndexId = v;
+    notifyListeners();
+  }
+
   void initTodoCollection() {
-    print('start initTodoCollection in appState');
     _todoCollection.initCollection(_participatingOrganizationList);
-    print('end initTodoCollection in appState');
   }
 
   List<TaskGroup> getTaskGroupList([String id]) {
@@ -59,14 +64,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addTask(Task newTask,
-      [String targetGroupId, String targetOrganizationId]) async {
+  Future<void> addTask(Task newTask, String targetGroupId,
+      [String targetOrganizationId]) async {
     await _todoCollection.addTask(newTask, targetGroupId, targetOrganizationId);
     notifyListeners();
   }
 
-  Future<void> deleteTask(Task targetTask,
-      [String targetGroupId, String targetOrganizationId]) async {
+  Future<void> deleteTask(Task targetTask, String targetGroupId,
+      [String targetOrganizationId]) async {
     await _todoCollection.deleteTask(
         targetTask, targetGroupId, targetOrganizationId);
     notifyListeners();
@@ -80,7 +85,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> deleteGroup(String targetGroupId,
       [String targetOrganizationId]) async {
-    await _todoCollection.deleteGroup(targetGroupId);
+    await _todoCollection.deleteGroup(targetGroupId, targetOrganizationId);
     notifyListeners();
   }
 
@@ -119,8 +124,6 @@ class AppState extends ChangeNotifier {
       res.add(await dbService.getOrganizationInfo(id, true));
     });
     _participatingOrganizationList = res;
-    print(_participatingOrganizationList);
-    print('end initUserSettings in appState');
     notifyListeners();
     return true;
   }
@@ -251,14 +254,6 @@ class AppState extends ChangeNotifier {
   bool get isOpenAddSchedulePage => _isOpenAddSchedulePage;
   set isOpenAddSchedulePage(bool value) {
     _isOpenAddSchedulePage = value;
-    notifyListeners();
-  }
-
-  // todo
-  String _targetTodoTabId;
-  String get targetTodoTabId => _targetTodoTabId;
-  set targetTodoTabId(String value) {
-    _targetTodoTabId = value;
     notifyListeners();
   }
 
