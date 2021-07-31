@@ -8,7 +8,6 @@ class ScheduleHomePage extends StatefulWidget {
   ScheduleHomePage({
     Key key,
     @required this.userId,
-    @required this.participatingOrganizationIdList,
     @required this.personalEventColor,
     @required this.organizationEventColor,
     @required this.loadSchedulesForMonth,
@@ -22,7 +21,6 @@ class ScheduleHomePage extends StatefulWidget {
   final Future<void> Function(DateTime targetMonth) loadSchedulesForMonth;
   final List<Schedule> Function(DateTime day) getEventsForDay;
   final DateTime targetCalendarMonth;
-  final List<String> participatingOrganizationIdList;
   final Color personalEventColor;
   final Color organizationEventColor;
   final void Function(DateTime day) handleChangeTargetCalendarMonth;

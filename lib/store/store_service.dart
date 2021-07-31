@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
-import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_group.dart';
 import 'package:flutter_application_1/store/database_service.dart';
 import 'package:flutter_application_1/user_settings/user_info.dart';
 import 'package:flutter_application_1/user_settings/user_settings.dart';
@@ -29,7 +29,6 @@ class FireStoreService extends DatabaseService {
   final scheduleCollectionName = 'schedule';
   final settingsCollectionName = 'settings';
   final settingsOrganizationName = 'organizations';
-  final taskGroupDocName = 'group';
   final public = 'public';
   final private = 'private';
 
@@ -515,92 +514,96 @@ class FireStoreService extends DatabaseService {
 
   // --------------------------- todo ------------------------------------------
   @override
-  Future<Map<String, TaskList>> getTaskList(String id) async {
-    print('getTaskList');
-    Map<String, TaskList> res = {};
-    final target = _store
+  Future<List<TaskGroup>> loadTaskList([String organizationId]) async {
+    print('loadTaskList in store: ${organizationId}');
+    bool isPersonal = organizationId == null;
+    List<TaskGroup> taskGroup = [];
+    final data = await _store
         .collection(
-            id.isEmpty ? usersCollectionName : organizationCollectionName)
-        .doc(id.isEmpty ? userId : id)
+            isPersonal ? usersCollectionName : organizationCollectionName)
+        .doc(isPersonal ? userId : organizationId)
         .collection(todoCollectionName)
-        .doc(taskGroupDocName);
+        .get();
     try {
-      final _data = (await target.get()).data();
-      if (_data == null) {
-        return res;
-      }
-      _data.forEach((key, value) {
-        final _tmp = List<String>.from(value);
-        res[key] = TaskList(_tmp.map((e) => Task(title: e)).toList());
+      data.docs.forEach((element) {
+        taskGroup.add(TaskGroup(
+            id: element.id,
+            name: element.data()['name'],
+            taskList: List<Task>.from(element
+                .data()['tasks']
+                .map((e) => Task(id: e['id'], title: e['title']))
+                .toList())));
       });
     } catch (e) {
       print(e);
     }
-    return res;
+    return taskGroup;
   }
 
   @override
-  Future<void> addTaskGroup(
-      String listName, String targetOrganizationId) async {
+  Future<TaskGroup> addTaskGroup(String newGroupName,
+      [String targetOrganizationId]) async {
     print('addTaskGroup');
-    bool isPersonal =
-        targetOrganizationId == null || targetOrganizationId.isEmpty;
-    await _store
+    bool isPersonal = targetOrganizationId == null;
+    final docRef = await _store
         .collection(
             isPersonal ? usersCollectionName : organizationCollectionName)
         .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
-        .doc(taskGroupDocName)
-        .set({listName: []}, SetOptions(merge: true));
+        .add({'name': newGroupName, 'tasks': []});
+    return TaskGroup(id: docRef.id, name: newGroupName);
   }
 
   @override
-  Future<void> deleteTaskGroup(
-      String listName, String targetOrganizationId) async {
+  Future<void> deleteTaskGroup(String targetGroupId,
+      [String targetOrganizationId]) async {
     print('deleteTaskGroup');
-    bool isPersonal =
-        targetOrganizationId == null || targetOrganizationId.isEmpty;
+    print('targetGroupId: $targetGroupId');
+    print('targetOrganizationId: $targetOrganizationId');
+    bool isPersonal = targetOrganizationId == null;
     await _store
         .collection(
             isPersonal ? usersCollectionName : organizationCollectionName)
         .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
-        .doc(taskGroupDocName)
-        .update({listName: FieldValue.delete()});
+        .doc(targetGroupId)
+        .delete();
   }
 
   @override
-  Future<void> addTask(
-      Task task, String targetListName, String targetOrganizationId) async {
+  Future<void> addTask(Task task,
+      [String targetGroupId, String targetOrganizationId]) async {
     print('addTask');
-    bool isPersonal =
-        targetOrganizationId == null || targetOrganizationId.isEmpty;
+    bool isPersonal = targetOrganizationId == null;
+    bool isRaw = targetGroupId == null;
     await _store
         .collection(
             isPersonal ? usersCollectionName : organizationCollectionName)
         .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
-        .doc(taskGroupDocName)
+        .doc(isRaw ? 'raw' : targetGroupId)
         .update({
-      targetListName: FieldValue.arrayUnion([task.title])
+      'tasks': FieldValue.arrayUnion([
+        {'id': task.id, 'title': task.title},
+      ])
     });
   }
 
   @override
-  Future<void> deleteTask(
-      Task task, String targetListName, String targetOrganizationId) async {
+  Future<void> deleteTask(Task task, String targetGroupId,
+      [String targetOrganizationId]) async {
     print('deleteTask');
-    bool isPersonal =
-        targetOrganizationId == null || targetOrganizationId.isEmpty;
-    // private
+    bool isPersonal = targetOrganizationId == null;
     await _store
         .collection(
             isPersonal ? usersCollectionName : organizationCollectionName)
         .doc(isPersonal ? userId : targetOrganizationId)
         .collection(todoCollectionName)
-        .doc(taskGroupDocName)
+        .doc(targetGroupId)
         .update({
-      targetListName: FieldValue.arrayRemove([task.title])
+      'tasks': FieldValue.arrayRemove([
+        {'id': task.id, 'title': task.title},
+      ])
     });
   }
 }

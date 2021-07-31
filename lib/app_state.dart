@@ -6,6 +6,9 @@ import 'package:flutter_application_1/route_path.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/schedule/schedule_collection.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
+import 'package:flutter_application_1/shell_pages/todo/task.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_group.dart';
+import 'package:flutter_application_1/shell_pages/todo/todo_collection.dart';
 import 'package:flutter_application_1/store/store_service.dart';
 import 'package:flutter_application_1/user_settings/user_settings.dart';
 import 'package:flutter_application_1/user_settings/user_theme.dart';
@@ -27,6 +30,7 @@ class AppState extends ChangeNotifier {
         _isOpenAddSchedulePage = false,
         _isContainPublicSchedule = false,
         // todo
+        _todoCollection = TodoCollection(),
         _targetTodoTabId = '',
         _searchingOrganizationId = '',
         // search
@@ -37,6 +41,48 @@ class AppState extends ChangeNotifier {
         _isOpenAccountView = false,
         _selectedSettingOrganizationId = '',
         _userSettings = null;
+
+  TodoCollection _todoCollection;
+
+  void initTodoCollection() {
+    print('start initTodoCollection in appState');
+    _todoCollection.initCollection(_participatingOrganizationList);
+    print('end initTodoCollection in appState');
+  }
+
+  List<TaskGroup> getTaskGroupList([String id]) {
+    return _todoCollection.getTaskGroupList(id);
+  }
+
+  Future<void> loadTasks([String targetOrganizationId]) async {
+    await _todoCollection.loadTask(targetOrganizationId);
+    notifyListeners();
+  }
+
+  Future<void> addTask(Task newTask,
+      [String targetGroupId, String targetOrganizationId]) async {
+    await _todoCollection.addTask(newTask, targetGroupId, targetOrganizationId);
+    notifyListeners();
+  }
+
+  Future<void> deleteTask(Task targetTask,
+      [String targetGroupId, String targetOrganizationId]) async {
+    await _todoCollection.deleteTask(
+        targetTask, targetGroupId, targetOrganizationId);
+    notifyListeners();
+  }
+
+  Future<void> addGroup(String newGroupName,
+      [String targetOrganizationId]) async {
+    await _todoCollection.addGroup(newGroupName, targetOrganizationId);
+    notifyListeners();
+  }
+
+  Future<void> deleteGroup(String targetGroupId,
+      [String targetOrganizationId]) async {
+    await _todoCollection.deleteGroup(targetGroupId);
+    notifyListeners();
+  }
 
   UserSettings _userSettings;
   UserThemeSettings get userThemeSettings => _userSettings.userThemeSettings;

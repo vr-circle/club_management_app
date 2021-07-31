@@ -13,7 +13,7 @@ class Schedule {
     @required this.details,
     @required this.createdBy,
     @required this.isPublic,
-  }) : id = id ?? _uuid.v1();
+  }) : id = id ?? _uuid.v4();
   String id;
   String title;
   DateTime start;

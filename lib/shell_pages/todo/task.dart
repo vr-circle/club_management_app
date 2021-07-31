@@ -4,9 +4,9 @@ var _uuid = Uuid();
 
 class Task {
   Task({
+    String id,
     this.title,
     this.isDone = false,
-    String id,
   }) : id = id ?? _uuid.v4();
 
   final String id;
@@ -15,5 +15,9 @@ class Task {
 
   void toggleDone() {
     this.isDone = !isDone;
+  }
+
+  void edit(String newTitle) {
+    this.title = newTitle;
   }
 }

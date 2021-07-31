@@ -75,10 +75,6 @@ List<ShellState> shellList = <ShellState>[
             },
             userId: appState.user.uid,
             targetCalendarMonth: appState.targetCalendarMonth,
-            participatingOrganizationIdList: appState
-                .participatingOrganizationList
-                .map((e) => e.id)
-                .toList(),
             personalEventColor: appState.personalEventColor,
             organizationEventColor: appState.organizationEventColor,
           )),
@@ -173,12 +169,20 @@ List<ShellState> shellList = <ShellState>[
       name: 'Todo',
       icon: const Icon(Icons.task),
       getPages: (appState) {
+        // appState.initTodoCollection();
         return [
           MaterialPage(
-              child: TodoHomePage(
-            participatingOrganizationList:
+              child: TodoPage(
+            initTodoCollection: appState.initTodoCollection,
+            key: ValueKey('TodoPage'),
+            participatingOrganizationInfoList:
                 appState.participatingOrganizationList,
-            appState: appState,
+            addGroup: appState.addGroup,
+            deleteGroup: appState.deleteGroup,
+            addTask: appState.addTask,
+            deleteTask: appState.deleteTask,
+            loadTasks: appState.loadTasks,
+            getTaskGroupList: appState.getTaskGroupList,
           )),
         ];
       },

@@ -1,22 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
-import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_group.dart';
 
 class TaskExpansionTile extends StatefulWidget {
   TaskExpansionTile({
     Key key,
     @required this.groupName,
-    @required this.taskList,
+    @required this.taskGroup,
     @required this.addTask,
     @required this.deleteTask,
     @required this.deleteGroup,
   }) : super(key: key);
+  final String groupName;
+  final TaskGroup taskGroup;
   final Future<void> Function(Task newTask) addTask;
   final Future<void> Function(Task targetTask) deleteTask;
-  final Future<void> Function(String targetGroupName) deleteGroup;
-  final String groupName;
-  final TaskList taskList;
+  final Future<void> Function() deleteGroup;
   _TaskExpansionTileState createState() => _TaskExpansionTileState();
 }
 
@@ -25,12 +25,14 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
 
   @override
   void initState() {
+    print('initState in _TaskExpansionTileState');
     _isOpenExpansion = true;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print('build in _TaskExpansionTileState');
     return GestureDetector(
         onLongPress: () async {
           await showDialog(
@@ -41,7 +43,7 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
                   actions: [
                     TextButton(
                         onPressed: () async {
-                          await widget.deleteGroup(widget.groupName);
+                          await widget.deleteGroup();
                           Navigator.pop(context);
                         },
                         child: const Text('Delete')),
@@ -62,7 +64,20 @@ class _TaskExpansionTileState extends State<TaskExpansionTile> {
             });
           },
           title: Text(widget.groupName),
-          children: widget.taskList.getTaskTileList(widget.deleteTask),
+          children: widget.taskGroup
+              .getSortedTaskList()
+              .map((e) => Card(
+                    child: ListTile(
+                      title: Text(e.title),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () async {
+                          await widget.deleteTask(e);
+                        },
+                      ),
+                    ),
+                  ))
+              .toList(),
           trailing: IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {

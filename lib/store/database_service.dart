@@ -1,7 +1,7 @@
 import 'package:flutter_application_1/shell_pages/schedule/schedule.dart';
 import 'package:flutter_application_1/shell_pages/search/organization_info.dart';
 import 'package:flutter_application_1/shell_pages/todo/task.dart';
-import 'package:flutter_application_1/shell_pages/todo/task_list.dart';
+import 'package:flutter_application_1/shell_pages/todo/task_group.dart';
 import 'package:flutter_application_1/user_settings/user_settings.dart';
 import 'package:flutter_application_1/user_settings/user_theme.dart';
 
@@ -32,13 +32,15 @@ abstract class DatabaseService {
   Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal);
 
   // todo
-  Future<Map<String, TaskList>> getTaskList(String id);
-  Future<void> addTaskGroup(String groupName, String targetOrganizationId);
-  Future<void> deleteTaskGroup(String groupName, String targetOrganizationId);
-  Future<void> addTask(
-      Task task, String targetGroupName, String targetOrganizationId);
-  Future<void> deleteTask(
-      Task task, String targetGroupName, String targetOrganizationId);
+  Future<List<TaskGroup>> loadTaskList([String organizationId]);
+  Future<TaskGroup> addTaskGroup(String newGroupName,
+      [String targetOrganizationId]);
+  Future<void> deleteTaskGroup(String targetGroupId,
+      [String targetOrganizationId]);
+  Future<void> addTask(Task task,
+      [String targetGroupName, String targetOrganizationId]);
+  Future<void> deleteTask(Task task, String targetGroupName,
+      [String targetOrganizationId]);
 
   // settings
   Future<UserSettings> initializeUserSettings();
