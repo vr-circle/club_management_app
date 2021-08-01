@@ -41,7 +41,11 @@ List<ShellState> shellList = <ShellState>[
         return [
           MaterialPage(
               child: HomePage(
-            appState: appState,
+            key: ValueKey('HomePage'),
+            getScheduleForDay: () async {
+              await appState.loadSchedulesForMonth(DateTime.now());
+              return appState.getScheduleForDay(DateTime.now());
+            },
           )),
         ];
       },
