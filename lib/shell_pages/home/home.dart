@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                 const ListTile(
                   title: Text('Your plans for today'),
                 ),
-                if (snapshot.data.isEmpty)
+                if (snapshot.data == null || snapshot.data.isEmpty)
                   const ListTile(
                     title: Text('No plans'),
                   )

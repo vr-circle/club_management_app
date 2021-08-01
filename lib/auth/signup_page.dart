@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_state.dart';
 
 class SignUpPage extends StatefulWidget {
-  SignUpPage({Key key, this.appState}) : super(key: key);
-  final AppState appState;
+  SignUpPage(
+      {Key key,
+      this.signUpWithEmailAndPasswordAndName,
+      this.handleCloseSignUpPage})
+      : super(key: key);
+  final Future<void> Function(String email, String password, String displayName)
+      signUpWithEmailAndPasswordAndName;
+  final void Function() handleCloseSignUpPage;
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -45,10 +50,17 @@ class _SignUpPageState extends State<SignUpPage> {
                 onChanged: (value) {
                   password = value;
                 },
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
               ),
               TextButton(
                   onPressed: () async {
-                    await widget.appState.signUpWithEmailAndPasswordAndName(
+                    if (email.isEmpty ||
+                        password.isEmpty ||
+                        displayName.isEmpty) {
+                      return;
+                    }
+                    await widget.signUpWithEmailAndPasswordAndName(
                         email, password, displayName);
                   },
                   child: const Text('SignUp'))

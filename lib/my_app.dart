@@ -216,7 +216,11 @@ class MyRouterDelegate extends RouterDelegate<RoutePath>
             appState.isOpenSignUpPage)
           MaterialPage(
               child: SignUpPage(
-            appState: appState,
+            handleCloseSignUpPage: () {
+              appState.isOpenSignUpPage = false;
+            },
+            signUpWithEmailAndPasswordAndName:
+                appState.signUpWithEmailAndPasswordAndName,
           )),
         if (appState.loggedInState == LoggedInState.loading)
           MaterialPage(

@@ -341,8 +341,13 @@ class AppState extends ChangeNotifier {
 
   Future<void> signUpWithEmailAndPasswordAndName(
       String email, String password, String displayName) async {
-    await _authService.signUpWithEmailAndPasswordAndName(
+    _loggedinState = LoggedInState.loading;
+    notifyListeners();
+    user = await _authService.signUpWithEmailAndPasswordAndName(
         email, password, displayName);
+    await initUserSettings();
+    _loggedinState = LoggedInState.loggedIn;
+    notifyListeners();
   }
 
   Future<void> logOut() async {
