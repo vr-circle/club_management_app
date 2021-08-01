@@ -39,7 +39,6 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
   TabController _tabController;
   @override
   void initState() {
-    print('initState in _TodoPageState');
     int res = 0;
     final x = widget.participatingOrganizationInfoList
       ..sort((a, b) => a.name.compareTo(b.name));

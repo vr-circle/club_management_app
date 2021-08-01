@@ -32,7 +32,6 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   void initState() {
-    print('widget.searchingParam == ${widget.searchingParam}');
     this._controller = TextEditingController(text: widget.searchingParam);
     super.initState();
   }

@@ -22,7 +22,6 @@ class TodoCollection {
 
   Future<void> loadTask([String organizationId]) async {
     if (_loadTable.containsKey(organizationId ?? '')) {
-      print('loadTask is ended');
       return;
     }
     _loadTable[organizationId ?? ''] = true;

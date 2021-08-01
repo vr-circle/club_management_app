@@ -34,10 +34,8 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<UserSettings> initializeUserSettings() async {
-    print('initializeUserSettings');
     final x =
         (await _store.collection(usersCollectionName).doc(userId).get()).data();
-    print(x);
     UserThemeSettings userThemeSettings = UserThemeSettings();
     try {
       userThemeSettings.generalTheme = x['theme']['general'] == 'dark'
@@ -45,12 +43,9 @@ class FireStoreService extends DatabaseService {
           : ThemeData.light();
       userThemeSettings.personalEventColor =
           Color(x['theme']['event']['personal']);
-      print(userThemeSettings.personalEventColor);
       userThemeSettings.organizationEventColor =
           Color(x['theme']['event']['organization']);
-      print(userThemeSettings.organizationEventColor);
     } catch (e) {
-      print('catch in initializeUserSettings');
       print(e);
     }
     UserSettings res = UserSettings(
@@ -58,13 +53,11 @@ class FireStoreService extends DatabaseService {
         name: x['name'],
         userThemeSettings: userThemeSettings,
         participatingOrganizationIdList: List<String>.from(x['organizations']));
-    print('end initializeUserSettings');
     return res;
   }
 
   @override
   Future<void> updateUserTheme(UserThemeSettings userTheme) async {
-    print('updateUserTheme');
     await _store.collection(usersCollectionName).doc(userId).update({
       'theme': {
         'event': {
@@ -79,13 +72,11 @@ class FireStoreService extends DatabaseService {
   // --------------------------- club ------------------------------------------
   @override
   Future<List<String>> getParticipatingOrganizationIdList() async {
-    print('getParticipatingOrganizationIdList');
     try {
       final data =
           (await _store.collection(usersCollectionName).doc(userId).get())
               .data();
       final res = List<String>.from(data['organizations']);
-      print(res);
       return res;
     } catch (e) {
       print(e);
@@ -94,7 +85,6 @@ class FireStoreService extends DatabaseService {
   }
 
   Future<List<MemberInfo>> getMemberDetails(String targetOrganizationId) async {
-    print('getMemberDetails');
     final data = (await _store
             .collection(organizationCollectionName)
             .doc(targetOrganizationId)
@@ -114,7 +104,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<OrganizationInfo> getOrganizationInfo(
       String id, bool isContainMemberDetail) async {
-    print('getOrganizationInfo');
     try {
       final mapData =
           (await _store.collection(organizationCollectionName).doc(id).get())
@@ -145,7 +134,6 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<List<OrganizationInfo>> getOrganizationList() async {
-    print('getOrganizationList');
     final res = <OrganizationInfo>[];
     final data = await _store.collection(organizationCollectionName).get();
     data.docs.forEach((element) {
@@ -166,7 +154,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<OrganizationInfo> createOrganization(
       OrganizationInfo newOrganization) async {
-    print('createOrganization');
     final docRef = await _store.collection(organizationCollectionName).add({
       'name': newOrganization.name,
       'introduction': newOrganization.introduction,
@@ -204,7 +191,6 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> joinOrganization(String targetOrganizationId) async {
-    print('joinOrganization');
     await _store.collection(usersCollectionName).doc(userId).set({
       'organizations': FieldValue.arrayUnion([targetOrganizationId])
     }, SetOptions(merge: true));
@@ -223,7 +209,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> leaveOrganization(
       OrganizationInfo targetOrganizationInfo) async {
-    print('leaveOrganization');
     await _store.collection(usersCollectionName).doc(userId).update({
       'organizations': FieldValue.arrayRemove([targetOrganizationInfo.id])
     });
@@ -289,7 +274,6 @@ class FireStoreService extends DatabaseService {
       DateTime targetMonth,
       bool isContainPublicSchedule,
       List<String> participatingOrganizationIdList) async {
-    print('getSchedulesForMonth');
     final String _year = targetMonth.year.toString();
     final String _month = targetMonth.month.toString();
     final Map<DateTime, List<Schedule>> res = {};
@@ -375,7 +359,6 @@ class FireStoreService extends DatabaseService {
       DateTime targetDay,
       bool isContainPublicSchedule,
       List<String> participatingOrganizationIdList) async {
-    print('getSchedulesForDay');
     final _data = LinkedHashMap<DateTime, List<Schedule>>(
         equals: isSameDay,
         hashCode: (DateTime key) {
@@ -389,7 +372,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<Schedule> getSchedule(String targetScheduleId, DateTime targetDay,
       List<String> participatingOrganizationIdList) async {
-    print('getSchedule');
     final _data = await getSchedulesForDay(
         targetDay, false, participatingOrganizationIdList);
     final res = _data.where((element) => element.id == targetScheduleId);
@@ -398,7 +380,6 @@ class FireStoreService extends DatabaseService {
 
   Future<void> setNewSchedule(
       DocumentReference target, Schedule newSchedule) async {
-    print('setNewSchedule');
     final key = DateFormat('dd').format(newSchedule.start);
     final start = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.start);
     final end = DateFormat('yyyy-MM-dd HH:mm').format(newSchedule.end);
@@ -419,7 +400,6 @@ class FireStoreService extends DatabaseService {
 
   Future<void> removeSchedule(
       DocumentReference target, Schedule targetSchedule) async {
-    print('removeSchedule');
     final key = DateFormat('dd').format(targetSchedule.start);
     final start = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.start);
     final end = DateFormat('yyyy-MM-dd HH:mm').format(targetSchedule.end);
@@ -444,7 +424,6 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> addSchedule(Schedule newSchedule, bool isPersonal) async {
-    print('addSchedule');
     if (isPersonal) {
       addPersonalSchedule(newSchedule);
     } else {
@@ -453,7 +432,6 @@ class FireStoreService extends DatabaseService {
   }
 
   Future<void> addPersonalSchedule(Schedule newSchedule) async {
-    print('addPersonalSchedule');
     final target = _store
         .collection(usersCollectionName)
         .doc(userId)
@@ -466,7 +444,6 @@ class FireStoreService extends DatabaseService {
   }
 
   Future<void> addOrganizationSchedule(Schedule newSchedule) async {
-    print('addOrganizationSchedule');
     DocumentReference target;
     target = _store
         .collection(organizationCollectionName)
@@ -480,7 +457,6 @@ class FireStoreService extends DatabaseService {
 
   @override
   Future<void> deleteSchedule(Schedule targetSchedule, bool isPersonal) async {
-    print('deleteSchedule');
     if (isPersonal) {
       deletePersonalSchedule(targetSchedule);
     } else {
@@ -489,7 +465,6 @@ class FireStoreService extends DatabaseService {
   }
 
   Future<void> deletePersonalSchedule(Schedule targetSchedule) async {
-    print('deletePersonalSchedule');
     final target = _store
         .collection(usersCollectionName)
         .doc(userId)
@@ -501,7 +476,6 @@ class FireStoreService extends DatabaseService {
   }
 
   Future<void> deleteOrganizationSchedule(Schedule targetSchedule) async {
-    print('deleteOrganizationSchedule');
     final target = _store
         .collection(organizationCollectionName)
         .doc(targetSchedule.createdBy)
@@ -515,7 +489,6 @@ class FireStoreService extends DatabaseService {
   // --------------------------- todo ------------------------------------------
   @override
   Future<List<TaskGroup>> loadTaskList([String organizationId]) async {
-    print('loadTaskList in store: ${organizationId}');
     bool isPersonal = organizationId == null;
     List<TaskGroup> taskGroup = [];
     final data = await _store
@@ -543,7 +516,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<TaskGroup> addTaskGroup(String newGroupName,
       [String targetOrganizationId]) async {
-    print('addTaskGroup');
     bool isPersonal = targetOrganizationId == null;
     final docRef = await _store
         .collection(
@@ -557,7 +529,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> deleteTaskGroup(String targetGroupId,
       [String targetOrganizationId]) async {
-    print('deleteTaskGroup');
     bool isPersonal = targetOrganizationId == null;
     await _store
         .collection(
@@ -571,7 +542,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> addTask(Task task, String targetGroupId,
       [String targetOrganizationId]) async {
-    print('addTask');
     bool isPersonal = targetOrganizationId == null;
     await _store
         .collection(
@@ -589,7 +559,6 @@ class FireStoreService extends DatabaseService {
   @override
   Future<void> deleteTask(Task task, String targetGroupId,
       [String targetOrganizationId]) async {
-    print('deleteTask');
     bool isPersonal = targetOrganizationId == null;
     await _store
         .collection(

@@ -112,9 +112,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<bool> initUserSettings() async {
-    print('initUserSettings in appState');
     if (_userSettings != null) {
-      print('userSettings is not null. end initUserSettings');
       return false;
     }
     _userSettings = await dbService.initializeUserSettings();
@@ -129,7 +127,6 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> updateUserTheme(UserThemeSettings userTheme) async {
-    print('udpateUserTheme');
     dbService.updateUserTheme(userTheme);
     notifyListeners();
   }
@@ -321,8 +318,6 @@ class AppState extends ChangeNotifier {
       _loggedinState = LoggedInState.loggedIn;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
-      print(e);
-      print(e.code);
       // switch (e.code) {
       // case 'wrong-password':
       // break;

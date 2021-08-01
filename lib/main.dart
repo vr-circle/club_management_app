@@ -9,7 +9,6 @@ import 'package:url_strategy/url_strategy.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
-  print('start main');
   setPathUrlStrategy();
   await Firebase.initializeApp();
   runApp(ProviderScope(child: MyApp()));
@@ -44,7 +43,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print('MyApp');
     return StreamBuilder(
       stream: _appState.authStateChange()(),
       builder: (context, AsyncSnapshot<User> snapshot) {
@@ -57,7 +55,6 @@ class _MyAppState extends State<MyApp> {
           return const Center(child: const Text('Error'));
         }
         if (snapshot.data != null) _appState.user = snapshot.data;
-        print('MaterialApp.router');
         return MaterialApp.router(
           title: 'OMA',
           debugShowCheckedModeBanner: false,

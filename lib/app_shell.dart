@@ -42,7 +42,6 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    print('build in AppSchell');
     // final appState = widget._appState;
     _childBackButtonDispatcher.takePriority();
     return FutureBuilder(
@@ -91,7 +90,6 @@ class InnerRouterDelegate extends RouterDelegate<RoutePath>
 
   @override
   Widget build(BuildContext context) {
-    print('build in InnerRouterDelegate');
     return Navigator(
       key: this.navigatorKey,
       pages:

@@ -38,7 +38,6 @@ class _ScheduleHomePageState extends State<ScheduleHomePage> {
 
   @override
   void initState() {
-    print('initState in ScheduleHomePage');
     this._selectedDay = DateTime.now();
     widget.loadSchedulesForMonth(widget.targetCalendarMonth);
     this._future = _getSchedulesForMonth();
